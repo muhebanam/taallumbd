@@ -7,6 +7,39 @@ LISTEN_PORT="${PORT:-10000}"
 sed -i "s/listen 80;/listen ${LISTEN_PORT};/g" /etc/nginx/nginx.conf
 sed -i "s/listen \[::\]:80;/listen [::]:${LISTEN_PORT};/g" /etc/nginx/nginx.conf
 
+# ─── Ensure Valid Laravel APP_KEY ─────────────────────────────────────────────
+# Laravel requires APP_KEY to be either 32 raw bytes or 'base64:' + 44-char base64 string.
+# Render's `generateValue: true` generates a 44-char base64 string WITHOUT 'base64:' prefix.
+# If missing, wrong length, or lacks the prefix, fix/generate it before PHP-FPM starts.
+export APP_KEY=$(php -r '
+    $key = getenv("APP_KEY") ?: "";
+    if (empty($key)) {
+        echo "base64:" . base64_encode(random_bytes(32));
+        exit(0);
+    }
+    if (str_starts_with($key, "base64:")) {
+        $decoded = base64_decode(substr($key, 7), true);
+        if ($decoded !== false && strlen($decoded) === 32) {
+            echo $key;
+            exit(0);
+        }
+    }
+    if (strlen($key) === 44 && ($decoded = base64_decode($key, true)) !== false && strlen($decoded) === 32) {
+        echo "base64:" . $key;
+        exit(0);
+    }
+    if (strlen($key) === 64 && ctype_xdigit($key)) {
+        echo "base64:" . base64_encode(hex2bin($key));
+        exit(0);
+    }
+    if (strlen($key) === 32) {
+        echo $key;
+        exit(0);
+    }
+    // Fallback: generate a fresh valid 32-byte key
+    echo "base64:" . base64_encode(random_bytes(32));
+')
+
 # ─── Storage Directories & Permissions ───────────────────────────────────────
 mkdir -p /var/www/html/storage/framework/cache/data \
          /var/www/html/storage/framework/sessions \
@@ -37,16 +70,20 @@ php artisan storage:link --force 2>/dev/null || true
 
 # Run migrations (retry up to 3 times to handle DB cold-start on Render free tier)
 for i in 1 2 3; do
-    php artisan migrate --force 2>/dev/null && break || {
-        echo "Migration attempt $i failed, retrying in 5s..."
-        sleep 5
-    }
+    echo "Running database migrations (attempt $i)..."
+    if php artisan migrate --force; then
+        echo "Migrations completed successfully."
+        break
+    fi
+    echo "Migration attempt $i failed, retrying in 5s..."
+    sleep 5
 done
 
 # Cache config/routes/views for production performance
-php artisan config:cache  2>/dev/null || true
-php artisan route:cache   2>/dev/null || true
-php artisan view:cache    2>/dev/null || true
+echo "Caching Laravel configuration, routes, and views..."
+php artisan config:cache || true
+php artisan route:cache || true
+php artisan view:cache || true
 
 # ─── Start Nginx in foreground ───────────────────────────────────────────────
 exec nginx -g "daemon off;"
