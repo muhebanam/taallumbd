@@ -8,8 +8,20 @@ use Illuminate\Support\Facades\DB;
 return new class extends Migration {
     public function up(): void
     {
-        // 1. Update courses table (add enum value and fields)
-        DB::statement("ALTER TABLE courses MODIFY COLUMN status ENUM('draft', 'pending', 'published', 'rejected', 'coming_soon') NOT NULL DEFAULT 'draft'");
+        // 1. Update courses.status column to add 'coming_soon' value
+        //    PostgreSQL does not support MySQL's "MODIFY COLUMN ... ENUM()" syntax.
+        //    The original column was created as string/enum via Laravel's ->enum().
+        //    We handle this in a DB-agnostic way:
+        if (DB::getDriverName() === 'pgsql') {
+            // PostgreSQL: drop old check constraint if it exists, then add new one
+            $quotedValues = "'draft','pending','published','rejected','coming_soon'";
+            DB::statement("ALTER TABLE courses DROP CONSTRAINT IF EXISTS courses_status_check");
+            DB::statement("ALTER TABLE courses ADD CONSTRAINT courses_status_check CHECK (status IN ({$quotedValues}))");
+            DB::statement("ALTER TABLE courses ALTER COLUMN status SET DEFAULT 'draft'");
+        } else {
+            // MySQL / MariaDB
+            DB::statement("ALTER TABLE courses MODIFY COLUMN status ENUM('draft', 'pending', 'published', 'rejected', 'coming_soon') NOT NULL DEFAULT 'draft'");
+        }
 
         Schema::table('courses', function (Blueprint $table) {
             $table->unsignedInteger('enrollment_limit')->nullable()->after('status');
@@ -69,6 +81,12 @@ return new class extends Migration {
             $table->dropColumn(['enrollment_limit', 'enrollment_start', 'enrollment_end', 'completion_requirements']);
         });
 
-        DB::statement("ALTER TABLE courses MODIFY COLUMN status ENUM('draft', 'pending', 'published', 'rejected') NOT NULL DEFAULT 'draft'");
+        if (DB::getDriverName() === 'pgsql') {
+            $quotedValues = "'draft','pending','published','rejected'";
+            DB::statement("ALTER TABLE courses DROP CONSTRAINT IF EXISTS courses_status_check");
+            DB::statement("ALTER TABLE courses ADD CONSTRAINT courses_status_check CHECK (status IN ({$quotedValues}))");
+        } else {
+            DB::statement("ALTER TABLE courses MODIFY COLUMN status ENUM('draft', 'pending', 'published', 'rejected') NOT NULL DEFAULT 'draft'");
+        }
     }
 };

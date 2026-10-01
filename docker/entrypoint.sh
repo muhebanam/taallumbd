@@ -4,8 +4,8 @@ set -e
 # ─── Port Configuration ───────────────────────────────────────────────────────
 # Render injects $PORT; update Nginx to listen on it
 LISTEN_PORT="${PORT:-10000}"
-sed -i "s/listen 80;/listen ${LISTEN_PORT};/g" /etc/nginx/conf.d/default.conf
-sed -i "s/listen \[::\]:80;/listen [::]:${LISTEN_PORT};/g" /etc/nginx/conf.d/default.conf
+sed -i "s/listen 80;/listen ${LISTEN_PORT};/g" /etc/nginx/nginx.conf
+sed -i "s/listen \[::\]:80;/listen [::]:${LISTEN_PORT};/g" /etc/nginx/nginx.conf
 
 # ─── Storage Directories & Permissions ───────────────────────────────────────
 mkdir -p /var/www/html/storage/framework/cache/data \
