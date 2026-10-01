@@ -5,27 +5,57 @@ services:
     plan: free
     region: singapore
     dockerfilePath: ./Dockerfile
+    # Health check – Laravel responds on /up
+    healthCheckPath: /up
     envVars:
+      # ── Application ──────────────────────────────────────────────────────────
+      - key: APP_NAME
+        value: "TaallumBD"
       - key: APP_ENV
         value: production
       - key: APP_DEBUG
-        value: false
+        value: "false"
       - key: APP_KEY
         generateValue: true
+      # Render sets the service URL automatically; we mirror it here
       - key: APP_URL
         value: https://taallumbd-app.onrender.com
+      - key: APP_LOCALE
+        value: en
+      - key: APP_TIMEZONE
+        value: Asia/Dhaka
+
+      # ── Database (PostgreSQL via Render) ─────────────────────────────────────
       - key: DB_CONNECTION
         value: pgsql
       - key: DATABASE_URL
         fromDatabase:
           name: taallumbd-db
           property: connectionString
+      - key: DB_SSLMODE
+        value: require
+
+      # ── Session / Cache / Queue ───────────────────────────────────────────────
       - key: SESSION_DRIVER
         value: database
+      - key: SESSION_LIFETIME
+        value: "120"
       - key: QUEUE_CONNECTION
         value: database
       - key: CACHE_STORE
         value: database
+
+      # ── Storage ───────────────────────────────────────────────────────────────
+      - key: FILESYSTEM_DISK
+        value: local
+      - key: LOG_CHANNEL
+        value: stderr
+      - key: LOG_LEVEL
+        value: error
+
+      # ── Mail (disable in production unless configured) ────────────────────────
+      - key: MAIL_MAILER
+        value: log
 
 databases:
   - name: taallumbd-db

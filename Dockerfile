@@ -4,7 +4,8 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm install --legacy-peer-deps
 COPY . .
-RUN npm run build
+# Limit Node memory to avoid OOM on Render free tier (512 MB RAM)
+RUN NODE_OPTIONS="--max_old_space_size=384" npm run build
 
 # Stage 2: PHP 8.3 + Nginx Runtime
 FROM php:8.3-fpm-alpine
@@ -13,6 +14,7 @@ FROM php:8.3-fpm-alpine
 RUN apk add --no-cache \
     nginx \
     curl \
+    netcat-openbsd \
     libpng-dev \
     libxml2-dev \
     zip \

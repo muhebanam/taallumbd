@@ -1,35 +1,52 @@
 #!/bin/sh
 set -e
 
-# Update port if PORT env variable is passed by Cloud provider (Render/Railway)
-if [ -n "$PORT" ]; then
-    sed -i "s/listen 80;/listen $PORT;/g" /etc/nginx/conf.d/default.conf
-    sed -i "s/listen \[::\]:80;/listen \[::\]:$PORT;/g" /etc/nginx/conf.d/default.conf
-fi
+# ─── Port Configuration ───────────────────────────────────────────────────────
+# Render injects $PORT; update Nginx to listen on it
+LISTEN_PORT="${PORT:-10000}"
+sed -i "s/listen 80;/listen ${LISTEN_PORT};/g" /etc/nginx/conf.d/default.conf
+sed -i "s/listen \[::\]:80;/listen [::]:${LISTEN_PORT};/g" /etc/nginx/conf.d/default.conf
 
-# Ensure storage permissions
-mkdir -p /var/www/html/storage/framework/cache/data
-mkdir -p /var/www/html/storage/framework/sessions
-mkdir -p /var/www/html/storage/framework/views
-mkdir -p /var/www/html/storage/logs
+# ─── Storage Directories & Permissions ───────────────────────────────────────
+mkdir -p /var/www/html/storage/framework/cache/data \
+         /var/www/html/storage/framework/sessions \
+         /var/www/html/storage/framework/views \
+         /var/www/html/storage/app/public \
+         /var/www/html/storage/logs \
+         /var/www/html/bootstrap/cache
 chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
+chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
 
-# Discover packages at runtime
-php artisan package:discover --ansi || true
-
-# Create storage symlink
-php artisan storage:link || true
-
-# Run database migrations if DB is accessible
-php artisan migrate --force || true
-
-# Optimize cache
-php artisan config:cache || true
-php artisan route:cache || true
-php artisan view:cache || true
-
-# Start PHP-FPM in background
+# ─── Start PHP-FPM first, then wait for it to be ready ───────────────────────
 php-fpm -D
 
-# Start Nginx in foreground
+# Wait for PHP-FPM to bind on port 9000 (max 10 seconds)
+WAIT=0
+until nc -z 127.0.0.1 9000 2>/dev/null; do
+    WAIT=$((WAIT + 1))
+    if [ "$WAIT" -ge 10 ]; then
+        echo "ERROR: PHP-FPM did not start in time."
+        exit 1
+    fi
+    sleep 1
+done
+
+# ─── Laravel Bootstrap ───────────────────────────────────────────────────────
+php artisan package:discover --ansi 2>/dev/null || true
+php artisan storage:link --force 2>/dev/null || true
+
+# Run migrations (retry up to 3 times to handle DB cold-start on Render free tier)
+for i in 1 2 3; do
+    php artisan migrate --force 2>/dev/null && break || {
+        echo "Migration attempt $i failed, retrying in 5s..."
+        sleep 5
+    }
+done
+
+# Cache config/routes/views for production performance
+php artisan config:cache  2>/dev/null || true
+php artisan route:cache   2>/dev/null || true
+php artisan view:cache    2>/dev/null || true
+
+# ─── Start Nginx in foreground ───────────────────────────────────────────────
 exec nginx -g "daemon off;"
