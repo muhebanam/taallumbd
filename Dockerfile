@@ -6,8 +6,8 @@ RUN npm install --legacy-peer-deps
 COPY . .
 RUN npm run build
 
-# Stage 2: PHP + Nginx Runtime
-FROM php:8.2-fpm-alpine
+# Stage 2: PHP 8.3 + Nginx Runtime
+FROM php:8.3-fpm-alpine
 
 # Install system dependencies & Nginx
 RUN apk add --no-cache \
