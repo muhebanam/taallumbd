@@ -14,6 +14,9 @@ mkdir -p /var/www/html/storage/framework/views
 mkdir -p /var/www/html/storage/logs
 chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 
+# Discover packages at runtime
+php artisan package:discover --ansi || true
+
 # Create storage symlink
 php artisan storage:link || true
 

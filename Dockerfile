@@ -2,7 +2,7 @@
 FROM node:20-alpine AS node_builder
 WORKDIR /app
 COPY package*.json ./
-RUN npm install
+RUN npm install --legacy-peer-deps
 COPY . .
 RUN npm run build
 
@@ -47,8 +47,9 @@ COPY . .
 # Copy compiled frontend assets from node_builder stage
 COPY --from=node_builder /app/public/build /var/www/html/public/build
 
-# Install PHP production dependencies
-RUN composer install --no-dev --optimize-autoloader --no-interaction
+# Install PHP production dependencies safely without scripts
+RUN composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader --no-scripts
+RUN composer dump-autoload --optimize
 
 # Copy Nginx config and entrypoint
 COPY docker/nginx.conf /etc/nginx/conf.d/default.conf
