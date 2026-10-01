@@ -20,7 +20,7 @@
         <!-- Scripts & Styles -->
         @routes
         @viteReactRefresh
-        @vite(['resources/js/app.jsx', 'resources/css/app.css'])
+        @vite(['resources/css/app.css', 'resources/js/app.jsx'])
         @inertiaHead
     </head>
     <body class="font-bangla bg-[#F8FAF8] text-[#102526] antialiased selection:bg-[#FFF99A] selection:text-[#102526]">
