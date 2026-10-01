@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /instructor/
+Disallow: /dashboard/
+Disallow: /checkout/
+Disallow: /mock-payment/
+
+Sitemap: https://taallumbd.com/sitemap.xml

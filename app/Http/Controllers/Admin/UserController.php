@@ -1,0 +1,37 @@
+<?php
+namespace App\Http\Controllers\Admin;
+
+use App\Http\Controllers\Controller;
+use App\Models\User;
+use Illuminate\Http\Request;
+use Inertia\Inertia;
+
+class UserController extends Controller
+{
+    public function index(Request $request)
+    {
+        $role = $request->is('admin/students*') ? 'student' : $request->role;
+        return Inertia::render('Admin/Users', [
+            'users' => User::when($role, fn ($q, $r) => $q->where('role', $r))
+                ->when($request->search, fn ($q, $s) => $q->where(function ($query) use ($s) {
+                    $query->where('name', 'like', "%{$s}%")
+                        ->orWhere('email', 'like', "%{$s}%");
+                }))
+                ->latest()->paginate(20)->withQueryString(),
+            'filters' => ['role' => $role, 'search' => $request->search],
+        ]);
+    }
+
+    public function updateRole(Request $request, User $user)
+    {
+        $user->update($request->validate(['role' => 'required|in:admin,instructor,student']));
+        return back()->with('success', 'ভূমিকা আপডেট হয়েছে।');
+    }
+
+    public function destroy(Request $request, User $user)
+    {
+        abort_if($user->id === $request->user()->id, 422, 'নিজেকে ডিলিট করা যাবে না।');
+        $user->delete();
+        return back()->with('success', 'ইউজার ডিলিট হয়েছে।');
+    }
+}

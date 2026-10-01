@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <defs>
+    <linearGradient id="brandGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#102526" />
+      <stop offset="100%" stop-color="#1A2E2F" />
+    </linearGradient>
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFF99A" />
+      <stop offset="100%" stop-color="#E5DB55" />
+    </linearGradient>
+  </defs>
+
+  <!-- Circular Base -->
+  <circle cx="100" cy="100" r="95" fill="url(#brandGrad)" stroke="url(#goldGrad)" stroke-width="4"/>
+
+  <!-- Inner Islamic Geometry Star Accent -->
+  <circle cx="100" cy="100" r="82" fill="none" stroke="#254244" stroke-width="1.5" stroke-dasharray="4,4"/>
+
+  <!-- Open Quran / Book Icon -->
+  <path d="M50 135 C70 120, 95 125, 100 138 C105 125, 130 120, 150 135 L150 75 C130 60, 105 65, 100 78 C95 65, 70 60, 50 75 Z" 
+        fill="url(#goldGrad)" opacity="0.95" />
+  <path d="M100 78 L100 138" stroke="#102526" stroke-width="3" stroke-linecap="round"/>
+
+  <!-- Minaret / Quill Nib Accent -->
+  <polygon points="100,32 108,55 92,55" fill="url(#goldGrad)"/>
+  <circle cx="100" cy="26" r="4" fill="url(#goldGrad)"/>
+
+  <!-- Arabic Calligraphy Text 'تعلم' (Taallum) -->
+  <text x="100" y="165" font-family="'Amiri', 'Traditional Arabic', serif" font-size="22" font-weight="bold" fill="url(#goldGrad)" text-anchor="middle">
+    تَعَلَّمْ
+  </text>
+</svg>
