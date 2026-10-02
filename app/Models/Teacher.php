@@ -124,10 +124,13 @@ class Teacher extends Model
     public function getAvatarUrlAttribute(): string
     {
         if ($this->avatar) {
-            if (str_starts_with($this->avatar, 'http') || str_starts_with($this->avatar, '/')) {
+            if (str_starts_with($this->avatar, 'http')) {
                 return $this->avatar;
             }
-            return '/storage/' . ltrim($this->avatar, '/');
+            if (str_starts_with($this->avatar, '/')) {
+                return $this->avatar . '?v=2';
+            }
+            return '/storage/' . ltrim($this->avatar, '/') . '?v=2';
         }
         $bg = '102526';
         $color = 'fff99a';
@@ -137,10 +140,13 @@ class Teacher extends Model
     public function getCoverPhotoUrlAttribute(): ?string
     {
         if ($this->cover_photo) {
-            if (str_starts_with($this->cover_photo, 'http') || str_starts_with($this->cover_photo, '/')) {
+            if (str_starts_with($this->cover_photo, 'http')) {
                 return $this->cover_photo;
             }
-            return '/storage/' . ltrim($this->cover_photo, '/');
+            if (str_starts_with($this->cover_photo, '/')) {
+                return $this->cover_photo . '?v=2';
+            }
+            return '/storage/' . ltrim($this->cover_photo, '/') . '?v=2';
         }
         return null;
     }
