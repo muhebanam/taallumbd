@@ -119,7 +119,13 @@ class Teacher extends Model
     public function getAvatarUrlAttribute(): string
     {
         if ($this->avatar) {
-            return str_starts_with($this->avatar, 'http') ? $this->avatar : asset('storage/' . $this->avatar);
+            if (str_starts_with($this->avatar, 'http')) {
+                return $this->avatar;
+            }
+            if (str_starts_with($this->avatar, '/')) {
+                return asset(ltrim($this->avatar, '/'));
+            }
+            return asset('storage/' . $this->avatar);
         }
         $bg = '102526';
         $color = 'fff99a';
@@ -129,7 +135,13 @@ class Teacher extends Model
     public function getCoverPhotoUrlAttribute(): ?string
     {
         if ($this->cover_photo) {
-            return str_starts_with($this->cover_photo, 'http') ? $this->cover_photo : asset('storage/' . $this->cover_photo);
+            if (str_starts_with($this->cover_photo, 'http')) {
+                return $this->cover_photo;
+            }
+            if (str_starts_with($this->cover_photo, '/')) {
+                return asset(ltrim($this->cover_photo, '/'));
+            }
+            return asset('storage/' . $this->cover_photo);
         }
         return null;
     }
