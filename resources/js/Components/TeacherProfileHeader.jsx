@@ -10,9 +10,9 @@ export default function TeacherProfileHeader({ teacher, isFollowing, onTabChange
         <div className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm">
             {/* Cover photo banner */}
             <div className="h-48 w-full bg-gradient-to-r from-[#102526] to-[#1A2E2F] relative sm:h-64">
-                {teacher.cover_photo_url ? (
+                {(teacher.cover_photo_url || teacher.cover_photo) ? (
                     <img 
-                        src={teacher.cover_photo_url} 
+                        src={teacher.cover_photo_url || teacher.cover_photo} 
                         alt="" 
                         className="h-full w-full object-cover opacity-80"
                     />
@@ -26,8 +26,12 @@ export default function TeacherProfileHeader({ teacher, isFollowing, onTabChange
                 {/* Avatar positioning */}
                 <div className="flex flex-col sm:flex-row sm:items-end justify-between -mt-20 sm:-mt-24 mb-4 gap-4">
                     <img 
-                        src={teacher.avatar_url} 
+                        src={teacher.avatar_url || teacher.avatar} 
                         alt={teacher.name}
+                        onError={(e) => {
+                            e.target.onerror = null;
+                            e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(teacher.name)}&background=102526&color=fff99a&size=150`;
+                        }}
                         className="h-36 w-36 rounded-full border-4 border-white bg-slate-100 object-cover shadow-md sm:h-44 sm:w-44"
                     />
                     

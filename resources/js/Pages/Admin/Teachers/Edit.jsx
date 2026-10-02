@@ -46,8 +46,8 @@ export default function EditTeacher({ teacher, users }) {
         sort_order: teacher.sort_order ?? 0,
     });
 
-    const [avatarPreview, setAvatarPreview] = useState(teacher.avatar ? (teacher.avatar.startsWith('http') ? teacher.avatar : `/storage/${teacher.avatar}`) : null);
-    const [coverPreview, setCoverPreview] = useState(teacher.cover_photo ? (teacher.cover_photo.startsWith('http') ? teacher.cover_photo : `/storage/${teacher.cover_photo}`) : null);
+    const [avatarPreview, setAvatarPreview] = useState(teacher.avatar ? ((teacher.avatar.startsWith('http') || teacher.avatar.startsWith('/')) ? teacher.avatar : `/storage/${teacher.avatar}`) : null);
+    const [coverPreview, setCoverPreview] = useState(teacher.cover_photo ? ((teacher.cover_photo.startsWith('http') || teacher.cover_photo.startsWith('/')) ? teacher.cover_photo : `/storage/${teacher.cover_photo}`) : null);
     const [activeFormTab, setActiveFormTab] = useState('basic');
 
     const specialtiesOptions = [

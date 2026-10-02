@@ -14,9 +14,9 @@ export default function TeacherCard({ teacher }) {
             <div>
                 {/* Header Cover Bar */}
                 <div className="relative h-24 w-full bg-gradient-to-r from-[#102526] via-[#1A2E2F] to-[#102526] overflow-hidden">
-                    {teacher.cover_photo_url ? (
+                    {(teacher.cover_photo_url || teacher.cover_photo) ? (
                         <img 
-                            src={teacher.cover_photo_url} 
+                            src={teacher.cover_photo_url || teacher.cover_photo} 
                             alt="" 
                             className="h-full w-full object-cover opacity-60"
                         />
@@ -29,7 +29,7 @@ export default function TeacherCard({ teacher }) {
                 <div className="relative -mt-10 px-5 flex items-end justify-between">
                     <Link href={`/teachers/${teacher.slug}`} className="block transition-transform duration-300 hover:scale-105">
                         <img 
-                            src={teacher.avatar_url} 
+                            src={teacher.avatar_url || teacher.avatar} 
                             alt={teacher.name}
                             onError={(e) => {
                                 e.target.onerror = null;
