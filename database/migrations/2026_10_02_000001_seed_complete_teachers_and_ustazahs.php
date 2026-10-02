@@ -1,20 +1,19 @@
 <?php
 
-namespace Database\Seeders;
-
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Str;
 use App\Models\User;
 use App\Models\Teacher;
-use App\Models\Fatwa;
-use App\Models\Review;
 use App\Models\Course;
 use App\Models\Category;
+use App\Models\Fatwa;
+use App\Models\Review;
 use App\Models\Publication;
-use Illuminate\Database\Seeder;
-use Illuminate\Support\Str;
 
-class TeacherSeeder extends Seeder
-{
-    public function run(): void
+return new class extends Migration {
+    public function up(): void
     {
         // 1. Ensure Categories Exist
         $fiqhCat = Category::firstOrCreate(['slug' => 'fiqh', 'type' => 'course'], ['name' => 'ফিকহ', 'status' => 'active']);
@@ -24,6 +23,8 @@ class TeacherSeeder extends Seeder
         $seerahCat = Category::firstOrCreate(['slug' => 'seerah', 'type' => 'course'], ['name' => 'সীরাত', 'status' => 'active']);
 
         $fatwaCat = Category::firstOrCreate(['slug' => 'islamic-rulings', 'type' => 'fatwa'], ['name' => 'ইসলামী বিধিবিধান', 'status' => 'active']);
+        $fatwaFamily = Category::firstOrCreate(['slug' => 'marriage-divorce', 'type' => 'fatwa'], ['name' => 'বিবাহ/শাদি/তালাক', 'status' => 'active']);
+
         $bookStoreCat = Category::firstOrCreate(['slug' => 'printed-books', 'type' => 'publication'], ['name' => 'প্রকাশিত বই', 'status' => 'active']);
         $ebookStoreCat = Category::firstOrCreate(['slug' => 'ebooks', 'type' => 'publication'], ['name' => 'ই-বুক', 'status' => 'active']);
 
@@ -726,4 +727,9 @@ class TeacherSeeder extends Seeder
             }
         }
     }
-}
+
+    public function down(): void
+    {
+        // Safe down migration: deactivate or leave intact
+    }
+};
