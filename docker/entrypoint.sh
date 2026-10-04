@@ -68,22 +68,18 @@ done
 php artisan package:discover --ansi 2>/dev/null || true
 php artisan storage:link --force 2>/dev/null || true
 
-# Run migrations (retry up to 3 times to handle DB cold-start on Render free tier)
+# Run migrations and seed data
 for i in 1 2 3; do
     echo "Running database migrations (attempt $i)..."
     if php artisan migrate --force; then
         echo "Migrations completed successfully."
+        echo "Running initial database seeder..."
+        php artisan db:seed --force || echo "Seeder finished with note."
         break
     fi
     echo "Migration attempt $i failed, retrying in 5s..."
     sleep 5
 done
-
-# Seed initial data if requested via DB_SEED=true
-if [ "${DB_SEED:-false}" = "true" ]; then
-    echo "Running database seeder..."
-    php artisan db:seed --force || true
-fi
 
 # Cache config/routes/views for production performance
 echo "Caching Laravel configuration, routes, and views..."

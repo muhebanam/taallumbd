@@ -4,24 +4,6 @@ use App\Http\Controllers as C;
 use Illuminate\Support\Facades\Route;
 
 /* ---------------- Public ---------------- */
-Route::withoutMiddleware([
-    \Illuminate\Session\Middleware\StartSession::class,
-    \Illuminate\View\Middleware\ShareErrorsFromSession::class,
-    \App\Http\Middleware\HandleInertiaRequests::class,
-])->get('/init-neon-db', function () {
-    try {
-        \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
-        $migrateOutput = \Illuminate\Support\Facades\Artisan::output();
-
-        \Illuminate\Support\Facades\Artisan::call('db:seed', ['--force' => true]);
-        $seedOutput = \Illuminate\Support\Facades\Artisan::output();
-
-        return response("<pre style='font-family: monospace; background: #102526; color: #4ade80; padding: 24px; font-size: 14px;'>=== MIGRATIONS COMPLETED ===\n" . e($migrateOutput) . "\n=== SEEDERS COMPLETED ===\n" . e($seedOutput) . "</pre>");
-    } catch (\Throwable $e) {
-        return response("<pre style='font-family: monospace; background: #261010; color: #f87171; padding: 24px; font-size: 14px;'>MIGRATION ERROR:\n" . e($e->getMessage()) . "\n\nStack Trace:\n" . e($e->getTraceAsString()) . "</pre>", 500);
-    }
-});
-
 Route::get('/', C\HomeController::class)->name('home');
 
 Route::get('/courses', [C\CourseController::class, 'index'])->name('courses.index');
