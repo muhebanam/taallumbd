@@ -18,6 +18,16 @@ return Application::configure(basePath: dirname(__DIR__))
                 $log[] = "Timestamp: " . date('Y-m-d H:i:s T');
                 $log[] = "--------------------------------------------------";
 
+                // Ensure Direct Connection (PgBouncer pooler fails on DDL migrations)
+                $dbUrl = config('database.connections.pgsql.url') ?: env('DATABASE_URL', '');
+                if (str_contains($dbUrl, '-pooler.')) {
+                    $directUrl = str_replace('-pooler.', '.', $dbUrl);
+                    config(['database.connections.pgsql.url' => $directUrl]);
+                    \Illuminate\Support\Facades\DB::purge('pgsql');
+                    \Illuminate\Support\Facades\DB::reconnect('pgsql');
+                    $log[] = "Converted connection to DIRECT Neon endpoint (bypassing PgBouncer pooler).";
+                }
+
                 // Step 1: Run Migrations
                 try {
                     $log[] = "\n[1/2] RUNNING MIGRATIONS (php artisan migrate --force)...";

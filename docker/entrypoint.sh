@@ -64,6 +64,14 @@ until nc -z 127.0.0.1 9000 2>/dev/null; do
     sleep 1
 done
 
+# ─── Ensure Direct Connection for Neon PostgreSQL ─────────────────────────────
+# Neon pooled URLs (-pooler) use PgBouncer in transaction mode which fails on migrations.
+# Convert -pooler. to . to connect directly to PostgreSQL.
+if echo "${DATABASE_URL:-}" | grep -q -- "-pooler\."; then
+    echo "Converting Neon pooled DATABASE_URL to DIRECT connection..."
+    export DATABASE_URL=$(echo "$DATABASE_URL" | sed 's/-pooler\./\./')
+fi
+
 # ─── Laravel Bootstrap ───────────────────────────────────────────────────────
 php artisan package:discover --ansi 2>/dev/null || true
 php artisan storage:link --force 2>/dev/null || true
