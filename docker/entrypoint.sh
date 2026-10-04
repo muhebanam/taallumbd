@@ -79,6 +79,12 @@ for i in 1 2 3; do
     sleep 5
 done
 
+# Seed initial data if requested via DB_SEED=true
+if [ "${DB_SEED:-false}" = "true" ]; then
+    echo "Running database seeder..."
+    php artisan db:seed --force || true
+fi
+
 # Cache config/routes/views for production performance
 echo "Caching Laravel configuration, routes, and views..."
 php artisan config:cache || true
