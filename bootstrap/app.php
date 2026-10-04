@@ -67,6 +67,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->validateCsrfTokens(except: [
             'init-neon-db',
             'init-neon-db/*',
+            'internal/cron',
         ]);
         $middleware->web(append: [
             SecurityHeaders::class,

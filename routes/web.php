@@ -30,6 +30,8 @@ Route::get('/contact', [C\ContactController::class, 'show'])->name('contact');
 Route::post('/contact', [C\ContactController::class, 'submit'])->name('contact.submit');
 Route::get('/become-instructor', [C\BecomeInstructorController::class, 'index'])->name('become-instructor');
 Route::get('/verify/{identifier}', [C\CertificateVerificationController::class, 'verify'])->name('certificates.verify');
+Route::get('/health', [C\HealthController::class, 'check'])->name('system.health');
+Route::get('/internal/cron', [C\InternalCronController::class, 'run'])->name('internal.cron');
 
 /* ---------------- Quran & Hadith Library ---------------- */
 Route::get('/quran', [C\QuranController::class, 'index'])->name('quran.index');
