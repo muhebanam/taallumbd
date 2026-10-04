@@ -51,7 +51,7 @@ class FatwaController extends Controller
 
         $scholars = Teacher::with('user:id,name')
             ->where('status', 'active')
-            ->get(['id', 'user_id', 'title_prefix', 'designation', 'slug']);
+            ->get(['id', 'user_id', 'name', 'designation', 'slug']);
 
         $stats = [
             'total_fatawa' => Fatwa::published()->count(),
@@ -120,7 +120,7 @@ class FatwaController extends Controller
 
         $scholars = Teacher::with('user:id,name')
             ->where('status', 'active')
-            ->get(['id', 'user_id', 'title_prefix', 'designation']);
+            ->get(['id', 'user_id', 'name', 'designation', 'slug']);
 
         return Inertia::render('Fatawa/Ask', [
             'categories' => $categories,

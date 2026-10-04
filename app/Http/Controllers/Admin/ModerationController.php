@@ -60,7 +60,7 @@ class ModerationController extends Controller
                 ->when($request->status, fn ($q, $s) => $q->where('status', $s))
                 ->latest()->paginate(20)->withQueryString(),
             'filters' => $request->only('status'),
-            'scholars' => \App\Models\Teacher::with('user:id,name')->get(['id', 'user_id', 'title_prefix', 'designation']),
+            'scholars' => \App\Models\Teacher::with('user:id,name')->get(['id', 'user_id', 'name', 'designation', 'slug']),
             'courses' => \App\Models\Course::where('status', 'published')->get(['id', 'title']),
         ]);
     }
