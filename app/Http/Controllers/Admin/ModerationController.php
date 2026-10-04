@@ -9,7 +9,9 @@ use App\Models\Course;
 use App\Models\Enrollment;
 use App\Models\Fatwa;
 use App\Models\Order;
+use App\Models\PaymentTransaction;
 use App\Models\Teacher;
+use App\Services\AuditLoggerService;
 use App\Services\PaymentService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -29,7 +31,20 @@ class ModerationController extends Controller
 
     public function updateCourseStatus(Request $request, Course $course)
     {
-        $course->update($request->validate(['status' => 'required|in:draft,pending,published,rejected']));
+        $validated = $request->validate(['status' => 'required|in:draft,pending,published,rejected']);
+        $oldStatus = $course->status;
+        $course->update($validated);
+
+        AuditLoggerService::log(
+            action: 'course.status_updated',
+            modelType: Course::class,
+            modelId: $course->id,
+            payload: [
+                'course_title' => $course->title,
+                'old_status' => $oldStatus,
+                'new_status' => $validated['status'],
+            ]
+        );
 
         return back()->with('success', 'কোর্স স্ট্যাটাস আপডেট হয়েছে।');
     }
@@ -47,7 +62,19 @@ class ModerationController extends Controller
     public function updateArticleStatus(Request $request, Article $article)
     {
         $data = $request->validate(['status' => 'required|in:draft,pending,published,rejected']);
+        $oldStatus = $article->status;
         $article->update([...$data, 'published_at' => $data['status'] === 'published' ? now() : $article->published_at]);
+
+        AuditLoggerService::log(
+            action: 'article.status_updated',
+            modelType: Article::class,
+            modelId: $article->id,
+            payload: [
+                'article_title' => $article->title,
+                'old_status' => $oldStatus,
+                'new_status' => $data['status'],
+            ]
+        );
 
         return back()->with('success', 'প্রবন্ধ স্ট্যাটাস আপডেট হয়েছে।');
     }
@@ -128,7 +155,35 @@ class ModerationController extends Controller
     {
         abort_unless($order->status === 'pending', 400, 'শুধুমাত্র পেন্ডিং অর্ডার বাতিল করা সম্ভব।');
 
+        $reason = $request->input('reason', 'প্রদত্ত তথ্য অনুযায়ী পেমেন্ট যাচাই করা সম্ভব হয়নি।');
         $order->update(['status' => 'cancelled']);
+
+        PaymentTransaction::create([
+            'order_id' => $order->id,
+            'gateway' => $order->payment_method ?: 'manual',
+            'type' => 'rejected',
+            'gateway_ref' => $order->transaction_id,
+            'amount' => $order->final_payable_amount,
+            'currency' => 'BDT',
+            'status' => 'rejected',
+            'payload' => [
+                'reason' => $reason,
+                'rejected_by' => $request->user()->id,
+                'rejected_at' => now()->toIso8601String(),
+            ],
+            'ip_address' => $request->ip(),
+        ]);
+
+        AuditLoggerService::log(
+            action: 'order.rejected',
+            modelType: Order::class,
+            modelId: $order->id,
+            payload: [
+                'order_id' => $order->id,
+                'reason' => $reason,
+                'transaction_id' => $order->transaction_id,
+            ]
+        );
 
         return back()->with('info', "অর্ডার #{$order->id} সফলভাবে বাতিল করা হয়েছে।");
     }

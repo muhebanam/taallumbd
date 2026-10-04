@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
+use App\Services\AuditLoggerService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
@@ -22,8 +24,20 @@ class AuthenticatedSessionController extends Controller
         ]);
 
         if (! Auth::attempt($credentials, $request->boolean('remember'))) {
+            AuditLoggerService::log(
+                action: 'auth.login_failed',
+                payload: ['email' => $credentials['email']]
+            );
+
             return back()->withErrors(['email' => 'ইমেইল বা পাসওয়ার্ড সঠিক নয়।'])->onlyInput('email');
         }
+
+        AuditLoggerService::log(
+            action: 'auth.login_success',
+            modelType: User::class,
+            modelId: Auth::id(),
+            payload: ['email' => $credentials['email'], 'role' => Auth::user()->role]
+        );
 
         $request->session()->regenerate();
 

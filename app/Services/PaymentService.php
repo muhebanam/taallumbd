@@ -7,6 +7,7 @@ use App\Models\Course;
 use App\Models\Enrollment;
 use App\Models\Order;
 use App\Models\Payment;
+use App\Models\PaymentTransaction;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -48,6 +49,9 @@ class PaymentService
     /**
      * Confirm payment and enroll student
      */
+    /**
+     * Confirm payment and enroll student (hardened with lockForUpdate and idempotency)
+     */
     public function confirm(
         Order $order,
         string $method = 'mock',
@@ -56,25 +60,55 @@ class PaymentService
         ?array $rawResponse = null
     ): Enrollment {
         return DB::transaction(function () use ($order, $method, $transactionId, $senderPhone, $rawResponse) {
+            // Lock order for update to prevent race conditions
+            $lockedOrder = Order::where('id', $order->id)->lockForUpdate()->firstOrFail();
+
+            // Idempotency: if already paid, return existing enrollment immediately
+            if ($lockedOrder->status === 'paid') {
+                $existing = Enrollment::where('user_id', $lockedOrder->user_id)
+                    ->where('course_id', $lockedOrder->course_id)
+                    ->first();
+
+                if ($existing) {
+                    return $existing;
+                }
+            }
+
             $finalTrx = $transactionId ?: ('TXN-'.strtoupper(Str::random(10)));
 
-            $order->update([
+            // Prevent duplicate transaction ID usage
+            $trxExists = Payment::where('transaction_id', $finalTrx)
+                ->where('status', 'success')
+                ->lockForUpdate()
+                ->exists();
+
+            if ($trxExists) {
+                throw new \RuntimeException('এই ট্রানজ্যাকশন আইডি (TrxID) দিয়ে ইতোমধ্যে একটি পেমেন্ট সম্পন্ন হয়েছে।');
+            }
+
+            // Lock and validate coupon limit if used
+            if ($lockedOrder->coupon_code) {
+                $coupon = Coupon::where('code', $lockedOrder->coupon_code)->lockForUpdate()->first();
+                if ($coupon) {
+                    if ($coupon->usage_limit !== null && $coupon->used_count >= $coupon->usage_limit) {
+                        throw new \RuntimeException('এই কুপনের সর্বোচ্চ ব্যবহারের সীমা শেষ হয়ে গেছে।');
+                    }
+                    $coupon->increment('used_count');
+                }
+            }
+
+            $lockedOrder->update([
                 'status' => 'paid',
                 'payment_method' => $method,
                 'sender_phone' => $senderPhone,
                 'transaction_id' => $finalTrx,
             ]);
 
-            // Increment coupon usage if used
-            if ($order->coupon_code) {
-                Coupon::where('code', $order->coupon_code)->increment('used_count');
-            }
-
             Payment::create([
-                'order_id' => $order->id,
+                'order_id' => $lockedOrder->id,
                 'transaction_id' => $finalTrx,
                 'payment_method' => $method,
-                'amount' => $order->final_payable_amount,
+                'amount' => $lockedOrder->final_payable_amount,
                 'status' => 'success',
                 'raw_response' => $rawResponse ?? [
                     'gateway' => $method,
@@ -84,7 +118,38 @@ class PaymentService
                 ],
             ]);
 
-            return $this->enroll($order->user, $order->course);
+            // Record transaction event
+            PaymentTransaction::create([
+                'order_id' => $lockedOrder->id,
+                'gateway' => $method,
+                'type' => 'verify',
+                'gateway_ref' => $finalTrx,
+                'amount' => $lockedOrder->final_payable_amount,
+                'currency' => 'BDT',
+                'status' => 'success',
+                'payload' => [
+                    'method' => $method,
+                    'phone' => $senderPhone,
+                    'verified_at' => now()->toIso8601String(),
+                ],
+                'ip_address' => request()->ip(),
+            ]);
+
+            // Audit log
+            AuditLoggerService::log(
+                action: 'order.payment_confirmed',
+                modelType: Order::class,
+                modelId: $lockedOrder->id,
+                payload: [
+                    'method' => $method,
+                    'transaction_id' => $finalTrx,
+                    'amount' => $lockedOrder->final_payable_amount,
+                    'user_id' => $lockedOrder->user_id,
+                    'course_id' => $lockedOrder->course_id,
+                ]
+            );
+
+            return $this->enroll($lockedOrder->user, $lockedOrder->course);
         });
     }
 

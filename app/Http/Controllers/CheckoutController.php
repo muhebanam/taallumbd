@@ -6,6 +6,7 @@ use App\Models\Coupon;
 use App\Models\Course;
 use App\Models\Order;
 use App\Models\Payment;
+use App\Models\PaymentTransaction;
 use App\Services\CourseEnrollmentService;
 use App\Services\PaymentService;
 use Illuminate\Http\Request;
@@ -149,6 +150,22 @@ class CheckoutController extends Controller
             'payment_method' => $method,
             'sender_phone' => $phone,
             'transaction_id' => $trxId,
+        ]);
+
+        PaymentTransaction::create([
+            'order_id' => $order->id,
+            'gateway' => $method,
+            'type' => 'manual_submit',
+            'gateway_ref' => $trxId,
+            'amount' => $order->final_payable_amount,
+            'currency' => 'BDT',
+            'status' => 'pending_verification',
+            'payload' => [
+                'sender_phone' => $phone,
+                'submitted_at' => now()->toIso8601String(),
+                'ip' => $request->ip(),
+            ],
+            'ip_address' => $request->ip(),
         ]);
 
         return redirect()->route('invoice', $order)

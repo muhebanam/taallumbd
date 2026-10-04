@@ -9,6 +9,15 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
+        if (app()->isProduction()) {
+            $this->command?->warn('Production environment detected: Only seeding essential categories.');
+            $this->call([
+                CategorySeeder::class,
+            ]);
+
+            return;
+        }
+
         $this->call([
             CategorySeeder::class,
             UserSeeder::class,

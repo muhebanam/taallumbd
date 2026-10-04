@@ -55,3 +55,24 @@ services:
       - key: MAIL_MAILER
         value: log
 
+      # ── Payments (Manual bKash/Nagad/Rocket) ──────────────────────────────────
+      - key: PAYMENT_DEFAULT_GATEWAY
+        value: manual
+      - key: PAYMENTS_MOCK_ENABLED
+        value: "false"
+      - key: BKASH_MANUAL_NUMBER
+        value: "01700000000"
+      - key: BKASH_MANUAL_TYPE
+        value: personal
+      - key: NAGAD_MANUAL_NUMBER
+        value: "01700000000"
+      - key: NAGAD_MANUAL_TYPE
+        value: personal
+      - key: ROCKET_MANUAL_NUMBER
+        value: "01700000000"
+      - key: ROCKET_MANUAL_TYPE
+        value: personal
+      - key: CRON_SECRET
+        generateValue: true
+
+

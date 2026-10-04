@@ -174,6 +174,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::post('/orders/{order}/reject', [C\Admin\ModerationController::class, 'rejectOrder'])->name('orders.reject');
     Route::get('/contact-messages', [C\Admin\ModerationController::class, 'contactMessages'])->name('messages.index');
     Route::put('/contact-messages/{message}/read', [C\Admin\ModerationController::class, 'markMessageRead'])->name('messages.read');
+    Route::get('/audit-logs', [C\Admin\AuditLogController::class, 'index'])->name('audit-logs.index');
 
     // Teacher management
     Route::get('/teachers', [C\Admin\AdminTeacherController::class, 'index'])->name('teachers.index');
