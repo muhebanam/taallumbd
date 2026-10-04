@@ -43,9 +43,21 @@ services:
       - key: CACHE_STORE
         value: file
 
-      # ── Storage ───────────────────────────────────────────────────────────────
+      # ── Storage (Local or Cloudflare R2 Free) ─────────────────────────────────
       - key: FILESYSTEM_DISK
         value: local
+      - key: R2_ACCESS_KEY_ID
+        sync: false
+      - key: R2_SECRET_ACCESS_KEY
+        sync: false
+      - key: R2_ENDPOINT
+        sync: false
+      - key: R2_PUBLIC_BUCKET
+        value: taallum-public
+      - key: R2_PRIVATE_BUCKET
+        value: taallum-private
+      - key: R2_PUBLIC_URL
+        sync: false
       - key: LOG_CHANNEL
         value: stderr
       - key: LOG_LEVEL
