@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use App\Models\Category;
@@ -21,6 +22,7 @@ class CourseController extends Controller
     public function category(string $slug)
     {
         $category = Category::ofType('course')->where('slug', $slug)->firstOrFail();
+
         return Inertia::render('Courses/Index', [
             'courses' => Course::publiclyVisible()->where('category_id', $category->id)
                 ->with(['instructor:id,name', 'category:id,name,slug'])

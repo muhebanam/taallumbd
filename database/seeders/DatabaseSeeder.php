@@ -1,7 +1,9 @@
 <?php
+
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Artisan;
 
 class DatabaseSeeder extends Seeder
 {
@@ -16,6 +18,6 @@ class DatabaseSeeder extends Seeder
         ]);
 
         $this->command->info('Backfilling curriculum items...');
-        \Illuminate\Support\Facades\Artisan::call('curriculum:backfill-items');
+        Artisan::call('curriculum:backfill-items');
     }
 }

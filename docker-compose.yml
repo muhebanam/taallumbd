@@ -1,0 +1,63 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: taallumbd_app
+    restart: unless-stopped
+    ports:
+      - "8000:80"
+    environment:
+      APP_NAME: "TaallumBD"
+      APP_ENV: local
+      APP_DEBUG: "true"
+      APP_KEY: base64:o9gVzMh9oK3H7Wj2bZ4R6eS8uT1vX3yZ5aB7cD9eF1g=
+      APP_URL: http://localhost:8000
+      DB_CONNECTION: pgsql
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_DATABASE: taallumbd_dev
+      DB_USERNAME: postgres
+      DB_PASSWORD: devsecretpassword
+      SESSION_DRIVER: cookie
+      CACHE_STORE: file
+      QUEUE_CONNECTION: sync
+      MAIL_MAILER: smtp
+      MAIL_HOST: mailpit
+      MAIL_PORT: 1025
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - .:/var/www/html
+      - /var/www/html/vendor
+      - /var/www/html/node_modules
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: taallumbd_postgres
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: taallumbd_dev
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: devsecretpassword
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d taallumbd_dev"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: taallumbd_mailpit
+    restart: unless-stopped
+    ports:
+      - "8025:8025" # Web UI
+      - "1025:1025" # SMTP Port
+
+volumes:
+  postgres_data:

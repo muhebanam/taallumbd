@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers\Student;
 
 use App\Http\Controllers\Controller;
@@ -12,6 +13,7 @@ class QuizController extends Controller
     public function show(Request $request, Quiz $quiz)
     {
         abort_unless($request->user()->isEnrolled($quiz->course), 403);
+
         return Inertia::render('Student/QuizView', [
             'quiz' => $quiz->load(['questions.options:id,question_id,option_text']), // correct answers never sent to client
             'lastAttempt' => $quiz->attempts()->where('user_id', $request->user()->id)->latest()->first(),

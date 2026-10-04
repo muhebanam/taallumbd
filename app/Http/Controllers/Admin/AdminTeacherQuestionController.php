@@ -17,7 +17,7 @@ class AdminTeacherQuestionController extends Controller
             ->paginate(15);
 
         return Inertia::render('Admin/TeacherQuestions/Index', [
-            'questions' => $questions
+            'questions' => $questions,
         ]);
     }
 
@@ -39,6 +39,7 @@ class AdminTeacherQuestionController extends Controller
     public function reject(Fatwa $question)
     {
         $question->update(['status' => 'rejected']);
+
         return back()->with('success', 'প্রশ্নটি বাতিল করা হয়েছে।');
     }
 }

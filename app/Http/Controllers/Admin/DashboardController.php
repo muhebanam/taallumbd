@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
@@ -7,10 +8,10 @@ use App\Models\ContactMessage;
 use App\Models\Course;
 use App\Models\Enrollment;
 use App\Models\Fatwa;
-use App\Models\Order;
-use App\Models\User;
 use App\Models\InstructorApplication;
+use App\Models\Order;
 use App\Models\Review;
+use App\Models\User;
 use Inertia\Inertia;
 
 class DashboardController extends Controller

@@ -4,16 +4,16 @@ namespace App\Http\Controllers\Instructor;
 
 use App\Http\Controllers\Controller;
 use App\Models\Assignment;
+use App\Models\AssignmentSubmission;
 use App\Models\Course;
 use App\Models\CourseSection;
+use App\Models\CurriculumItem;
 use App\Models\Lesson;
+use App\Models\LiveClass;
 use App\Models\Quiz;
 use App\Models\QuizOption;
 use App\Models\QuizQuestion;
 use App\Models\Resource as CourseResource;
-use App\Models\LiveClass;
-use App\Models\CurriculumItem;
-use App\Models\AssignmentSubmission;
 use App\Services\CurriculumItemService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -43,12 +43,12 @@ class CurriculumController extends Controller
     {
         $this->authorizeCourse($request, $course);
         $data = $request->validate(['title' => 'required|string|max:255']);
-        
+
         $course->sections()->create([
             'title' => $data['title'],
-            'sort_order' => $course->sections()->count() + 1
+            'sort_order' => $course->sections()->count() + 1,
         ]);
-        
+
         return back()->with('success', 'সেকশন যোগ হয়েছে।');
     }
 
@@ -57,9 +57,9 @@ class CurriculumController extends Controller
         $this->authorizeCourse($request, $course);
         $this->assertSectionBelongsToCourse($course, $section);
         $data = $request->validate(['title' => 'required|string|max:255']);
-        
+
         $section->update($data);
-        
+
         return back()->with('success', 'সেকশন আপডেট হয়েছে।');
     }
 
@@ -67,7 +67,7 @@ class CurriculumController extends Controller
     {
         $this->authorizeCourse($request, $course);
         $this->assertSectionBelongsToCourse($course, $section);
-        
+
         // Delete all items inside this section
         foreach ($section->curriculumItems as $item) {
             if ($item->itemable) {
@@ -75,9 +75,9 @@ class CurriculumController extends Controller
             }
             $item->delete();
         }
-        
+
         $section->delete();
-        
+
         return back()->with('success', 'সেকশন মুছে ফেলা হয়েছে।');
     }
 
@@ -102,7 +102,7 @@ class CurriculumController extends Controller
         $lesson = $course->lessons()->create([
             'section_id' => $section->id,
             'title' => $data['title'],
-            'slug' => Str::slug($data['title']) . '-' . Str::random(4),
+            'slug' => Str::slug($data['title']).'-'.Str::random(4),
             'content' => $data['content'] ?? null,
             'video_url' => $data['video_url'] ?? null,
             'lecture_sheet' => $data['lecture_sheet'] ?? null,
@@ -148,7 +148,7 @@ class CurriculumController extends Controller
     {
         $this->authorizeCourse($request, $course);
         $this->assertModelBelongsToCourse($course, $lesson);
-        
+
         $this->curriculumService->deleteItemForModel($lesson);
         $lesson->delete();
 
@@ -185,16 +185,16 @@ class CurriculumController extends Controller
 
         foreach ($data['questions'] as $q) {
             $question = QuizQuestion::create([
-                'quiz_id' => $quiz->id, 
-                'question' => $q['question'], 
-                'type' => $q['type'], 
-                'marks' => $q['marks']
+                'quiz_id' => $quiz->id,
+                'question' => $q['question'],
+                'type' => $q['type'],
+                'marks' => $q['marks'],
             ]);
             foreach ($q['options'] as $opt) {
                 QuizOption::create([
-                    'question_id' => $question->id, 
-                    'option_text' => $opt['option_text'], 
-                    'is_correct' => (bool) ($opt['is_correct'] ?? false)
+                    'question_id' => $question->id,
+                    'option_text' => $opt['option_text'],
+                    'is_correct' => (bool) ($opt['is_correct'] ?? false),
                 ]);
             }
         }
@@ -235,16 +235,16 @@ class CurriculumController extends Controller
 
         foreach ($data['questions'] as $q) {
             $question = QuizQuestion::create([
-                'quiz_id' => $quiz->id, 
-                'question' => $q['question'], 
-                'type' => $q['type'], 
-                'marks' => $q['marks']
+                'quiz_id' => $quiz->id,
+                'question' => $q['question'],
+                'type' => $q['type'],
+                'marks' => $q['marks'],
             ]);
             foreach ($q['options'] as $opt) {
                 QuizOption::create([
-                    'question_id' => $question->id, 
-                    'option_text' => $opt['option_text'], 
-                    'is_correct' => (bool) ($opt['is_correct'] ?? false)
+                    'question_id' => $question->id,
+                    'option_text' => $opt['option_text'],
+                    'is_correct' => (bool) ($opt['is_correct'] ?? false),
                 ]);
             }
         }
@@ -260,7 +260,7 @@ class CurriculumController extends Controller
     {
         $this->authorizeCourse($request, $course);
         $this->assertModelBelongsToCourse($course, $quiz);
-        
+
         $this->curriculumService->deleteItemForModel($quiz);
         $quiz->delete();
 
@@ -319,7 +319,7 @@ class CurriculumController extends Controller
     {
         $this->authorizeCourse($request, $course);
         $this->assertModelBelongsToCourse($course, $assignment);
-        
+
         $this->curriculumService->deleteItemForModel($assignment);
         $assignment->delete();
 
@@ -383,7 +383,7 @@ class CurriculumController extends Controller
     {
         $this->authorizeCourse($request, $course);
         $this->assertModelBelongsToCourse($course, $resource);
-        
+
         $this->curriculumService->deleteItemForModel($resource);
         $resource->delete();
 
@@ -442,7 +442,7 @@ class CurriculumController extends Controller
     {
         $this->authorizeCourse($request, $course);
         $this->assertModelBelongsToCourse($course, $liveClass);
-        
+
         $this->curriculumService->deleteItemForModel($liveClass);
         $liveClass->delete();
 
@@ -475,6 +475,7 @@ class CurriculumController extends Controller
             'marks' => 'required|integer|min:0',
             'feedback' => 'nullable|string|max:2000',
         ]) + ['status' => 'reviewed']);
+
         return back()->with('success', 'মূল্যায়ন সংরক্ষিত হয়েছে।');
     }
 }

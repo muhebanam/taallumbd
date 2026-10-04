@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use App\Models\ContactMessage;
@@ -21,6 +22,7 @@ class ContactController extends Controller
             'subject' => 'required|string|max:255',
             'message' => 'required|string|max:5000',
         ]));
+
         return back()->with('success', 'আপনার বার্তাটি পাঠানো হয়েছে। আমরা শীঘ্রই যোগাযোগ করব, ইনশাআল্লাহ।');
     }
 }

@@ -107,12 +107,13 @@ return [
         }
         // If Render's generateValue generated a 44-char base64 string without 'base64:' prefix
         if (strlen($key) === 44 && ($decoded = base64_decode($key, true)) !== false && strlen($decoded) === 32) {
-            return 'base64:' . $key;
+            return 'base64:'.$key;
         }
         // If 64-char hex key was provided
         if (strlen($key) === 64 && ctype_xdigit($key)) {
-            return 'base64:' . base64_encode(hex2bin($key));
+            return 'base64:'.base64_encode(hex2bin($key));
         }
+
         return $key;
     })(),
 

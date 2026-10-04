@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers\Student;
 
 use App\Http\Controllers\Controller;
@@ -12,6 +13,7 @@ class AssignmentController extends Controller
     public function show(Request $request, Assignment $assignment)
     {
         abort_unless($request->user()->isEnrolled($assignment->course), 403);
+
         return Inertia::render('Student/AssignmentView', [
             'assignment' => $assignment->load('course:id,title,slug'),
             'submission' => $assignment->submissions()->where('user_id', $request->user()->id)->latest()->first(),
@@ -25,7 +27,7 @@ class AssignmentController extends Controller
             'answer_text' => 'nullable|string|max:20000',
             'file' => 'nullable|file|max:10240|mimes:pdf,doc,docx,zip,jpg,png',
         ]);
-        abort_if(empty($data['answer_text']) && !$request->hasFile('file'), 422, 'উত্তর বা ফাইল দিন।');
+        abort_if(empty($data['answer_text']) && ! $request->hasFile('file'), 422, 'উত্তর বা ফাইল দিন।');
 
         AssignmentSubmission::create([
             'assignment_id' => $assignment->id,
@@ -34,6 +36,7 @@ class AssignmentController extends Controller
             'file_path' => $request->hasFile('file') ? $request->file('file')->store('assignments', 'public') : null,
             'status' => 'submitted',
         ]);
+
         return back()->with('success', 'অ্যাসাইনমেন্ট জমা হয়েছে।');
     }
 }

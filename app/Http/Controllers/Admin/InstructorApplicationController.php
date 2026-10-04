@@ -37,6 +37,7 @@ class InstructorApplicationController extends Controller
             if ($user) {
                 $user->update(['role' => 'instructor']);
             }
+
             return back()->with('success', 'আবেদনটি অনুমোদিত হয়েছে এবং ব্যবহারকারীকে শিক্ষক হিসেবে উন্নীত করা হয়েছে।');
         }
 

@@ -3,11 +3,11 @@
 namespace App\Http\Controllers\Instructor;
 
 use App\Http\Controllers\Controller;
-use App\Models\Teacher;
 use App\Models\Fatwa;
+use App\Models\Teacher;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Inertia\Inertia;
 
 class InstructorTeacherProfileController extends Controller
@@ -15,8 +15,9 @@ class InstructorTeacherProfileController extends Controller
     public function edit()
     {
         $teacher = Teacher::where('user_id', auth()->id())->first();
+
         return Inertia::render('Instructor/TeacherProfile/Edit', [
-            'teacher' => $teacher
+            'teacher' => $teacher,
         ]);
     }
 
@@ -61,7 +62,7 @@ class InstructorTeacherProfileController extends Controller
         $slug = Str::slug($request->name);
         $count = Teacher::where('slug', 'like', "{$slug}%")->count();
         if ($count > 0) {
-            $slug = "{$slug}-" . ($count + 1);
+            $slug = "{$slug}-".($count + 1);
         }
 
         $data = $request->except(['avatar_file', 'cover_file']);
@@ -125,7 +126,7 @@ class InstructorTeacherProfileController extends Controller
             $slug = Str::slug($request->name);
             $count = Teacher::where('slug', 'like', "{$slug}%")->where('id', '!=', $teacher->id)->count();
             if ($count > 0) {
-                $slug = "{$slug}-" . ($count + 1);
+                $slug = "{$slug}-".($count + 1);
             }
             $data['slug'] = $slug;
         }
@@ -152,14 +153,14 @@ class InstructorTeacherProfileController extends Controller
     public function questions()
     {
         $teacher = Teacher::where('user_id', auth()->id())->firstOrFail();
-        
+
         $questions = Fatwa::where('teacher_id', $teacher->id)
             ->with('user')
             ->latest()
             ->paginate(15);
 
         return Inertia::render('Instructor/TeacherProfile/Questions', [
-            'questions' => $questions
+            'questions' => $questions,
         ]);
     }
 
@@ -187,6 +188,7 @@ class InstructorTeacherProfileController extends Controller
         $question = Fatwa::where('teacher_id', $teacher->id)->findOrFail($id);
 
         $question->update(['status' => 'rejected']);
+
         return back()->with('success', 'প্রশ্নটি বাতিল করা হয়েছে।');
     }
 }

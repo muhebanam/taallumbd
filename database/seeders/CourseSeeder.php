@@ -10,7 +10,6 @@ use App\Models\QuizOption;
 use App\Models\QuizQuestion;
 use App\Models\User;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Str;
 
 class CourseSeeder extends Seeder
 {
@@ -43,7 +42,7 @@ class CourseSeeder extends Seeder
                 'sections' => [
                     'ভূমিকা ও তাওহীদ' => ['আক্বীদার গুরুত্ব', 'তাওহীদ কি ও প্রকারভেদ', 'শিরক ও তার পরিণতি'],
                     'ঈমানের অন্যান্য স্তম্ভ' => ['ফেরেশতাকুল ও আসমানী কিতাব', 'নবুওয়াত ও পরকাল', 'তাকদীরের প্রতি বিশ্বাস'],
-                ]
+                ],
             ],
             [
                 'instructor_id' => $inst4->id,
@@ -59,7 +58,7 @@ class CourseSeeder extends Seeder
                 'sections' => [
                     'সূচনা ও আল্লাহর গুণাবলি' => ['গ্রন্থকার পরিচিতি ও গ্রন্থের গুরুত্ব', 'আল্লাহর জাত ও সিফাত', 'আল্লাহর কালাম ও কুরআন'],
                     'নবুওয়াত ও পরকাল অধ্যায়' => ['রাসূলুল্লাহ ﷺ-এর রিসালাত ও মিরাজ', 'কবর ও হাশরের ময়দান', 'হাউযে কাওসার ও শাফায়াত'],
-                ]
+                ],
             ],
 
             // 2. কুরআন
@@ -77,7 +76,7 @@ class CourseSeeder extends Seeder
                 'sections' => [
                     'মাখরাজ পরিচিতি' => ['হরফ ও মাখরাজের ভূমিকা', 'হলকের হরফসমূহ', 'জিহ্বার হরফসমূহ'],
                     'তাজবীদের বিধি' => ['নূন সাকিন ও তানভীনের বিধি', 'মীম সাকিনের বিধি', 'মাদ্দের প্রকারভেদ'],
-                ]
+                ],
             ],
             [
                 'instructor_id' => $inst2->id,
@@ -93,7 +92,7 @@ class CourseSeeder extends Seeder
                 'sections' => [
                     'গুন্নাহ ও মীম সাকিন' => ['গুন্নাহর সূচনা', 'মীম সাকিনের ৩টি নিয়ম', 'ওয়াজিব গুন্নাহর বিবরণ'],
                     'লাম ও রার নিয়ম' => ['আল্লাহ শব্দের লাম পড়ার নিয়ম', 'রা হরফ মোটা ও চিকন করার নিয়ম', 'সুস্থ তিলাওয়াত অনুশীলন'],
-                ]
+                ],
             ],
 
             // 3. তাফসীর
@@ -111,7 +110,7 @@ class CourseSeeder extends Seeder
                 'sections' => [
                     'উম্মুল কুরআন তাফসীর' => ['সূরা ফাতিহার ফযীলত ও গুরুত্ব', 'তাআউউয ও তাসমিয়াহর ব্যাখ্যা', 'ফাতিহার আয়াত ভিত্তিক গভীর ব্যাখ্যা'],
                     'শেষ সূরাসমূহের তাফসীর' => ['সূরা নাস ও ফালাকের তাফসীর', 'সূরা ইখলাস ও কদরের ব্যাখ্যা', 'সূরা ফিল ও কুরাইশের ঘটনা'],
-                ]
+                ],
             ],
             [
                 'instructor_id' => $inst3->id,
@@ -127,7 +126,7 @@ class CourseSeeder extends Seeder
                 'sections' => [
                     'ওহীর ইতিহাস' => ['কুরআন নাযিলের সূচনা', 'সংকলন ও সংরক্ষণের ইতিহাস', 'ওহীর প্রকারভেদ'],
                     'কুরআনী থিম' => ['আদম ও ইবলিসের গল্প এবং শিক্ষা', 'নবীগণের দাওয়াত ও পদ্ধতি', 'পারিবারিক ও সামাজিক নির্দেশনা'],
-                ]
+                ],
             ],
 
             // 4. সীরাত
@@ -145,7 +144,7 @@ class CourseSeeder extends Seeder
                 'sections' => [
                     'নবুওয়াত পূর্ব জীবন' => ['আরবের ভৌগোলিক ও সামাজিক অবস্থা', 'হাশেমী বংশ ও নবীজির শুভ জন্ম', 'হিলফুল ফুযুল ও বিয়ে'],
                     'দাওয়াতের মক্কী অধ্যায়' => ['নবুওয়াত লাভ ও গোপনে দাওয়াত', 'প্রকাশ্য দাওয়াত ও নির্যাতনের সূচনা', 'তাইফ সফর ও মিরাজ'],
-                ]
+                ],
             ],
             [
                 'instructor_id' => $inst5->id,
@@ -161,7 +160,7 @@ class CourseSeeder extends Seeder
                 'sections' => [
                     'মদীনার সমাজ গঠন' => ['মদীনায় আগমন ও মসজিদে নববী নির্মাণ', 'আনসার ও মুহাজির ভাই-ভাই সম্পর্ক', 'মদীনা সনদ'],
                     'ইসলামের প্রতিরক্ষা ও বিজয়' => ['বদর যুদ্ধের ইতিহাস ও শিক্ষা', 'ওহুদের পরীক্ষা ও খন্দকের পরিখা', 'মক্কা বিজয় ও ওফাত'],
-                ]
+                ],
             ],
 
             // 5. হাদীস
@@ -179,7 +178,7 @@ class CourseSeeder extends Seeder
                 'sections' => [
                     'নিয়ত ও দ্বীনের রূপরেখা' => ['১ম হাদীস: নিয়ত ও হিজরত', '২য় হাদীস: হাদীসে জিবরীল (ইসলাম, ঈমান, ইহসান)', '৩য় হাদীস: ইসলামের রুকনসমূহ'],
                     'আমল ও আচরণ বিধি' => ['৬ষ্ঠ হাদীস: হালাল-হারাম ও সন্দেহজনক', '১৩শ হাদীস: মুসলিম ভ্রাতৃত্ব', '১৫শ হাদীস: জবান নিয়ন্ত্রণ ও মেহমানদারী'],
-                ]
+                ],
             ],
             [
                 'instructor_id' => $inst3->id,
@@ -195,7 +194,7 @@ class CourseSeeder extends Seeder
                 'sections' => [
                     'হাদীসের ইতিহাস' => ['রাসূলুল্লাহ ﷺ-এর যুগে হাদীস লিখন', 'সাহাবী ও তাবেয়ী যুগের সংকলন', 'ছয় প্রধান কিতাবের সংক্ষিপ্ত ইতিহাস'],
                     'হাদীসের প্রকারভেদ' => ['সূত্রের ভিত্তিতে হাদীসের প্রকার', 'গ্রহণযোগ্যতার বিচারে হাদীস', 'জাল হাদীসের প্রাদুর্ভাব ও চেনার উপায়'],
-                ]
+                ],
             ],
 
             // 6. ফিকহ
@@ -213,7 +212,7 @@ class CourseSeeder extends Seeder
                 'sections' => [
                     'তাহারাত' => ['পানির প্রকারভেদ', 'অযু ও গোসলের ফরয', 'তায়াম্মুমের বিধান'],
                     'সালাত' => ['সালাতের শর্তসমূহ', 'সালাতের ওয়াজিবসমূহ', 'সাহু সিজদার বিধান'],
-                ]
+                ],
             ],
             [
                 'instructor_id' => $inst1->id,
@@ -229,7 +228,7 @@ class CourseSeeder extends Seeder
                 'sections' => [
                     'বিবাহ ও দাম্পত্য' => ['পাত্র-পাত্রী নির্বাচন ও মোহরানা', 'দাম্পত্য জীবন সুন্দর রাখার উপায়', 'স্ত্রীর ভরণপোষণ'],
                     'পারিবারিক বিচ্ছেদ ও সম্পদ' => ['তালাকের বিধান ও সতর্কতা', 'ইদ্দত পালনের নিয়ম', 'উত্তরাধিকার বন্টনের প্রাথমিক নীতি'],
-                ]
+                ],
             ],
 
             // 7. আরবী ভাষা
@@ -247,7 +246,7 @@ class CourseSeeder extends Seeder
                 'sections' => [
                     'কুশল বিনিময় ও পরিবার' => ['পরস্পর সম্ভাষণ (সালাম ও উত্তর)', 'পরিবারের সদস্যদের পরিচয়', 'আরবী সংখ্যা ও গণনা'],
                     'দৈনন্দিন জীবন ও যাতায়াত' => ['সময় ও তারিখ বলা', 'বাজার ও রেস্টুরেন্টে আরবী', 'দিক নির্দেশনা জিজ্ঞেস করা'],
-                ]
+                ],
             ],
             [
                 'instructor_id' => $inst6->id,
@@ -263,7 +262,7 @@ class CourseSeeder extends Seeder
                 'sections' => [
                     'কাল ও ফেল পরিচিতি' => ['আরবী ব্যাকরণের ভূমিকা', 'ফেয়েল মাদী (অতীত কাল)', 'ফেয়েল মুদারে (বর্তমান/ভবিষ্যৎ কাল)'],
                     'ইসিম ও হরফ অধ্যায়' => ['ইসিমের প্রকারভেদ ও বহুবচন', 'হরফে জার ও তার ব্যবহার', 'ছোট বাক্যের বিশ্লেষণ'],
-                ]
+                ],
             ],
 
             // 8. বিবিধ
@@ -281,7 +280,7 @@ class CourseSeeder extends Seeder
                 'sections' => [
                     'মনস্তাত্ত্বিক ব্যাধি' => ['অহংকারের ভয়াবহতা ও প্রতিকার', 'হিংসা ও তার সুক্ষ্ম ক্ষতিকর দিক', 'রিয়া ও কাজের ইখলাস নষ্ট হওয়া'],
                     'উত্তম চরিত্রের ভূষণ' => ['সবর বা ধৈর্যের প্রকারভেদ', 'শোকর বা কৃতজ্ঞতা জ্ঞাপন', 'তাওয়াক্কুল বা আল্লাহর ওপর ভরসা'],
-                ]
+                ],
             ],
             [
                 'instructor_id' => $inst4->id,
@@ -297,7 +296,7 @@ class CourseSeeder extends Seeder
                 'sections' => [
                     'বুদ্ধিবৃত্তিক ফিতনা' => ['নাস্তিকতা ও সংশয়বাদের কারণ ও প্রতিকার', 'বস্তুবাদের ক্ষতিকর রূপ', 'উদারতাবাদের নামে বিকৃতি'],
                     'ব্যবহারিক ফিতনা ও প্রতিকার' => ['পর্নোগ্রাফি ও স্ক্রিন অ্যাডিকশন থেকে মুক্তি', 'চরিত্র গঠনে ভালো সাহচর্যের ভূমিকা', 'নেক আমল ও প্রার্থনার শক্তি'],
-                ]
+                ],
             ],
         ];
 
@@ -309,14 +308,14 @@ class CourseSeeder extends Seeder
             $sOrder = 0;
             foreach ($sections as $sectionTitle => $lessonTitles) {
                 $section = $course->sections()->create([
-                    'title' => $sectionTitle, 
-                    'sort_order' => ++$sOrder
+                    'title' => $sectionTitle,
+                    'sort_order' => ++$sOrder,
                 ]);
                 foreach ($lessonTitles as $i => $title) {
                     $course->lessons()->create([
                         'section_id' => $section->id,
                         'title' => $title,
-                        'slug' => 'lesson-' . $course->id . '-' . $sOrder . '-' . ($i + 1),
+                        'slug' => 'lesson-'.$course->id.'-'.$sOrder.'-'.($i + 1),
                         'content' => 'এই পাঠের বিস্তারিত ও নির্ভরযোগ্য ইসলামী আলোচনা ভিডিও এবং লেকচার শীটের মাধ্যমে দেওয়া হয়েছে। দয়া করে সম্পূর্ণ পাঠটি পড়ে মূল্যায়ন কুইজে অংশ নিন।',
                         'video_url' => 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
                         'is_preview' => $sOrder === 1 && $i === 0,
@@ -327,55 +326,55 @@ class CourseSeeder extends Seeder
 
             // Create one quiz for each course
             $quiz = Quiz::create([
-                'course_id' => $course->id, 
-                'title' => $course->title . ' — মূল্যায়ন কুইজ',
-                'description' => 'এই কোর্সের অর্জিত জ্ঞানের ওপর একটি সাধারণ মূল্যায়ন কুইজ।', 
-                'total_marks' => 2, 
+                'course_id' => $course->id,
+                'title' => $course->title.' — মূল্যায়ন কুইজ',
+                'description' => 'এই কোর্সের অর্জিত জ্ঞানের ওপর একটি সাধারণ মূল্যায়ন কুইজ।',
+                'total_marks' => 2,
                 'pass_marks' => 1,
             ]);
 
             foreach (['কোর্সের আলোচিত মূল লক্ষ্য কোনটি?', 'ইসলামে এই বিষয়টির গুরুত্ব কেমন?'] as $qText) {
                 $question = QuizQuestion::create([
-                    'quiz_id' => $quiz->id, 
-                    'question' => $qText, 
-                    'type' => 'single_choice', 
-                    'marks' => 1
+                    'quiz_id' => $quiz->id,
+                    'question' => $qText,
+                    'type' => 'single_choice',
+                    'marks' => 1,
                 ]);
                 QuizOption::create([
-                    'question_id' => $question->id, 
-                    'option_text' => 'হ্যাঁ / সঠিক উত্তর', 
-                    'is_correct' => true
+                    'question_id' => $question->id,
+                    'option_text' => 'হ্যাঁ / সঠিক উত্তর',
+                    'is_correct' => true,
                 ]);
                 QuizOption::create([
-                    'question_id' => $question->id, 
-                    'option_text' => 'না / ভুল উত্তর', 
-                    'is_correct' => false
+                    'question_id' => $question->id,
+                    'option_text' => 'না / ভুল উত্তর',
+                    'is_correct' => false,
                 ]);
             }
         }
 
         // Two draft courses for admin approval flow testing
         Course::create([
-            'instructor_id' => $inst1->id, 
+            'instructor_id' => $inst1->id,
             'category_id' => $cat('seerah'),
-            'title' => 'আসহাবে রাসূলের বীরত্বগাথা', 
+            'title' => 'আসহাবে রাসূলের বীরত্বগাথা',
             'slug' => 'companions-of-the-prophet-bravery',
             'short_description' => 'রাসূলুল্লাহ ﷺ-এর সাহাবীদের গৌরবময় জীবন ও সংগ্রাম।',
-            'description' => 'শীঘ্রই আসছে।', 
-            'price' => 0, 
-            'is_free' => true, 
+            'description' => 'শীঘ্রই আসছে।',
+            'price' => 0,
+            'is_free' => true,
             'status' => 'draft',
         ]);
-        
+
         Course::create([
-            'instructor_id' => $inst6->id, 
+            'instructor_id' => $inst6->id,
             'category_id' => $cat('arabic-language'),
-            'title' => 'আরবী বাক্য শৈলী ও আধুনিক কথ্য আরবী', 
+            'title' => 'আরবী বাক্য শৈলী ও আধুনিক কথ্য আরবী',
             'slug' => 'advanced-conversational-arabic',
             'short_description' => 'উচ্চতর বাক্যগঠন ও কথোপকথন শিক্ষা।',
-            'description' => 'শীঘ্রই আসছে।', 
-            'price' => 1200, 
-            'is_free' => false, 
+            'description' => 'শীঘ্রই আসছে।',
+            'price' => 1200,
+            'is_free' => false,
             'status' => 'draft',
         ]);
 

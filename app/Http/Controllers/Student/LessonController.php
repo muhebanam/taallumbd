@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers\Student;
 
 use App\Http\Controllers\Controller;
@@ -46,6 +47,7 @@ class LessonController extends Controller
     {
         $this->authorizeLesson($request, $lesson);
         $progress = $this->progress->completeLesson($request->user(), $lesson);
+
         return back()->with('success', $progress === 100 ? 'মাশাআল্লাহ! কোর্স সম্পন্ন হয়েছে।' : 'পাঠ সম্পন্ন হয়েছে।');
     }
 }

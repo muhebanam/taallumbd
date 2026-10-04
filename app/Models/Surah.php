@@ -11,7 +11,7 @@ class Surah extends Model
 
     protected $fillable = [
         'number', 'name_arabic', 'name_bangla', 'name_transliteration',
-        'ayah_count', 'revelation_type', 'revelation_order'
+        'ayah_count', 'revelation_type', 'revelation_order',
     ];
 
     public function ayahs()

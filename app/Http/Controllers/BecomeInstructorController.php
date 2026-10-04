@@ -3,9 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Course;
+use App\Models\InstructorApplication;
 use App\Models\Lesson;
 use App\Models\User;
-use App\Models\InstructorApplication;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -15,12 +15,12 @@ class BecomeInstructorController extends Controller
     {
         // 1. Calculate live statistics
         $stats = [
-            'total_students' => bn_number(User::where('role', 'student')->count()) . ' জন',
-            'active_students' => bn_number(max(20, User::has('enrollments')->count())) . ' জন', // Safe fallback if no activity exists
-            'published_lessons' => bn_number(Lesson::count()) . ' টি',
-            'active_courses' => bn_number(Course::where('status', 'published')->count()) . ' টি',
-            'total_instructors' => bn_number(User::where('role', 'instructor')->count()) . ' জন',
-            'support_label' => "২৪/৭",
+            'total_students' => bn_number(User::where('role', 'student')->count()).' জন',
+            'active_students' => bn_number(max(20, User::has('enrollments')->count())).' জন', // Safe fallback if no activity exists
+            'published_lessons' => bn_number(Lesson::count()).' টি',
+            'active_courses' => bn_number(Course::where('status', 'published')->count()).' টি',
+            'total_instructors' => bn_number(User::where('role', 'instructor')->count()).' জন',
+            'support_label' => '২৪/৭',
         ];
 
         // 2. Load existing application if authenticated

@@ -11,7 +11,7 @@ class Hadith extends Model
 
     protected $fillable = [
         'book_id', 'chapter_id', 'number', 'hadith_number_in_book',
-        'text_arabic', 'text_bangla', 'narrator', 'grade', 'grade_by', 'explanation'
+        'text_arabic', 'text_bangla', 'narrator', 'grade', 'grade_by', 'explanation',
     ];
 
     public function book()

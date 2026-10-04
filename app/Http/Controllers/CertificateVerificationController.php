@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Certificate;
-use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class CertificateVerificationController extends Controller
@@ -26,7 +25,7 @@ class CertificateVerificationController extends Controller
         return Inertia::render('Certificate/Verify', [
             'certificate' => $certificate,
             'identifier' => $identifier,
-            'isValid' => !is_null($certificate),
+            'isValid' => ! is_null($certificate),
         ]);
     }
 }

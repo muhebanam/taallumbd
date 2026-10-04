@@ -4,11 +4,12 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration {
+return new class extends Migration
+{
     public function up(): void
     {
         // 1. Lesson Notes (শিক্ষার্থীদের পাঠভিত্তিক ব্যক্তিগত নোট)
-        if (!Schema::hasTable('lesson_notes')) {
+        if (! Schema::hasTable('lesson_notes')) {
             Schema::create('lesson_notes', function (Blueprint $table) {
                 $table->id();
                 $table->foreignId('user_id')->constrained()->cascadeOnDelete();
@@ -21,7 +22,7 @@ return new class extends Migration {
         }
 
         // 2. Lesson Bookmarks (নির্দিষ্ট সময় বা লেসন বুকমার্ক)
-        if (!Schema::hasTable('lesson_bookmarks')) {
+        if (! Schema::hasTable('lesson_bookmarks')) {
             Schema::create('lesson_bookmarks', function (Blueprint $table) {
                 $table->id();
                 $table->foreignId('user_id')->constrained()->cascadeOnDelete();
@@ -35,7 +36,7 @@ return new class extends Migration {
         }
 
         // 3. Lesson Comments / Q&A (উস্তাযের সাথে সরাসরি পাঠভিত্তিক আলোচনা)
-        if (!Schema::hasTable('lesson_comments')) {
+        if (! Schema::hasTable('lesson_comments')) {
             Schema::create('lesson_comments', function (Blueprint $table) {
                 $table->id();
                 $table->foreignId('user_id')->constrained()->cascadeOnDelete();
@@ -50,7 +51,7 @@ return new class extends Migration {
         }
 
         // 4. Learning Paths (প্রাতিষ্ঠানিক স্তরভিত্তিক লার্নিং রোডম্যাপ)
-        if (!Schema::hasTable('learning_paths')) {
+        if (! Schema::hasTable('learning_paths')) {
             Schema::create('learning_paths', function (Blueprint $table) {
                 $table->id();
                 $table->string('title');
@@ -65,7 +66,7 @@ return new class extends Migration {
         }
 
         // 5. Learning Path Courses pivot
-        if (!Schema::hasTable('learning_path_courses')) {
+        if (! Schema::hasTable('learning_path_courses')) {
             Schema::create('learning_path_courses', function (Blueprint $table) {
                 $table->id();
                 $table->foreignId('learning_path_id')->constrained('learning_paths')->cascadeOnDelete();
@@ -80,7 +81,7 @@ return new class extends Migration {
         // 6. Add UUID to certificates table for public verification URL /verify/{uuid}
         if (Schema::hasTable('certificates')) {
             Schema::table('certificates', function (Blueprint $table) {
-                if (!Schema::hasColumn('certificates', 'uuid')) {
+                if (! Schema::hasColumn('certificates', 'uuid')) {
                     $table->uuid('uuid')->nullable()->unique()->after('id');
                 }
             });

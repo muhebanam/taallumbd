@@ -38,12 +38,13 @@ class Certificate extends Model
 
     public function getVerificationUrlAttribute(): string
     {
-        return url('/verify/' . ($this->uuid ?: $this->certificate_no));
+        return url('/verify/'.($this->uuid ?: $this->certificate_no));
     }
 
     public function getQrCodeUrlAttribute(): string
     {
         $verifyUrl = urlencode($this->verification_url);
+
         return "https://api.qrserver.com/v1/create-qr-code/?size=180x180&data={$verifyUrl}&color=10-37-38&bgcolor=ffffff";
     }
 }

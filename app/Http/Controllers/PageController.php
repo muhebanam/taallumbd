@@ -1,11 +1,12 @@
 <?php
+
 namespace App\Http\Controllers;
 
-use App\Models\Teacher;
-use App\Models\Course;
 use App\Models\Article;
+use App\Models\Course;
 use App\Models\Fatwa;
 use App\Models\Publication;
+use App\Models\Teacher;
 use App\Models\TeacherFollower;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -83,8 +84,12 @@ class PageController extends Controller
         $featuredTeachers = Teacher::active()
             ->verified()
             ->featured()
-            ->withCount(['followers', 'courses' => function ($q) { $q->published(); }])
-            ->withAvg(['teacherReviews as average_rating' => function ($q) { $q->where('status', 'approved'); }], 'rating')
+            ->withCount(['followers', 'courses' => function ($q) {
+                $q->published();
+            }])
+            ->withAvg(['teacherReviews as average_rating' => function ($q) {
+                $q->where('status', 'approved');
+            }], 'rating')
             ->take(3)
             ->get();
 
@@ -107,7 +112,7 @@ class PageController extends Controller
                 'specialty' => $specialty,
                 'sort' => $sort,
                 'verified' => $verifiedOnly,
-            ]
+            ],
         ]);
     }
 }

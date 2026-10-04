@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers\Student;
 
 use App\Http\Controllers\Controller;
@@ -17,7 +18,7 @@ class StudentOrderController extends Controller
             ->paginate(10);
 
         return Inertia::render('Student/Orders', [
-            'orders' => $orders
+            'orders' => $orders,
         ]);
     }
 }

@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers\Student;
 
 use App\Http\Controllers\Controller;
@@ -10,6 +11,7 @@ class DashboardController extends Controller
     public function index(Request $request)
     {
         $user = $request->user();
+
         return Inertia::render('Student/Dashboard', [
             'enrollments' => $user->enrollments()->with(['course' => fn ($q) => $q->with('instructor:id,name')->withCount('lessons')])->latest()->get(),
             'certificates' => $user->certificates()->with('course:id,title,slug')->latest()->get(),

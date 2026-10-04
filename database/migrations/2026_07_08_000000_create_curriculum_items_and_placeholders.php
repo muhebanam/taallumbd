@@ -2,10 +2,11 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration {
+return new class extends Migration
+{
     public function up(): void
     {
         // ── Step 1: Extend courses.status to accept 'coming_soon' ─────────────
@@ -24,7 +25,7 @@ return new class extends Migration {
                     'rejected'::text,
                     'coming_soon'::text
                 ]))");
-        } else {
+        } elseif (DB::getDriverName() === 'mysql') {
             // MySQL / MariaDB – modify ENUM in place
             DB::statement("ALTER TABLE courses MODIFY COLUMN status
                 ENUM('draft','pending','published','rejected','coming_soon')
@@ -33,22 +34,22 @@ return new class extends Migration {
 
         // ── Step 2: Add extra scheduling columns to courses ───────────────────
         Schema::table('courses', function (Blueprint $table) {
-            if (!Schema::hasColumn('courses', 'enrollment_limit')) {
+            if (! Schema::hasColumn('courses', 'enrollment_limit')) {
                 $table->unsignedInteger('enrollment_limit')->nullable()->after('status');
             }
-            if (!Schema::hasColumn('courses', 'enrollment_start')) {
+            if (! Schema::hasColumn('courses', 'enrollment_start')) {
                 $table->timestamp('enrollment_start')->nullable()->after('enrollment_limit');
             }
-            if (!Schema::hasColumn('courses', 'enrollment_end')) {
+            if (! Schema::hasColumn('courses', 'enrollment_end')) {
                 $table->timestamp('enrollment_end')->nullable()->after('enrollment_start');
             }
-            if (!Schema::hasColumn('courses', 'completion_requirements')) {
+            if (! Schema::hasColumn('courses', 'completion_requirements')) {
                 $table->json('completion_requirements')->nullable()->after('enrollment_end');
             }
         });
 
         // ── Step 3: Supplementary tables ─────────────────────────────────────
-        if (!Schema::hasTable('resources')) {
+        if (! Schema::hasTable('resources')) {
             Schema::create('resources', function (Blueprint $table) {
                 $table->id();
                 $table->foreignId('course_id')->constrained()->cascadeOnDelete();
@@ -59,7 +60,7 @@ return new class extends Migration {
             });
         }
 
-        if (!Schema::hasTable('live_classes')) {
+        if (! Schema::hasTable('live_classes')) {
             Schema::create('live_classes', function (Blueprint $table) {
                 $table->id();
                 $table->foreignId('course_id')->constrained()->cascadeOnDelete();
@@ -71,7 +72,7 @@ return new class extends Migration {
             });
         }
 
-        if (!Schema::hasTable('curriculum_items')) {
+        if (! Schema::hasTable('curriculum_items')) {
             Schema::create('curriculum_items', function (Blueprint $table) {
                 $table->id();
                 $table->foreignId('course_id')->constrained()->cascadeOnDelete();
@@ -102,7 +103,7 @@ return new class extends Migration {
         Schema::table('courses', function (Blueprint $table) {
             $cols = array_filter(
                 ['enrollment_limit', 'enrollment_start', 'enrollment_end', 'completion_requirements'],
-                fn($c) => Schema::hasColumn('courses', $c)
+                fn ($c) => Schema::hasColumn('courses', $c)
             );
             if ($cols) {
                 $table->dropColumn(array_values($cols));
@@ -116,7 +117,7 @@ return new class extends Migration {
                 CHECK (status::text = ANY (ARRAY[
                     'draft'::text,'pending'::text,'published'::text,'rejected'::text
                 ]))");
-        } else {
+        } elseif (DB::getDriverName() === 'mysql') {
             DB::statement("ALTER TABLE courses MODIFY COLUMN status
                 ENUM('draft','pending','published','rejected')
                 NOT NULL DEFAULT 'draft'");

@@ -17,7 +17,7 @@ class Teacher extends Model
         'expertise_map', 'qualifications', 'experiences', 'office_hours',
         'consultation_enabled', 'consultation_note', 'status', 'featured',
         'is_verified', 'verified_at', 'allow_follow', 'show_email',
-        'show_phone', 'sort_order'
+        'show_phone', 'sort_order',
     ];
 
     protected $casts = [
@@ -34,7 +34,7 @@ class Teacher extends Model
         'show_email' => 'boolean',
         'show_phone' => 'boolean',
         'verified_at' => 'datetime',
-        'sort_order' => 'integer'
+        'sort_order' => 'integer',
     ];
 
     protected $appends = [
@@ -106,17 +106,23 @@ class Teacher extends Model
 
     public function scopeSearch($q, ?string $search)
     {
-        if (!$search) return $q;
+        if (! $search) {
+            return $q;
+        }
+
         return $q->where(function ($query) use ($search) {
             $query->where('name', 'like', "%{$search}%")
-                  ->orWhere('designation', 'like', "%{$search}%")
-                  ->orWhere('headline', 'like', "%{$search}%");
+                ->orWhere('designation', 'like', "%{$search}%")
+                ->orWhere('headline', 'like', "%{$search}%");
         });
     }
 
     public function scopeSpecialty($q, ?string $specialty)
     {
-        if (!$specialty || $specialty === 'সবাই') return $q;
+        if (! $specialty || $specialty === 'সবাই') {
+            return $q;
+        }
+
         return $q->whereJsonContains('specialties', $specialty);
     }
 
@@ -128,13 +134,15 @@ class Teacher extends Model
                 return $this->avatar;
             }
             if (str_starts_with($this->avatar, '/')) {
-                return $this->avatar . '?v=2';
+                return $this->avatar.'?v=2';
             }
-            return '/storage/' . ltrim($this->avatar, '/') . '?v=2';
+
+            return '/storage/'.ltrim($this->avatar, '/').'?v=2';
         }
         $bg = '102526';
         $color = 'fff99a';
-        return "https://ui-avatars.com/api/?name=" . urlencode($this->name) . "&background={$bg}&color={$color}&size=150";
+
+        return 'https://ui-avatars.com/api/?name='.urlencode($this->name)."&background={$bg}&color={$color}&size=150";
     }
 
     public function getCoverPhotoUrlAttribute(): ?string
@@ -144,10 +152,12 @@ class Teacher extends Model
                 return $this->cover_photo;
             }
             if (str_starts_with($this->cover_photo, '/')) {
-                return $this->cover_photo . '?v=2';
+                return $this->cover_photo.'?v=2';
             }
-            return '/storage/' . ltrim($this->cover_photo, '/') . '?v=2';
+
+            return '/storage/'.ltrim($this->cover_photo, '/').'?v=2';
         }
+
         return null;
     }
 
@@ -167,7 +177,8 @@ class Teacher extends Model
         }
 
         $avg = $this->teacherReviews()->where('status', 'approved')->avg('rating');
-        return $avg ? round((float)$avg, 1) : 0.0;
+
+        return $avg ? round((float) $avg, 1) : 0.0;
     }
 
     public function getProfileCompletionPercentageAttribute(): int
@@ -189,7 +200,7 @@ class Teacher extends Model
 
         $score = 0;
         foreach ($fields as $field => $weight) {
-            if ($this->{$field} && (!is_array($this->{$field}) || count($this->{$field}) > 0)) {
+            if ($this->{$field} && (! is_array($this->{$field}) || count($this->{$field}) > 0)) {
                 $score += $weight;
             }
         }
@@ -205,20 +216,44 @@ class Teacher extends Model
     public function getProfileCompletionSuggestionsAttribute(): array
     {
         $suggestions = [];
-        if (!$this->avatar) $suggestions[] = 'প্রোফাইল ছবি যুক্ত করুন';
-        if (!$this->cover_photo) $suggestions[] = 'কভার ছবি যুক্ত করুন';
-        if (!$this->designation) $suggestions[] = 'পদবি / পরিচয় যুক্ত করুন';
-        if (!$this->headline) $suggestions[] = 'সংক্ষিপ্ত হেডলাইন যুক্ত করুন';
-        if (!$this->short_bio) $suggestions[] = 'সংক্ষিপ্ত পরিচিতি লিখুন';
-        if (!$this->bio) $suggestions[] = 'বিস্তারিত বায়ো লিখুন';
-        if (empty($this->specialties)) $suggestions[] = 'বিশেষজ্ঞতা বা পড়ানোর বিষয়সমূহ যুক্ত করুন';
-        if (empty($this->expertise_map)) $suggestions[] = 'বিশেষজ্ঞতার বিস্তারিত ক্ষেত্র (Expertise Map) যুক্ত করুন';
-        if (empty($this->qualifications)) $suggestions[] = 'শিক্ষাগত যোগ্যতা যুক্ত করুন';
-        if (empty($this->experiences)) $suggestions[] = 'কাজের অভিজ্ঞতা যুক্ত করুন';
-        if (empty($this->knowledge_path)) $suggestions[] = 'শিক্ষার্থীরা কী শিখবে (Knowledge Path) যুক্ত করুন';
-        
+        if (! $this->avatar) {
+            $suggestions[] = 'প্রোফাইল ছবি যুক্ত করুন';
+        }
+        if (! $this->cover_photo) {
+            $suggestions[] = 'কভার ছবি যুক্ত করুন';
+        }
+        if (! $this->designation) {
+            $suggestions[] = 'পদবি / পরিচয় যুক্ত করুন';
+        }
+        if (! $this->headline) {
+            $suggestions[] = 'সংক্ষিপ্ত হেডলাইন যুক্ত করুন';
+        }
+        if (! $this->short_bio) {
+            $suggestions[] = 'সংক্ষিপ্ত পরিচিতি লিখুন';
+        }
+        if (! $this->bio) {
+            $suggestions[] = 'বিস্তারিত বায়ো লিখুন';
+        }
+        if (empty($this->specialties)) {
+            $suggestions[] = 'বিশেষজ্ঞতা বা পড়ানোর বিষয়সমূহ যুক্ত করুন';
+        }
+        if (empty($this->expertise_map)) {
+            $suggestions[] = 'বিশেষজ্ঞতার বিস্তারিত ক্ষেত্র (Expertise Map) যুক্ত করুন';
+        }
+        if (empty($this->qualifications)) {
+            $suggestions[] = 'শিক্ষাগত যোগ্যতা যুক্ত করুন';
+        }
+        if (empty($this->experiences)) {
+            $suggestions[] = 'কাজের অভিজ্ঞতা যুক্ত করুন';
+        }
+        if (empty($this->knowledge_path)) {
+            $suggestions[] = 'শিক্ষার্থীরা কী শিখবে (Knowledge Path) যুক্ত করুন';
+        }
+
         $hasSocial = $this->facebook_url || $this->youtube_url || $this->linkedin_url || $this->twitter_url || $this->instagram_url || $this->telegram_url || $this->website;
-        if (!$hasSocial) $suggestions[] = 'সোশ্যাল মিডিয়া লিংক যুক্ত করুন';
+        if (! $hasSocial) {
+            $suggestions[] = 'সোশ্যাল মিডিয়া লিংক যুক্ত করুন';
+        }
 
         return $suggestions;
     }

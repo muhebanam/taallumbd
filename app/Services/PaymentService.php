@@ -56,7 +56,7 @@ class PaymentService
         ?array $rawResponse = null
     ): Enrollment {
         return DB::transaction(function () use ($order, $method, $transactionId, $senderPhone, $rawResponse) {
-            $finalTrx = $transactionId ?: ('TXN-' . strtoupper(Str::random(10)));
+            $finalTrx = $transactionId ?: ('TXN-'.strtoupper(Str::random(10)));
 
             $order->update([
                 'status' => 'paid',

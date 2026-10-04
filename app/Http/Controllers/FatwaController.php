@@ -1,8 +1,8 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use App\Models\Category;
-use App\Models\Course;
 use App\Models\Fatwa;
 use App\Models\Teacher;
 use Illuminate\Http\Request;
@@ -37,7 +37,7 @@ class FatwaController extends Controller
                 'category:id,name,slug',
                 'mufti:id,name',
                 'teacher.user:id,name',
-                'assignedScholar.user:id,name'
+                'assignedScholar.user:id,name',
             ])
             ->latest('published_at');
 
@@ -77,8 +77,8 @@ class FatwaController extends Controller
         $isAuthor = $user && $fatwa->question_user_id === $user->id;
         $isStaff = $user && in_array($user->role, ['admin', 'instructor']);
 
-        if (!$isAuthor && !$isStaff) {
-            abort_unless($fatwa->status === 'published' && !$fatwa->is_private, 404);
+        if (! $isAuthor && ! $isStaff) {
+            abort_unless($fatwa->status === 'published' && ! $fatwa->is_private, 404);
         }
 
         // Increment views
@@ -91,8 +91,8 @@ class FatwaController extends Controller
             'assignedScholar.user:id,name',
             'relatedCourse' => function ($q) {
                 $q->select('id', 'title', 'slug', 'thumbnail', 'price', 'instructor_id')
-                  ->with('instructor:id,name');
-            }
+                    ->with('instructor:id,name');
+            },
         ]);
 
         // Related Fatawa in the same category
@@ -143,7 +143,7 @@ class FatwaController extends Controller
 
         $data['question_user_id'] = $request->user()?->id;
         $data['status'] = 'pending';
-        
+
         Fatwa::create($data);
 
         return back()->with('success', 'আপনার প্রশ্নটি সফলভাবে জমা হয়েছে। উলামা ও মুফতী পরিষদ উত্তর প্রস্তুত করার পর জানানো হবে, ইনশাআল্লাহ।');
@@ -164,4 +164,3 @@ class FatwaController extends Controller
         ]);
     }
 }
-

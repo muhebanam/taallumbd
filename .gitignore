@@ -24,3 +24,5 @@ Thumbs.db
 *.sql
 *.sql.gz
 files.zip
+*bundle*
+

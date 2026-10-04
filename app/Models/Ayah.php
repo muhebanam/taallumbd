@@ -10,7 +10,7 @@ class Ayah extends Model
     use HasFactory;
 
     protected $fillable = [
-        'surah_id', 'number', 'number_in_quran', 'text_uthmani', 'juz', 'sajdah'
+        'surah_id', 'number', 'number_in_quran', 'text_uthmani', 'juz', 'sajdah',
     ];
 
     protected $casts = [

@@ -3,7 +3,6 @@
 namespace App\Console\Commands;
 
 use App\Models\Assignment;
-use App\Models\Course;
 use App\Models\CourseSection;
 use App\Models\CurriculumItem;
 use App\Models\Lesson;
@@ -13,6 +12,7 @@ use Illuminate\Console\Command;
 class BackfillCurriculumItemsCommand extends Command
 {
     protected $signature = 'curriculum:backfill-items';
+
     protected $description = 'Backfills existing lessons, quizzes, and assignments into curriculum_items';
 
     public function handle()
@@ -48,7 +48,7 @@ class BackfillCurriculumItemsCommand extends Command
             if ($quiz->lesson) {
                 $sectionId = $quiz->lesson->section_id;
             }
-            if (!$sectionId) {
+            if (! $sectionId) {
                 $firstSection = CourseSection::where('course_id', $quiz->course_id)->orderBy('sort_order')->first();
                 $sectionId = $firstSection?->id;
             }
@@ -83,7 +83,7 @@ class BackfillCurriculumItemsCommand extends Command
             if ($assignment->lesson) {
                 $sectionId = $assignment->lesson->section_id;
             }
-            if (!$sectionId) {
+            if (! $sectionId) {
                 $firstSection = CourseSection::where('course_id', $assignment->course_id)->orderBy('sort_order')->first();
                 $sectionId = $firstSection?->id;
             }
@@ -111,6 +111,7 @@ class BackfillCurriculumItemsCommand extends Command
         }
 
         $this->info('Curriculum items backfill completed successfully!');
+
         return Command::SUCCESS;
     }
 }

@@ -2,9 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Surah;
-use App\Models\Ayah;
 use App\Models\MemorizationProgress;
+use App\Models\Surah;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -20,9 +19,9 @@ class QuranController extends Controller
         $surahs = Surah::query()
             ->when($search, function ($query, $s) {
                 $query->where('name_bangla', 'like', "%{$s}%")
-                      ->orWhere('name_arabic', 'like', "%{$s}%")
-                      ->orWhere('name_transliteration', 'like', "%{$s}%")
-                      ->orWhere('number', $s);
+                    ->orWhere('name_arabic', 'like', "%{$s}%")
+                    ->orWhere('name_transliteration', 'like', "%{$s}%")
+                    ->orWhere('number', $s);
             })
             ->orderBy('number')
             ->get();
@@ -58,7 +57,7 @@ class QuranController extends Controller
             ->first();
 
         // If not found in DB yet, load standard structured data for this Surah
-        if (!$surah) {
+        if (! $surah) {
             $surah = $this->getSurahFallback($number);
         }
 
@@ -138,7 +137,7 @@ class QuranController extends Controller
                     ['number' => 5, 'text_uthmani' => 'إِيَّاكَ نَعْبُدُ وَإِيَّاكَ نَسْتَعِينُ', 'bangla_translation' => ['text' => 'আমরা একমাত্র তোমারই ইবাদত করি এবং শুধুমাত্র তোমারই সাহায্য প্রার্থনা করি।']],
                     ['number' => 6, 'text_uthmani' => 'اهْدِنَا الصِّرَاطَ الْمُسْتَقِيمَ', 'bangla_translation' => ['text' => 'আমাদেরকে সরল-সঠিক পথ প্রদর্শন করুন।']],
                     ['number' => 7, 'text_uthmani' => 'صِرَاطَ الَّذِينَ أَنْعَمْتَ عَلَيْهِمْ غَيْرِ الْمَغْضُوبِ عَلَيْهِمْ وَلَا الضَّالِّينَ', 'bangla_translation' => ['text' => 'তাদের পথ, যাদেরকে তুমি অনুগ্রহ দান করেছ; তাদের পথ নয়, যাদের ওপর তোমার গজব নাজিল হয়েছে এবং যারা পথভ্রষ্ট হয়েছে।']],
-                ]
+                ],
             ];
         }
 
@@ -149,7 +148,7 @@ class QuranController extends Controller
             'name_bangla' => "সূরা নং {$number}",
             'ayah_count' => 0,
             'revelation_type' => 'Meccan',
-            'ayahs' => []
+            'ayahs' => [],
         ];
     }
 }

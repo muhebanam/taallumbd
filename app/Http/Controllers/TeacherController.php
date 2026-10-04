@@ -3,9 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Category;
-use App\Models\Teacher;
 use App\Models\Enrollment;
-use Illuminate\Http\Request;
+use App\Models\Review;
+use App\Models\Teacher;
 use Inertia\Inertia;
 
 class TeacherController extends Controller
@@ -50,10 +50,10 @@ class TeacherController extends Controller
             ->with('category')
             ->get();
 
-        $reviews = \App\Models\Review::where(function ($query) use ($teacher, $courses) {
-                $query->where('teacher_id', $teacher->id)
-                      ->orWhereIn('course_id', $courses->pluck('id'));
-            })
+        $reviews = Review::where(function ($query) use ($teacher, $courses) {
+            $query->where('teacher_id', $teacher->id)
+                ->orWhereIn('course_id', $courses->pluck('id'));
+        })
             ->where('status', 'approved')
             ->with(['user', 'course'])
             ->latest()
@@ -74,7 +74,7 @@ class TeacherController extends Controller
 
         // Recalculate average rating and reviews count on the fly
         $avgRating = $reviews->avg('rating');
-        $teacher->average_rating = $avgRating ? round((float)$avgRating, 1) : 0.0;
+        $teacher->average_rating = $avgRating ? round((float) $avgRating, 1) : 0.0;
         $teacher->reviews_count = $reviews->count();
 
         // Calculate unique enrolled students count for this teacher's courses

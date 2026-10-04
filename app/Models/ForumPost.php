@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -56,7 +57,10 @@ class ForumPost extends Model
 
     public function isLikedBy(?User $user): bool
     {
-        if (!$user) return false;
+        if (! $user) {
+            return false;
+        }
+
         return $this->likes()->where('user_id', $user->id)->exists();
     }
 

@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
@@ -8,6 +9,8 @@ use App\Models\Course;
 use App\Models\Enrollment;
 use App\Models\Fatwa;
 use App\Models\Order;
+use App\Models\Teacher;
+use App\Services\PaymentService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -27,6 +30,7 @@ class ModerationController extends Controller
     public function updateCourseStatus(Request $request, Course $course)
     {
         $course->update($request->validate(['status' => 'required|in:draft,pending,published,rejected']));
+
         return back()->with('success', 'কোর্স স্ট্যাটাস আপডেট হয়েছে।');
     }
 
@@ -44,6 +48,7 @@ class ModerationController extends Controller
     {
         $data = $request->validate(['status' => 'required|in:draft,pending,published,rejected']);
         $article->update([...$data, 'published_at' => $data['status'] === 'published' ? now() : $article->published_at]);
+
         return back()->with('success', 'প্রবন্ধ স্ট্যাটাস আপডেট হয়েছে।');
     }
 
@@ -55,13 +60,13 @@ class ModerationController extends Controller
                 'mufti:id,name',
                 'teacher.user:id,name',
                 'assignedScholar.user:id,name',
-                'relatedCourse:id,title'
+                'relatedCourse:id,title',
             ])
                 ->when($request->status, fn ($q, $s) => $q->where('status', $s))
                 ->latest()->paginate(20)->withQueryString(),
             'filters' => $request->only('status'),
-            'scholars' => \App\Models\Teacher::with('user:id,name')->get(['id', 'user_id', 'name', 'designation', 'slug']),
-            'courses' => \App\Models\Course::where('status', 'published')->get(['id', 'title']),
+            'scholars' => Teacher::with('user:id,name')->get(['id', 'user_id', 'name', 'designation', 'slug']),
+            'courses' => Course::where('status', 'published')->get(['id', 'title']),
         ]);
     }
 
@@ -83,7 +88,7 @@ class ModerationController extends Controller
             'references' => $data['references'] ?? $fatwa->references,
         ];
 
-        if (!empty($data['answer_body'])) {
+        if (! empty($data['answer_body'])) {
             $updates['answer_body'] = $data['answer_body'];
             $updates['answered_by'] = $request->user()->id;
             $updates['answered_at'] = now();
@@ -105,6 +110,29 @@ class ModerationController extends Controller
         ]);
     }
 
+    public function approveOrder(Request $request, Order $order, PaymentService $payments)
+    {
+        abort_unless($order->status === 'pending', 400, 'এই অর্ডারটি পেন্ডিং নয়।');
+
+        $payments->confirm(
+            $order,
+            $order->payment_method ?: 'manual',
+            $order->transaction_id,
+            $order->sender_phone
+        );
+
+        return back()->with('success', "অর্ডার #{$order->id} সফলভাবে অনুমোদন করা হয়েছে এবং শিক্ষার্থীকে কোর্সে যুক্ত করা হয়েছে।");
+    }
+
+    public function rejectOrder(Request $request, Order $order)
+    {
+        abort_unless($order->status === 'pending', 400, 'শুধুমাত্র পেন্ডিং অর্ডার বাতিল করা সম্ভব।');
+
+        $order->update(['status' => 'cancelled']);
+
+        return back()->with('info', "অর্ডার #{$order->id} সফলভাবে বাতিল করা হয়েছে।");
+    }
+
     public function enrollments()
     {
         return Inertia::render('Admin/Enrollments', [
@@ -122,6 +150,7 @@ class ModerationController extends Controller
     public function markMessageRead(ContactMessage $message)
     {
         $message->update(['status' => 'read']);
+
         return back();
     }
 }

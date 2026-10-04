@@ -6,8 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Teacher;
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Inertia\Inertia;
 
 class AdminTeacherController extends Controller
@@ -20,15 +20,16 @@ class AdminTeacherController extends Controller
             ->paginate(15);
 
         return Inertia::render('Admin/Teachers/Index', [
-            'teachers' => $teachers
+            'teachers' => $teachers,
         ]);
     }
 
     public function create()
     {
         $users = User::whereIn('role', ['instructor', 'admin'])->get();
+
         return Inertia::render('Admin/Teachers/Create', [
-            'users' => $users
+            'users' => $users,
         ]);
     }
 
@@ -74,7 +75,7 @@ class AdminTeacherController extends Controller
         // Ensure unique slug
         $count = Teacher::where('slug', 'like', "{$slug}%")->count();
         if ($count > 0) {
-            $slug = "{$slug}-" . ($count + 1);
+            $slug = "{$slug}-".($count + 1);
         }
 
         $data = $request->except(['avatar_file', 'cover_file']);
@@ -100,9 +101,10 @@ class AdminTeacherController extends Controller
     public function edit(Teacher $teacher)
     {
         $users = User::whereIn('role', ['instructor', 'admin'])->get();
+
         return Inertia::render('Admin/Teachers/Edit', [
             'teacher' => $teacher,
-            'users' => $users
+            'users' => $users,
         ]);
     }
 
@@ -150,7 +152,7 @@ class AdminTeacherController extends Controller
             $slug = Str::slug($request->name);
             $count = Teacher::where('slug', 'like', "{$slug}%")->where('id', '!=', $teacher->id)->count();
             if ($count > 0) {
-                $slug = "{$slug}-" . ($count + 1);
+                $slug = "{$slug}-".($count + 1);
             }
             $data['slug'] = $slug;
         }
@@ -169,9 +171,9 @@ class AdminTeacherController extends Controller
             $data['cover_photo'] = $request->file('cover_file')->store('teachers/covers', 'public');
         }
 
-        if ($request->boolean('is_verified') && !$teacher->is_verified) {
+        if ($request->boolean('is_verified') && ! $teacher->is_verified) {
             $data['verified_at'] = now();
-        } elseif (!$request->boolean('is_verified')) {
+        } elseif (! $request->boolean('is_verified')) {
             $data['verified_at'] = null;
         }
 
@@ -196,27 +198,31 @@ class AdminTeacherController extends Controller
     public function verify(Teacher $teacher)
     {
         $teacher->update([
-            'is_verified' => !$teacher->is_verified,
-            'verified_at' => !$teacher->is_verified ? now() : null
+            'is_verified' => ! $teacher->is_verified,
+            'verified_at' => ! $teacher->is_verified ? now() : null,
         ]);
+
         return back()->with('success', 'ভেরিফিকেশন স্ট্যাটাস আপডেট হয়েছে।');
     }
 
     public function feature(Teacher $teacher)
     {
-        $teacher->update(['featured' => !$teacher->featured]);
+        $teacher->update(['featured' => ! $teacher->featured]);
+
         return back()->with('success', 'ফিচার্ড স্ট্যাটাস আপডেট হয়েছে।');
     }
 
     public function activate(Teacher $teacher)
     {
         $teacher->update(['status' => 'active']);
+
         return back()->with('success', 'শিক্ষক প্রোফাইল সক্রিয় করা হয়েছে।');
     }
 
     public function reject(Teacher $teacher)
     {
         $teacher->update(['status' => 'rejected']);
+
         return back()->with('success', 'শিক্ষক প্রোফাইল বাতিল করা হয়েছে।');
     }
 }

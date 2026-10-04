@@ -4,9 +4,9 @@ namespace App\Http\Controllers\Student;
 
 use App\Http\Controllers\Controller;
 use App\Models\Lesson;
-use App\Models\LessonNote;
 use App\Models\LessonBookmark;
 use App\Models\LessonComment;
+use App\Models\LessonNote;
 use Illuminate\Http\Request;
 
 class LessonInteractionController extends Controller
@@ -61,7 +61,7 @@ class LessonInteractionController extends Controller
             'user_id' => $request->user()->id,
             'lesson_id' => $lesson->id,
             'timestamp_seconds' => $validated['timestamp_seconds'],
-            'title' => $validated['title'] ?: 'বুকমার্ক (' . gmdate("i:s", $validated['timestamp_seconds']) . ')',
+            'title' => $validated['title'] ?: 'বুকমার্ক ('.gmdate('i:s', $validated['timestamp_seconds']).')',
         ]);
 
         return response()->json([

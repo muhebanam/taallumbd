@@ -27,7 +27,14 @@ export default function MockPayment({ order }) {
             alert('অনুগ্রহ করে মোবাইল নম্বর এবং Transaction ID (TrxID) প্রদান করুন।');
             return;
         }
-        handlePay('manual_' + tab, transactionId);
+        setProcessing(true);
+        router.post(`/payment/${order.id}/manual-submit`, {
+            method: 'manual_' + tab,
+            sender_phone: senderPhone,
+            transaction_id: transactionId,
+        }, {
+            onFinish: () => setProcessing(false),
+        });
     };
 
     return (

@@ -4,11 +4,12 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration {
+return new class extends Migration
+{
     public function up(): void
     {
         // 1. Surahs table
-        if (!Schema::hasTable('surahs')) {
+        if (! Schema::hasTable('surahs')) {
             Schema::create('surahs', function (Blueprint $table) {
                 $table->id();
                 $table->unsignedSmallInteger('number')->unique();
@@ -23,7 +24,7 @@ return new class extends Migration {
         }
 
         // 2. Ayahs table
-        if (!Schema::hasTable('ayahs')) {
+        if (! Schema::hasTable('ayahs')) {
             Schema::create('ayahs', function (Blueprint $table) {
                 $table->id();
                 $table->foreignId('surah_id')->constrained('surahs')->cascadeOnDelete();
@@ -39,7 +40,7 @@ return new class extends Migration {
         }
 
         // 3. Ayah Translations table
-        if (!Schema::hasTable('ayah_translations')) {
+        if (! Schema::hasTable('ayah_translations')) {
             Schema::create('ayah_translations', function (Blueprint $table) {
                 $table->id();
                 $table->foreignId('ayah_id')->constrained('ayahs')->cascadeOnDelete();
@@ -53,7 +54,7 @@ return new class extends Migration {
         }
 
         // 4. Ayah Tafsir table
-        if (!Schema::hasTable('ayah_tafsir')) {
+        if (! Schema::hasTable('ayah_tafsir')) {
             Schema::create('ayah_tafsir', function (Blueprint $table) {
                 $table->id();
                 $table->foreignId('ayah_id')->constrained('ayahs')->cascadeOnDelete();
@@ -66,7 +67,7 @@ return new class extends Migration {
         }
 
         // 5. Memorization Progress table (হিফজ ট্র্যাকার)
-        if (!Schema::hasTable('memorization_progress')) {
+        if (! Schema::hasTable('memorization_progress')) {
             Schema::create('memorization_progress', function (Blueprint $table) {
                 $table->id();
                 $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();

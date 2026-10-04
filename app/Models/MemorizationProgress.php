@@ -12,7 +12,7 @@ class MemorizationProgress extends Model
     protected $table = 'memorization_progress';
 
     protected $fillable = [
-        'user_id', 'surah_id', 'ayah_from', 'ayah_to', 'status', 'notes'
+        'user_id', 'surah_id', 'ayah_from', 'ayah_to', 'status', 'notes',
     ];
 
     public function user()

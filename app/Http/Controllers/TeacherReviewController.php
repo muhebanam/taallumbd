@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Teacher;
-use App\Models\Review;
 use App\Models\Enrollment;
+use App\Models\Review;
+use App\Models\Teacher;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
@@ -23,7 +23,7 @@ class TeacherReviewController extends Controller
         ]);
 
         $user = auth()->user();
-        $courseId = !empty($data['course_id']) ? (int) $data['course_id'] : null;
+        $courseId = ! empty($data['course_id']) ? (int) $data['course_id'] : null;
 
         if ($courseId) {
             $isEnrolled = Enrollment::where('user_id', $user->id)
@@ -31,7 +31,7 @@ class TeacherReviewController extends Controller
                 ->whereIn('status', ['active', 'completed'])
                 ->exists();
 
-            if (!$isEnrolled) {
+            if (! $isEnrolled) {
                 return back()->with('error', 'নির্দিষ্ট কোর্সের রিভিউ দেওয়ার জন্য আপনাকে কোর্সটিতে ভর্তি থাকতে হবে।');
             }
 

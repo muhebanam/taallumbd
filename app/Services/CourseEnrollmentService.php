@@ -27,7 +27,7 @@ class CourseEnrollmentService
 
         // 4. Enrollment Window check
         if ($course->enrollment_start && $course->enrollment_start->isFuture()) {
-            throw new Exception('কোর্সে ভর্তি শুরু হবে ' . $course->enrollment_start->format('Y-m-d H:i') . ' এ।');
+            throw new Exception('কোর্সে ভর্তি শুরু হবে '.$course->enrollment_start->format('Y-m-d H:i').' এ।');
         }
 
         if ($course->enrollment_end && $course->enrollment_end->isPast()) {

@@ -47,9 +47,26 @@ export default function Invoice({ order }) {
                             <p className="text-[10px] text-gray-400">www.taallumbd.com • support@taallumbd.com</p>
                         </div>
                         <div className="text-right">
-                            <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-bold text-emerald-800">
-                                পরিশোধিত (PAID)
-                            </span>
+                            {order.status === 'paid' && (
+                                <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-bold text-emerald-800">
+                                    ✅ পরিশোধিত (PAID)
+                                </span>
+                            )}
+                            {order.status === 'pending' && order.transaction_id && (
+                                <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-bold text-amber-800">
+                                    ⏳ যাচাইকরণাধীন (PENDING VERIFICATION)
+                                </span>
+                            )}
+                            {order.status === 'pending' && !order.transaction_id && (
+                                <span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-bold text-gray-800">
+                                    🕒 অপরিশোধিত (UNPAID)
+                                </span>
+                            )}
+                            {order.status === 'cancelled' && (
+                                <span className="rounded-full bg-rose-100 px-3 py-1 text-xs font-bold text-rose-800">
+                                    ❌ বাতিলকৃত (CANCELLED)
+                                </span>
+                            )}
                             <p className="mt-2 text-xs font-bold text-gray-800">ইনভয়েস #{order.id}</p>
                             <p className="text-[11px] text-gray-400">
                                 তারিখ: {new Date(order.updated_at || order.created_at).toLocaleDateString('bn-BD', {
@@ -60,6 +77,34 @@ export default function Invoice({ order }) {
                             </p>
                         </div>
                     </div>
+
+                    {/* Status Alert Banners */}
+                    {order.status === 'pending' && order.transaction_id && (
+                        <div className="mt-4 rounded-2xl bg-amber-50 border border-amber-200 p-4 text-xs text-amber-900 flex items-start gap-3">
+                            <span className="text-lg">⏳</span>
+                            <div>
+                                <p className="font-bold">আপনার পেমেন্ট যাচাইকরণাধীন রয়েছে</p>
+                                <p className="mt-0.5 text-amber-800">
+                                    আমরা আপনার প্রেরিত মোবাইল নম্বর ও TrxID যাচাই করছি। অ্যাডমিন অনুমোদন সম্পন্ন হলে (সাধারণত ১৫-৩০ মিনিট) কোর্সটি আপনার ড্যাশবোর্ডে সক্রিয় হয়ে যাবে।
+                                </p>
+                            </div>
+                        </div>
+                    )}
+
+                    {order.status === 'paid' && (
+                        <div className="mt-4 rounded-2xl bg-emerald-50 border border-emerald-200 p-4 text-xs text-emerald-900 flex items-center justify-between">
+                            <div>
+                                <p className="font-bold">কোর্সে প্রবেশাধিকার সক্রিয় হয়েছে!</p>
+                                <p className="text-emerald-700">আপনি যেকোনো সময় ক্লাস শুরু করতে পারেন।</p>
+                            </div>
+                            <Link
+                                href={`/courses/${order.course?.slug}`}
+                                className="rounded-xl bg-emerald-700 px-4 py-2 font-bold text-white shadow hover:bg-emerald-800"
+                            >
+                                কোর্সে প্রবেশ করুন &rarr;
+                            </Link>
+                        </div>
+                    )}
 
                     {/* Billed To */}
                     <div className="mt-6 grid grid-cols-2 gap-4 text-xs">

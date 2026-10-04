@@ -2,12 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Course;
-use App\Models\Teacher;
-use App\Models\Category;
-use App\Models\Fatwa;
 use App\Models\Article;
-use App\Models\User;
+use App\Models\Category;
+use App\Models\Course;
+use App\Models\Fatwa;
+use App\Models\Teacher;
 use Inertia\Inertia;
 
 class HomeController extends Controller
@@ -25,7 +24,7 @@ class HomeController extends Controller
         $featuredTeachers = Teacher::where('status', 'active')
             ->where(function ($query) {
                 $query->where('featured', true)
-                      ->orWhere('is_verified', true);
+                    ->orWhere('is_verified', true);
             })
             ->withCount(['courses', 'articles', 'fatawa', 'followers'])
             ->orderByDesc('featured')
@@ -64,8 +63,8 @@ class HomeController extends Controller
             ['value' => '২,৫০০+', 'label' => 'নিবন্ধিত শিক্ষার্থী'],
             ['value' => '৯৫%', 'label' => 'সন্তুষ্ট শিক্ষার্থী'],
             ['value' => '১০০%', 'label' => 'বিশুদ্ধ কারিকুলাম'],
-            ['value' => bn_number(Course::published()->count()) . ' টি', 'label' => 'সক্রিয় কোর্স'],
-            ['value' => bn_number(Teacher::where('status', 'active')->count()) . ' জন', 'label' => 'যোগ্য উস্তায ও গবেষক'],
+            ['value' => bn_number(Course::published()->count()).' টি', 'label' => 'সক্রিয় কোর্স'],
+            ['value' => bn_number(Teacher::where('status', 'active')->count()).' জন', 'label' => 'যোগ্য উস্তায ও গবেষক'],
         ];
 
         return Inertia::render('Home', [

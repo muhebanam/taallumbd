@@ -14,7 +14,6 @@ use App\Models\HadithChapter;
 use App\Models\Teacher;
 use App\Models\User;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Str;
 
 class PlatformContentSeeder extends Seeder
 {
@@ -57,8 +56,8 @@ class PlatformContentSeeder extends Seeder
                                 'bangla_translation' => 'উম্মুল মুমিনীন আয়িশা (রা.) হতে বর্ণিত, হারিস ইবনে হিশাম (রা.) রাসুলুল্লাহ (ﷺ)-কে জিজ্ঞাসা করলেন: হে আল্লাহর রাসুল! আপনার কাছে ওহী কীভাবে আসে? তিনি বললেন: কোনো কোনো সময় ওহী আমার নিকট ঘন্টার টুংটাং শব্দের ন্যায় আসে, আর এটিই আমার জন্য অধিক কষ্টসাধ্য হয়...',
                                 'narrator_bn' => 'উম্মুল মুমিনীন হযরত আয়িশা (রা.)',
                                 'grade' => 'সহীহ',
-                            ]
-                        ]
+                            ],
+                        ],
                     ],
                     [
                         'chapter_number' => 2,
@@ -71,10 +70,10 @@ class PlatformContentSeeder extends Seeder
                                 'bangla_translation' => 'ইসলামের স্তম্ভ পাঁচটি: সাক্ষ্য দেওয়া যে, আল্লাহ ব্যতীত কোনো উপাস্য নেই এবং মুহাম্মদ (ﷺ) আল্লাহর রাসুল, সালাত কায়েম করা, যাকাত আদায় করা, হজ্জ করা এবং রমযানের সিয়াম পালন করা।',
                                 'narrator_bn' => 'হযরত আব্দুল্লাহ ইবনে উমর (রা.)',
                                 'grade' => 'সহীহ',
-                            ]
-                        ]
-                    ]
-                ]
+                            ],
+                        ],
+                    ],
+                ],
             ],
             [
                 'name_bn' => 'সহীহ মুসলিম',
@@ -98,10 +97,10 @@ class PlatformContentSeeder extends Seeder
                                 'bangla_translation' => 'একদিন আমরা রাসুলুল্লাহ (ﷺ)-এর দরবারে বসা ছিলাম। এমন সময় ধবধবে সাদা পোশাক ও কুচকুচে কালো চুল বিশিষ্ট এক ব্যক্তি আসলেন, যার মধ্যে সফরের কোনো চিহ্ন ছিল না... (হাদীসে জিবরীল: ইসলাম, ঈমান ও ইহসান পরিচিতি)।',
                                 'narrator_bn' => 'হযরত উমর ইবনুল খাত্তাব (রা.)',
                                 'grade' => 'সহীহ',
-                            ]
-                        ]
-                    ]
-                ]
+                            ],
+                        ],
+                    ],
+                ],
             ],
             [
                 'name_bn' => 'জামে আত-তিরমিযী',
@@ -113,7 +112,7 @@ class PlatformContentSeeder extends Seeder
                 'total_hadiths' => 3956,
                 'is_active' => true,
                 'sort_order' => 3,
-                'chapters' => []
+                'chapters' => [],
             ],
             [
                 'name_bn' => 'সুনান আবী দাউদ',
@@ -125,7 +124,7 @@ class PlatformContentSeeder extends Seeder
                 'total_hadiths' => 5274,
                 'is_active' => true,
                 'sort_order' => 4,
-                'chapters' => []
+                'chapters' => [],
             ],
             [
                 'name_bn' => 'সুনান আন-নাসায়ী',
@@ -137,7 +136,7 @@ class PlatformContentSeeder extends Seeder
                 'total_hadiths' => 5758,
                 'is_active' => true,
                 'sort_order' => 5,
-                'chapters' => []
+                'chapters' => [],
             ],
             [
                 'name_bn' => 'সুনান ইবনে মাজাহ',
@@ -149,8 +148,8 @@ class PlatformContentSeeder extends Seeder
                 'total_hadiths' => 4341,
                 'is_active' => true,
                 'sort_order' => 6,
-                'chapters' => []
-            ]
+                'chapters' => [],
+            ],
         ];
 
         foreach ($booksData as $bData) {
@@ -166,7 +165,7 @@ class PlatformContentSeeder extends Seeder
 
                 $chapter = HadithChapter::updateOrCreate([
                     'hadith_book_id' => $book->id,
-                    'chapter_number' => $chData['chapter_number']
+                    'chapter_number' => $chData['chapter_number'],
                 ], $chData);
 
                 foreach ($hadiths as $hData) {
@@ -175,7 +174,7 @@ class PlatformContentSeeder extends Seeder
 
                     Hadith::updateOrCreate([
                         'hadith_book_id' => $book->id,
-                        'hadith_number' => $hData['hadith_number']
+                        'hadith_number' => $hData['hadith_number'],
                     ], $hData);
                 }
             }
@@ -213,7 +212,7 @@ class PlatformContentSeeder extends Seeder
                 'min_order_amount' => 0.00,
                 'usage_limit' => 50,
                 'status' => 'active',
-            ]
+            ],
         ];
 
         foreach ($coupons as $c) {
@@ -257,7 +256,7 @@ class PlatformContentSeeder extends Seeder
                     'published_at' => now()->subDays(1),
                     'answered_at' => now()->subDays(1),
                     'views_count' => 98,
-                ]
+                ],
             ];
 
             foreach ($sampleFatawa as $f) {
@@ -273,7 +272,7 @@ class PlatformContentSeeder extends Seeder
                 [
                     'title' => 'কুরআন হিফয ও তিলাওয়াত দীর্ঘমেয়াদে স্মরণে রাখার সর্বোত্তম কার্যপদ্ধতি কী?',
                     'topic' => 'quran-hadith',
-                    'body' => "মুহতারাম ভাই ও বোনেরা, কুরআন মুখস্থ করার পর তা যাতে বিস্মৃত না হয় সেজন্য প্রতিদিনের তিলাওয়াত ও পুনরাবৃত্তি (দাওর) কীভাবে সংগঠিত করা সবচেয়ে ফলপ্রসূ? বিজ্ঞ হাফেজ ও উস্তাযগণের অভিজ্ঞতা ও সুন্নাহসম্মত পরামর্শ জানতে চাচ্ছি।",
+                    'body' => 'মুহতারাম ভাই ও বোনেরা, কুরআন মুখস্থ করার পর তা যাতে বিস্মৃত না হয় সেজন্য প্রতিদিনের তিলাওয়াত ও পুনরাবৃত্তি (দাওর) কীভাবে সংগঠিত করা সবচেয়ে ফলপ্রসূ? বিজ্ঞ হাফেজ ও উস্তাযগণের অভিজ্ঞতা ও সুন্নাহসম্মত পরামর্শ জানতে চাচ্ছি।',
                     'user_id' => $admin->id,
                     'course_id' => $sampleCourse?->id,
                     'is_pinned' => true,
@@ -288,22 +287,22 @@ class PlatformContentSeeder extends Seeder
                         ],
                         [
                             'user_id' => $admin->id,
-                            'body' => "জাযাকাল্লাহু খাইরান উস্তায! আলহামদুলিল্লাহ, তাহাজ্জুদে তিলাওয়াতের অভ্যাস মুখস্থ ধরে রাখতে চমৎকার ভূমিকা রাখে।",
-                        ]
-                    ]
+                            'body' => 'জাযাকাল্লাহু খাইরান উস্তায! আলহামদুলিল্লাহ, তাহাজ্জুদে তিলাওয়াতের অভ্যাস মুখস্থ ধরে রাখতে চমৎকার ভূমিকা রাখে।',
+                        ],
+                    ],
                 ],
                 [
                     'title' => 'সহজ পদ্ধতিতে আরবি ব্যাকরণ (নাহব ও সরফ) আয়ত্ত করার কার্যকরী রোডম্যাপ',
                     'topic' => 'arabic-lang',
-                    'body' => "যারা বাংলা মাধ্যমে পড়াশোনা করেছেন কিন্তু সরাসরি আরবি কিতাব ও কুরআনের ভাষা বুঝতে চান, তাদের জন্য কোন কিতাবগুলো ক্রমানুসারে অধ্যয়ন করা উপকারী হবে? এ ব্যাপারে অভিজ্ঞ আলেমগণের দিকনির্দেশনা প্রত্যাশা করছি।",
+                    'body' => 'যারা বাংলা মাধ্যমে পড়াশোনা করেছেন কিন্তু সরাসরি আরবি কিতাব ও কুরআনের ভাষা বুঝতে চান, তাদের জন্য কোন কিতাবগুলো ক্রমানুসারে অধ্যয়ন করা উপকারী হবে? এ ব্যাপারে অভিজ্ঞ আলেমগণের দিকনির্দেশনা প্রত্যাশা করছি।',
                     'user_id' => $admin->id,
                     'is_pinned' => false,
                     'is_solved' => false,
                     'upvotes_count' => 8,
                     'views_count' => 125,
                     'status' => 'published',
-                    'comments' => []
-                ]
+                    'comments' => [],
+                ],
             ];
 
             foreach ($samplePosts as $p) {
@@ -317,7 +316,7 @@ class PlatformContentSeeder extends Seeder
                     ForumComment::firstOrCreate([
                         'forum_post_id' => $post->id,
                         'user_id' => $c['user_id'],
-                        'body' => $c['body']
+                        'body' => $c['body'],
                     ], $c);
                 }
             }

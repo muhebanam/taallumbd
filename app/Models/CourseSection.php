@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
@@ -6,7 +7,19 @@ use Illuminate\Database\Eloquent\Model;
 class CourseSection extends Model
 {
     protected $fillable = ['course_id', 'title', 'sort_order'];
-    public function course() { return $this->belongsTo(Course::class); }
-    public function lessons() { return $this->hasMany(Lesson::class, 'section_id')->orderBy('sort_order'); }
-    public function curriculumItems() { return $this->hasMany(CurriculumItem::class, 'section_id')->orderBy('sort_order'); }
+
+    public function course()
+    {
+        return $this->belongsTo(Course::class);
+    }
+
+    public function lessons()
+    {
+        return $this->hasMany(Lesson::class, 'section_id')->orderBy('sort_order');
+    }
+
+    public function curriculumItems()
+    {
+        return $this->hasMany(CurriculumItem::class, 'section_id')->orderBy('sort_order');
+    }
 }

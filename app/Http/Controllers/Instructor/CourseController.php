@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers\Instructor;
 
 use App\Http\Controllers\Controller;
@@ -48,12 +49,13 @@ class CourseController extends Controller
     {
         $data = $request->validate($this->rules());
         $data['instructor_id'] = $request->user()->id;
-        $data['slug'] = Str::slug($data['title']) . '-' . Str::random(5);
+        $data['slug'] = Str::slug($data['title']).'-'.Str::random(5);
         $data['status'] = 'pending'; // instructor submissions require admin approval
         if ($request->hasFile('thumbnail')) {
             $data['thumbnail'] = $request->file('thumbnail')->store('courses', 'public');
         }
         $course = Course::create($data);
+
         return redirect()->route('instructor.courses.edit', $course)
             ->with('success', 'কোর্স তৈরি হয়েছে। কারিকুলাম যোগ করুন।');
     }
@@ -69,6 +71,7 @@ class CourseController extends Controller
                 Quiz::class => ['questions.options'],
             ]);
         });
+
         return Inertia::render('Instructor/Builder', [
             'categories' => Category::ofType('course')->get(['id', 'name']),
             'course' => $course,
@@ -83,12 +86,14 @@ class CourseController extends Controller
             $data['thumbnail'] = $request->file('thumbnail')->store('courses', 'public');
         }
         $course->update($data);
+
         return back()->with('success', 'কোর্স আপডেট হয়েছে।');
     }
 
     public function students(Request $request, Course $course)
     {
         abort_unless($request->user()->can('update', $course), 403);
+
         return Inertia::render('Instructor/CourseStudents', [
             'course' => $course->only('id', 'title', 'slug'),
             'enrollments' => $course->enrollments()->with('user:id,name,email')->latest()->paginate(20),

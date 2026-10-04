@@ -32,7 +32,7 @@ class ForumController extends Controller
             ->with([
                 'user:id,name,role',
                 'course:id,title,slug',
-                'category:id,name'
+                'category:id,name',
             ]);
 
         // Sorting
@@ -99,7 +99,7 @@ class ForumController extends Controller
             'category:id,name',
             'comments' => function ($q) {
                 $q->with('user:id,name,role')->latest();
-            }
+            },
         ])->loadCount('likes');
 
         $user = $request->user();
@@ -200,7 +200,7 @@ class ForumController extends Controller
         abort_unless($user && ($user->id === $post->user_id || in_array($user->role, ['admin', 'instructor'])), 403);
 
         $post->update([
-            'is_solved' => !$post->is_solved,
+            'is_solved' => ! $post->is_solved,
         ]);
 
         $message = $post->is_solved

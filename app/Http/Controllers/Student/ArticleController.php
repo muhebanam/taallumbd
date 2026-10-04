@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers\Student;
 
 use App\Http\Controllers\Controller;
@@ -28,9 +29,10 @@ class ArticleController extends Controller
         Article::create([
             ...$data,
             'user_id' => $request->user()->id,
-            'slug' => Str::slug($data['title']) . '-' . Str::random(5),
+            'slug' => Str::slug($data['title']).'-'.Str::random(5),
             'status' => 'pending', // admin approval required before publish
         ]);
+
         return redirect()->route('dashboard')->with('success', 'প্রবন্ধ জমা হয়েছে। অ্যাডমিন অনুমোদনের পর প্রকাশিত হবে।');
     }
 }

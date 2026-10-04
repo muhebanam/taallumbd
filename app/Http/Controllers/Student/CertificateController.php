@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers\Student;
 
 use App\Http\Controllers\Controller;
@@ -25,12 +26,14 @@ class CertificateController extends Controller
         abort_unless($this->progress->eligibleForCertificate($user, $course), 403,
             'সার্টিফিকেটের জন্য ১০০% পাঠ সম্পন্ন এবং সব কুইজে পাস করতে হবে।');
         $certificate = $this->progress->issueCertificate($user, $course);
+
         return redirect()->route('certificates.show', $certificate);
     }
 
     public function show(Request $request, Certificate $certificate)
     {
         abort_unless($certificate->user_id === $request->user()->id || $request->user()->isAdmin(), 403);
+
         return Inertia::render('Student/CertificateView', [
             'certificate' => $certificate->load(['user:id,name', 'course:id,title']),
         ]);

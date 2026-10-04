@@ -30,10 +30,18 @@ class Coupon extends Model
 
     public function isValidForAmount(float $amount): bool
     {
-        if ($this->status !== 'active') return false;
-        if ($this->expires_at && $this->expires_at->isPast()) return false;
-        if ($this->usage_limit && $this->used_count >= $this->usage_limit) return false;
-        if ($amount < $this->min_order_amount) return false;
+        if ($this->status !== 'active') {
+            return false;
+        }
+        if ($this->expires_at && $this->expires_at->isPast()) {
+            return false;
+        }
+        if ($this->usage_limit && $this->used_count >= $this->usage_limit) {
+            return false;
+        }
+        if ($amount < $this->min_order_amount) {
+            return false;
+        }
 
         return true;
     }

@@ -4,11 +4,12 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration {
+return new class extends Migration
+{
     public function up(): void
     {
         // 1. Hadith Books table (যেমন: সহীহ বুখারী, সহীহ মুসলিম, সুনান আবূ দাউদ, ইত্যাদি)
-        if (!Schema::hasTable('hadith_books')) {
+        if (! Schema::hasTable('hadith_books')) {
             Schema::create('hadith_books', function (Blueprint $table) {
                 $table->id();
                 $table->string('name_arabic');
@@ -23,7 +24,7 @@ return new class extends Migration {
         }
 
         // 2. Hadith Chapters table (কিতাবের অধ্যায় বা কিতাবসমূহ)
-        if (!Schema::hasTable('hadith_chapters')) {
+        if (! Schema::hasTable('hadith_chapters')) {
             Schema::create('hadith_chapters', function (Blueprint $table) {
                 $table->id();
                 $table->foreignId('book_id')->constrained('hadith_books')->cascadeOnDelete();
@@ -37,7 +38,7 @@ return new class extends Migration {
         }
 
         // 3. Hadiths table (হাদীসের মূল আরবী ও বাংলা অনুবাদ)
-        if (!Schema::hasTable('hadiths')) {
+        if (! Schema::hasTable('hadiths')) {
             Schema::create('hadiths', function (Blueprint $table) {
                 $table->id();
                 $table->foreignId('book_id')->constrained('hadith_books')->cascadeOnDelete();

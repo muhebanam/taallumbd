@@ -93,7 +93,9 @@ Route::middleware('auth')->group(function () {
     Route::post('/checkout/{course}/coupon', [C\CheckoutController::class, 'checkCoupon'])->name('checkout.coupon');
     Route::get('/mock-payment/{order}', [C\CheckoutController::class, 'mockPayment'])->name('payment.mock');
     Route::post('/mock-payment/{order}/success', [C\CheckoutController::class, 'mockSuccess'])->name('payment.mock.success');
+    Route::post('/payment/{order}/manual-submit', [C\CheckoutController::class, 'submitManualPayment'])->name('payment.manual.submit');
     Route::get('/orders/{order}/invoice', [C\CheckoutController::class, 'invoice'])->name('orders.invoice');
+    Route::get('/invoice/{order}', [C\CheckoutController::class, 'invoice'])->name('invoice');
 
     // Teacher interaction routes
     Route::post('/teachers/{teacher}/follow', [C\TeacherFollowController::class, 'store'])->name('teachers.follow');
@@ -168,6 +170,8 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::put('/articles/{article}/status', [C\Admin\ModerationController::class, 'updateArticleStatus'])->name('articles.status');
     Route::get('/enrollments', [C\Admin\ModerationController::class, 'enrollments'])->name('enrollments.index');
     Route::get('/orders', [C\Admin\ModerationController::class, 'orders'])->name('orders.index');
+    Route::post('/orders/{order}/approve', [C\Admin\ModerationController::class, 'approveOrder'])->name('orders.approve');
+    Route::post('/orders/{order}/reject', [C\Admin\ModerationController::class, 'rejectOrder'])->name('orders.reject');
     Route::get('/contact-messages', [C\Admin\ModerationController::class, 'contactMessages'])->name('messages.index');
     Route::put('/contact-messages/{message}/read', [C\Admin\ModerationController::class, 'markMessageRead'])->name('messages.read');
 

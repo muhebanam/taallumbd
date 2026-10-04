@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Teacher;
 use App\Models\Fatwa;
+use App\Models\Teacher;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 

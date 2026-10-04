@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
@@ -6,6 +7,14 @@ use Illuminate\Database\Eloquent\Model;
 class QuizQuestion extends Model
 {
     protected $fillable = ['quiz_id', 'question', 'type', 'marks'];
-    public function quiz() { return $this->belongsTo(Quiz::class); }
-    public function options() { return $this->hasMany(QuizOption::class, 'question_id'); }
+
+    public function quiz()
+    {
+        return $this->belongsTo(Quiz::class);
+    }
+
+    public function options()
+    {
+        return $this->hasMany(QuizOption::class, 'question_id');
+    }
 }
