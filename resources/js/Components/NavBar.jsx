@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, usePage } from '@inertiajs/react';
 import UserMenu from './UserMenu';
 import CourseMegaMenu from './CourseMegaMenu';
+import NotificationBell from './NotificationBell';
 
 export default function NavBar() {
     const { auth } = usePage().props;
@@ -93,7 +94,10 @@ export default function NavBar() {
                 {/* Right Side: Auth / CTA */}
                 <div className="hidden sm:flex items-center gap-3">
                     {auth?.user ? (
-                        <UserMenu user={auth.user} />
+                        <>
+                            <NotificationBell />
+                            <UserMenu user={auth.user} />
+                        </>
                     ) : (
                         <div className="flex items-center gap-2.5">
                             <Link 
@@ -114,7 +118,7 @@ export default function NavBar() {
 
                 {/* Mobile Menu Toggle Button */}
                 <div className="flex lg:hidden items-center gap-2">
-                    {auth?.user && <div className="sm:hidden"><UserMenu user={auth.user} /></div>}
+                    {auth?.user && <div className="sm:hidden flex items-center gap-1"><NotificationBell /><UserMenu user={auth.user} /></div>}
                     <button
                         type="button"
                         onClick={() => setMobileOpen(!mobileOpen)}

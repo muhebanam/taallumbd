@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Fatwa;
+use App\Services\NotificationDispatcher;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -23,6 +24,7 @@ class AdminTeacherQuestionController extends Controller
 
     public function answer(Request $request, Fatwa $question)
     {
+        $question->loadMissing('user');
         $request->validate([
             'answer_body' => 'required|string',
         ]);
@@ -32,6 +34,7 @@ class AdminTeacherQuestionController extends Controller
             'status' => 'published',
             'published_at' => now(),
         ]);
+        app(NotificationDispatcher::class)->teacherQuestionAnswered($question);
 
         return back()->with('success', 'প্রশ্নের উত্তর সফলভাবে প্রকাশিত হয়েছে।');
     }

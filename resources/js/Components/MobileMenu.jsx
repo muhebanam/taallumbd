@@ -46,23 +46,23 @@ export default function MobileMenu({ user, onClose }) {
                 {(Array.isArray(navCategories?.fatwa) ? navCategories.fatwa : []).map((c) => (
                     <div key={c.id}>
                         <MobileLink href={`/fatawa/category/${c.slug}`}>{c.name}</MobileLink>
-                        {c.children?.map((child) => <MobileLink key={child.id} href={`/fatawa/category/${child.slug}`} indent>{child.name}</MobileLink>)}
+                        {Array.isArray(c.children) && c.children.map((child) => <MobileLink key={child.id} href={`/fatawa/category/${child.slug}`} indent>{child.name}</MobileLink>)}
                     </div>
                 ))}
                 <MobileLink href="/fatawa/ask">প্রশ্ন করুন</MobileLink>
             </Expandable>
 
             <Expandable label="প্রকাশনা">
-                {publicationsMenu.map((item) => (
+                {(Array.isArray(publicationsMenu) ? publicationsMenu : []).map((item) => (
                     <div key={item.label}>
                         <MobileLink href={item.href}>{item.label}</MobileLink>
-                        {item.children?.map((child) => <MobileLink key={child.label} href={child.href} indent>{child.label}</MobileLink>)}
+                        {Array.isArray(item.children) && item.children.map((child) => <MobileLink key={child.label} href={child.href} indent>{child.label}</MobileLink>)}
                     </div>
                 ))}
             </Expandable>
 
             <Expandable label="পরিচিতি">
-                {aboutMenu.map((item) => <MobileLink key={item.label} href={item.href}>{item.label}</MobileLink>)}
+                {(Array.isArray(aboutMenu) ? aboutMenu : []).map((item) => <MobileLink key={item.label} href={item.href}>{item.label}</MobileLink>)}
             </Expandable>
 
             <Link href="/contact" className="block border-b border-white/10 px-4 py-3 font-medium text-white" onClick={onClose}>যোগাযোগ</Link>

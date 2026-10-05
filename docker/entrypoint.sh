@@ -94,11 +94,12 @@ for i in 1 2 3; do
     sleep 5
 done
 
-# Cache config/routes/views for production performance
-echo "Caching Laravel configuration, routes, and views..."
+# Cache config/routes/views/events for production performance
+echo "Caching Laravel configuration, routes, views, and events..."
 php artisan config:cache || true
 php artisan route:cache || true
 php artisan view:cache || true
+php artisan event:cache || true
 
 # ─── Start Nginx in foreground ───────────────────────────────────────────────
 exec nginx -g "daemon off;"

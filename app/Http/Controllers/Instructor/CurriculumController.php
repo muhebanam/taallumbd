@@ -15,6 +15,7 @@ use App\Models\QuizOption;
 use App\Models\QuizQuestion;
 use App\Models\Resource as CourseResource;
 use App\Services\CurriculumItemService;
+use App\Services\NotificationDispatcher;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -114,6 +115,9 @@ class CurriculumController extends Controller
             'is_preview' => $lesson->is_preview,
             'sort_order' => $lesson->sort_order,
         ]);
+        if (! $lesson->is_preview) {
+            app(NotificationDispatcher::class)->lessonPublished($lesson->fresh('course'));
+        }
 
         return back()->with('success', 'পাঠ যোগ হয়েছে।');
     }
@@ -475,6 +479,7 @@ class CurriculumController extends Controller
             'marks' => 'required|integer|min:0',
             'feedback' => 'nullable|string|max:2000',
         ]) + ['status' => 'reviewed']);
+        app(NotificationDispatcher::class)->assignmentGraded($submission->fresh(['user', 'assignment']));
 
         return back()->with('success', 'মূল্যায়ন সংরক্ষিত হয়েছে।');
     }

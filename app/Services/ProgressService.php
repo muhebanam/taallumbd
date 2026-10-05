@@ -128,13 +128,27 @@ class ProgressService
 
     public function issueCertificate(User $user, Course $course): Certificate
     {
-        return Certificate::firstOrCreate(
-            ['user_id' => $user->id, 'course_id' => $course->id],
-            [
-                'uuid' => (string) Str::uuid(),
-                'certificate_no' => 'TBD-'.now()->format('Y').'-'.strtoupper(Str::random(6)),
-                'issued_at' => now(),
-            ]
+        $existing = Certificate::where('user_id', $user->id)->where('course_id', $course->id)->first();
+        if ($existing) {
+            return $existing;
+        }
+
+        $certificate = Certificate::create([
+            'user_id' => $user->id,
+            'course_id' => $course->id,
+            'uuid' => (string) Str::uuid(),
+            'certificate_no' => 'TBD-'.now()->format('Y').'-'.strtoupper(Str::random(6)),
+            'issued_at' => now(),
+        ]);
+
+        app(NotificationDispatcher::class)->send(
+            $user,
+            NotificationDispatcher::CERTIFICATE,
+            'আপনার সার্টিফিকেট ইস্যু হয়েছে',
+            "«{$course->title}» কোর্সের সার্টিফিকেট প্রস্তুত হয়েছে।",
+            route('student.certificates'),
         );
+
+        return $certificate;
     }
 }

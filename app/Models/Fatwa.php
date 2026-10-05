@@ -27,6 +27,17 @@ class Fatwa extends Model
 
     protected $appends = ['subject'];
 
+    protected static function booted(): void
+    {
+        $clearCache = function () {
+            cache()->forget('homepage_latest_fatawa');
+            cache()->forget('fatawa_stats');
+        };
+
+        static::saved($clearCache);
+        static::deleted($clearCache);
+    }
+
     public function category()
     {
         return $this->belongsTo(Category::class);

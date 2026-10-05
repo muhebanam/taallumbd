@@ -42,6 +42,21 @@ class Teacher extends Model
         'cover_photo_url',
     ];
 
+    protected static function booted(): void
+    {
+        $clearCache = function ($teacher) {
+            cache()->forget('homepage_featured_teachers');
+            cache()->forget('homepage_stats');
+            cache()->forget('fatwa_scholars_list');
+            if (! empty($teacher->slug)) {
+                cache()->forget("scholar_show_{$teacher->slug}");
+            }
+        };
+
+        static::saved($clearCache);
+        static::deleted($clearCache);
+    }
+
     public function getRouteKeyName(): string
     {
         return 'slug';

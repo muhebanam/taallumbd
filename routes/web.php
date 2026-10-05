@@ -24,7 +24,9 @@ Route::get('/publications', [C\PublicationController::class, 'index'])->name('pu
 Route::get('/publications/{parent}/{child?}', [C\PublicationController::class, 'index'])->name('publications.category');
 
 Route::get('/about/teachers', [C\PageController::class, 'teachers'])->name('about.teachers');
+Route::get('/teachers', [C\PageController::class, 'teachers'])->name('teachers.index');
 Route::get('/teachers/{teacher:slug}', [C\TeacherController::class, 'show'])->name('teachers.show');
+Route::get('/scholars/{teacher:slug}', [C\TeacherController::class, 'show'])->name('scholars.show');
 Route::get('/about/{section?}', [C\PageController::class, 'about'])->name('about');
 Route::get('/contact', [C\ContactController::class, 'show'])->name('contact');
 Route::post('/contact', [C\ContactController::class, 'submit'])->name('contact.submit');
@@ -65,6 +67,14 @@ Route::post('/logout', [C\Auth\AuthenticatedSessionController::class, 'destroy']
 
 /* ---------------- Student (any authenticated user) ---------------- */
 Route::middleware('auth')->group(function () {
+    Route::get('/profile', [C\ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [C\ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [C\ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::get('/profile/notifications', [C\NotificationController::class, 'preferences'])->name('profile.notifications');
+    Route::put('/profile/notifications', [C\NotificationController::class, 'updatePreferences'])->name('profile.notifications.update');
+    Route::get('/dashboard/notifications', [C\NotificationController::class, 'index'])->name('notifications.index');
+    Route::post('/dashboard/notifications/{notification}/read', [C\NotificationController::class, 'read'])->name('notifications.read');
+    Route::post('/dashboard/notifications/read-all', [C\NotificationController::class, 'readAll'])->name('notifications.read-all');
     Route::get('/dashboard', [C\Student\DashboardController::class, 'index'])->name('dashboard');
     Route::get('/dashboard/my-courses', [C\Student\DashboardController::class, 'index'])->name('student.courses.index');
     Route::get('/dashboard/courses/{course}', [C\Student\CourseController::class, 'show'])->name('student.courses.show');

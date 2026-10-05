@@ -13,6 +13,16 @@ class Article extends Model
 
     protected $casts = ['published_at' => 'datetime'];
 
+    protected static function booted(): void
+    {
+        $clearCache = function () {
+            cache()->forget('homepage_latest_articles');
+        };
+
+        static::saved($clearCache);
+        static::deleted($clearCache);
+    }
+
     public function getRouteKeyName(): string
     {
         return 'slug';

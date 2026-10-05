@@ -59,7 +59,8 @@ class PaymentService
         ?string $senderPhone = null,
         ?array $rawResponse = null
     ): Enrollment {
-        return DB::transaction(function () use ($order, $method, $transactionId, $senderPhone, $rawResponse) {
+        $alreadyPaid = $order->status === 'paid';
+        $enrollment = DB::transaction(function () use ($order, $method, $transactionId, $senderPhone, $rawResponse) {
             // Lock order for update to prevent race conditions
             $lockedOrder = Order::where('id', $order->id)->lockForUpdate()->firstOrFail();
 
@@ -151,6 +152,12 @@ class PaymentService
 
             return $this->enroll($lockedOrder->user, $lockedOrder->course);
         });
+
+        if (! $alreadyPaid) {
+            app(NotificationDispatcher::class)->paymentVerified($order->fresh(['user', 'course']));
+        }
+
+        return $enrollment;
     }
 
     /**
@@ -158,9 +165,21 @@ class PaymentService
      */
     public function enroll(User $user, Course $course): Enrollment
     {
-        return Enrollment::firstOrCreate(
-            ['user_id' => $user->id, 'course_id' => $course->id],
-            ['status' => 'active', 'progress' => 0, 'enrolled_at' => now()]
-        );
+        $existing = Enrollment::where('user_id', $user->id)->where('course_id', $course->id)->first();
+        if ($existing) {
+            return $existing;
+        }
+
+        $enrollment = Enrollment::create([
+            'user_id' => $user->id,
+            'course_id' => $course->id,
+            'status' => 'active',
+            'progress' => 0,
+            'enrolled_at' => now(),
+        ]);
+
+        app(NotificationDispatcher::class)->enrollment($enrollment->load(['user', 'course']));
+
+        return $enrollment;
     }
 }

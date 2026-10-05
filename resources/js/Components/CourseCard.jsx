@@ -13,6 +13,10 @@ export default function CourseCard({ course }) {
                     <img
                         src={course.thumbnail.startsWith('http') ? course.thumbnail : `/storage/${course.thumbnail}`}
                         alt={course.title}
+                        width="640"
+                        height="360"
+                        loading="lazy"
+                        decoding="async"
                         className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                     />
                 ) : (

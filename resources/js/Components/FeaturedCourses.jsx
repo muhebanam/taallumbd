@@ -3,6 +3,7 @@ import { Link } from '@inertiajs/react';
 import CourseCard from './CourseCard';
 
 export default function FeaturedCourses({ courses = [] }) {
+    const courseList = Array.isArray(courses) ? courses : (courses && typeof courses === 'object' ? Object.values(courses) : []);
     return (
         <section className="py-16 sm:py-24 bg-white">
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -33,9 +34,9 @@ export default function FeaturedCourses({ courses = [] }) {
 
                 {/* Course Grid */}
                 <div className="mt-12">
-                    {courses.length > 0 ? (
+                    {courseList.length > 0 ? (
                         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                            {courses.map((course) => (
+                            {courseList.map((course) => (
                                 <CourseCard key={course.id} course={course} />
                             ))}
                         </div>

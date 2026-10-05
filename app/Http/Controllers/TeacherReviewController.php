@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Enrollment;
 use App\Models\Review;
 use App\Models\Teacher;
+use App\Services\NotificationDispatcher;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
@@ -55,7 +56,7 @@ class TeacherReviewController extends Controller
             }
         }
 
-        Review::create([
+        $review = Review::create([
             'teacher_id' => $teacher->id,
             'user_id' => $user->id,
             'course_id' => $courseId,
@@ -63,6 +64,7 @@ class TeacherReviewController extends Controller
             'comment' => $data['review'] ?? null,
             'status' => 'pending', // Pending admin moderation
         ]);
+        app(NotificationDispatcher::class)->teacherReview($review);
 
         return back()->with('success', 'আপনার রিভিউটি সফলভাবে জমা হয়েছে। অ্যাডমিন অনুমোদনের পর এটি প্রকাশিত হবে।');
     }

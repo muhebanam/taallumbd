@@ -6,6 +6,7 @@ use App\Models\Hadith;
 use App\Models\HadithBook;
 use App\Models\HadithChapter;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Inertia\Inertia;
 
 class HadithController extends Controller
@@ -15,11 +16,11 @@ class HadithController extends Controller
      */
     public function index()
     {
-        $books = HadithBook::withCount(['hadiths', 'chapters'])->get();
+        $books = Cache::remember('hadith_books_with_counts', 86400, function () {
+            $items = HadithBook::withCount(['hadiths', 'chapters'])->get();
 
-        if ($books->isEmpty()) {
-            $books = $this->getDefaultBooks();
-        }
+            return $items->isEmpty() ? $this->getDefaultBooks() : $items;
+        });
 
         return Inertia::render('Hadith/Index', [
             'books' => $books,
@@ -34,13 +35,14 @@ class HadithController extends Controller
         $book = HadithBook::where('slug', $slug)->first();
 
         if (! $book) {
-            $book = $this->getDefaultBookBySlug($slug);
+            $book = (object) $this->getDefaultBookBySlug($slug);
         }
 
         $chapterId = $request->query('chapter');
         $search = $request->query('search');
+        $bookId = is_object($book) ? ($book->id ?? 0) : ($book['id'] ?? 0);
 
-        $hadithsQuery = Hadith::where('book_id', $book->id ?? 0)
+        $hadithsQuery = Hadith::where('book_id', $bookId)
             ->when($chapterId, fn ($q) => $q->where('chapter_id', $chapterId))
             ->when($search, function ($q, $s) {
                 $q->where('text_bangla', 'like', "%{$s}%")
@@ -58,7 +60,7 @@ class HadithController extends Controller
             $hadiths = $this->getSampleHadiths($book);
         }
 
-        $chapters = HadithChapter::where('book_id', $book->id ?? 0)
+        $chapters = HadithChapter::where('book_id', $bookId)
             ->withCount('hadiths')
             ->orderBy('number')
             ->get();

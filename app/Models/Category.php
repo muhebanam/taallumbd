@@ -11,6 +11,19 @@ class Category extends Model
 
     protected $fillable = ['name', 'slug', 'type', 'parent_id', 'sort_order', 'status'];
 
+    protected static function booted(): void
+    {
+        $clearCache = function () {
+            cache()->forget('nav_categories_v2');
+            cache()->forget('course_categories_active');
+            cache()->forget('fatwa_categories_tree');
+            cache()->forget('homepage_categories');
+        };
+
+        static::saved($clearCache);
+        static::deleted($clearCache);
+    }
+
     public function parent()
     {
         return $this->belongsTo(self::class, 'parent_id');

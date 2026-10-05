@@ -25,6 +25,18 @@ class Course extends Model
         'enrollment_end' => 'datetime',
     ];
 
+    protected static function booted(): void
+    {
+        $clearCache = function () {
+            cache()->forget('homepage_popular_courses');
+            cache()->forget('homepage_stats');
+            cache()->forget('all_courses_public_list');
+        };
+
+        static::saved($clearCache);
+        static::deleted($clearCache);
+    }
+
     public function getRouteKeyName(): string
     {
         return 'slug';

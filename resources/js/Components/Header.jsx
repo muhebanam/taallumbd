@@ -14,7 +14,7 @@ export default function Header() {
     const fatwaItems = (Array.isArray(navCategories?.fatwa) ? navCategories.fatwa : []).map((c) => ({
         label: c.name,
         href: `/fatawa/category/${c.slug}`,
-        children: c.children?.length ? c.children.map((ch) => ({ label: ch.name, href: `/fatawa/category/${ch.slug}` })) : undefined,
+        children: Array.isArray(c.children) && c.children.length ? c.children.map((ch) => ({ label: ch.name, href: `/fatawa/category/${ch.slug}` })) : undefined,
     }));
 
     return (

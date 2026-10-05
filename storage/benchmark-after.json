@@ -1,0 +1,137 @@
+[
+    {
+        "name": "Home Page",
+        "url": "\/",
+        "status": 200,
+        "query_count": 7,
+        "duplicates": 6,
+        "db_time_ms": 17.71,
+        "page_time_ms": 1345.42
+    },
+    {
+        "name": "Courses Index",
+        "url": "\/courses",
+        "status": 200,
+        "query_count": 6,
+        "duplicates": 1,
+        "db_time_ms": 13.58,
+        "page_time_ms": 240.68
+    },
+    {
+        "name": "Course Detail",
+        "url": "\/courses\/tajweedul-quran-masterclass",
+        "status": 200,
+        "query_count": 6,
+        "duplicates": 0,
+        "db_time_ms": 0.62,
+        "page_time_ms": 16.88
+    },
+    {
+        "name": "Scholars Directory",
+        "url": "\/teachers",
+        "status": 200,
+        "query_count": 10,
+        "duplicates": 1,
+        "db_time_ms": 1.41,
+        "page_time_ms": 69.64
+    },
+    {
+        "name": "Scholar Profile",
+        "url": "\/scholars\/mufti-abdullah-al-mahmud",
+        "status": 200,
+        "query_count": 2,
+        "duplicates": 1,
+        "db_time_ms": 0.12,
+        "page_time_ms": 14.44
+    },
+    {
+        "name": "Fatawa Index",
+        "url": "\/fatawa",
+        "status": 200,
+        "query_count": 10,
+        "duplicates": 4,
+        "db_time_ms": 0.58,
+        "page_time_ms": 21.48
+    },
+    {
+        "name": "Fatawa Detail",
+        "url": "\/fatawa\/1",
+        "status": 200,
+        "query_count": 9,
+        "duplicates": 1,
+        "db_time_ms": 17.58,
+        "page_time_ms": 33.93
+    },
+    {
+        "name": "Publications Index",
+        "url": "\/publications",
+        "status": 200,
+        "query_count": 6,
+        "duplicates": 0,
+        "db_time_ms": 0.28,
+        "page_time_ms": 16.01
+    },
+    {
+        "name": "Articles Index",
+        "url": "\/articles",
+        "status": 200,
+        "query_count": 6,
+        "duplicates": 0,
+        "db_time_ms": 0.28,
+        "page_time_ms": 16.66
+    },
+    {
+        "name": "Article Detail",
+        "url": "\/articles\/similique-officiis-et-error-accusamus-2418",
+        "status": 200,
+        "query_count": 4,
+        "duplicates": 0,
+        "db_time_ms": 0.41,
+        "page_time_ms": 14.62
+    },
+    {
+        "name": "Quran Index",
+        "url": "\/quran",
+        "status": 200,
+        "query_count": 2,
+        "duplicates": 1,
+        "db_time_ms": 0.08,
+        "page_time_ms": 14.33
+    },
+    {
+        "name": "Surah Detail (Al-Fatihah)",
+        "url": "\/quran\/1",
+        "status": 200,
+        "query_count": 8,
+        "duplicates": 5,
+        "db_time_ms": 33.27,
+        "page_time_ms": 69.35
+    },
+    {
+        "name": "Hadith Index",
+        "url": "\/hadith",
+        "status": 200,
+        "query_count": 2,
+        "duplicates": 1,
+        "db_time_ms": 0.08,
+        "page_time_ms": 14.12
+    },
+    {
+        "name": "Hadith Book (Bukhari)",
+        "url": "\/hadith\/sahih-bukhari",
+        "status": 200,
+        "query_count": 4,
+        "duplicates": 0,
+        "db_time_ms": 0.73,
+        "page_time_ms": 22.8
+    },
+    {
+        "name": "Student Dashboard",
+        "url": "\/dashboard",
+        "status": 200,
+        "query_count": 5,
+        "duplicates": 0,
+        "db_time_ms": 1.01,
+        "page_time_ms": 23.17
+    }
+]

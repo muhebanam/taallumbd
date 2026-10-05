@@ -3,7 +3,10 @@ import AppLayout from '../../Layouts/AppLayout';
 import CourseCard from '../../Components/CourseCard';
 import Pagination from '../../Components/Pagination';
 
-export default function CoursesIndex({ courses, categories, activeCategory }) {
+export default function CoursesIndex({ courses, categories = [], activeCategory }) {
+    const categoryList = Array.isArray(categories) ? categories : (categories && typeof categories === 'object' ? Object.values(categories) : []);
+    const courseList = Array.isArray(courses?.data) ? courses.data : [];
+
     return (
         <AppLayout>
             <Head title={activeCategory ? activeCategory.name : 'কোর্সসমূহ'} />
@@ -12,16 +15,16 @@ export default function CoursesIndex({ courses, categories, activeCategory }) {
 
                 <div className="mt-6 flex flex-wrap gap-2">
                     <Link href="/courses" className={`rounded-full px-4 py-1.5 text-sm font-medium ${!activeCategory ? 'bg-brand text-brand-cream' : 'bg-white text-brand-text hover:bg-brand-light'}`}>সব</Link>
-                    {categories.map((c) => (
+                    {categoryList.map((c) => (
                         <Link key={c.id} href={`/courses/category/${c.slug}`} className={`rounded-full px-4 py-1.5 text-sm font-medium ${activeCategory?.id === c.id ? 'bg-brand text-brand-cream' : 'bg-white text-brand-text hover:bg-brand-light'}`}>
                             {c.name}
                         </Link>
                     ))}
                 </div>
 
-                {courses.data.length ? (
+                {courseList.length ? (
                     <div className="mt-8 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                        {courses.data.map((c) => <CourseCard key={c.id} course={c} />)}
+                        {courseList.map((c) => <CourseCard key={c.id} course={c} />)}
                     </div>
                 ) : (
                     <p className="mt-12 text-center text-brand-text/60">এই ক্যাটাগরিতে এখনো কোনো কোর্স প্রকাশিত হয়নি। শীঘ্রই আসছে, ইনশাআল্লাহ।</p>

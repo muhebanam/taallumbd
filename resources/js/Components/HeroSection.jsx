@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from '@inertiajs/react';
 
 export default function HeroSection({ stats = [] }) {
+    const statsList = Array.isArray(stats) ? stats : (stats && typeof stats === 'object' ? Object.values(stats) : []);
     return (
         <section className="relative overflow-hidden bg-[#102526] text-white">
             {/* Ambient Background Glow and Islamic Decorative Radial Gradients */}
@@ -76,10 +77,10 @@ export default function HeroSection({ stats = [] }) {
                 </div>
 
                 {/* Key Statistics Strip */}
-                {stats.length > 0 && (
+                {statsList.length > 0 && (
                     <div className="mt-16 rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-md sm:p-8">
                         <div className="grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-5 text-center">
-                            {stats.map((s, index) => (
+                            {statsList.map((s, index) => (
                                 <div key={index} className="flex flex-col items-center justify-center">
                                     <span className="text-2xl sm:text-3xl font-extrabold text-[#FFF99A] tracking-tight">
                                         {s.value}

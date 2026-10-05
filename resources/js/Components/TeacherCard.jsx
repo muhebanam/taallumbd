@@ -18,6 +18,10 @@ export default function TeacherCard({ teacher }) {
                         <img 
                             src={teacher.cover_photo_url || teacher.cover_photo} 
                             alt="" 
+                            width="400"
+                            height="96"
+                            loading="lazy"
+                            decoding="async"
                             className="h-full w-full object-cover opacity-60"
                         />
                     ) : (
@@ -31,6 +35,10 @@ export default function TeacherCard({ teacher }) {
                         <img 
                             src={teacher.avatar_url || teacher.avatar} 
                             alt={teacher.name}
+                            width="80"
+                            height="80"
+                            loading="lazy"
+                            decoding="async"
                             onError={(e) => {
                                 e.target.onerror = null;
                                 e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(teacher.name)}&background=102526&color=fff99a&size=150`;

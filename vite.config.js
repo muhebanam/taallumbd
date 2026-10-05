@@ -23,5 +23,25 @@ export default defineConfig({
             usePolling: true,
         },
     },
+    build: {
+        rollupOptions: {
+            output: {
+                manualChunks(id) {
+                    if (id.includes('node_modules')) {
+                        if (id.includes('react') || id.includes('react-dom') || id.includes('scheduler')) {
+                            return 'vendor-react';
+                        }
+                        if (id.includes('@inertiajs')) {
+                            return 'vendor-inertia';
+                        }
+                        if (id.includes('@headlessui')) {
+                            return 'vendor-headlessui';
+                        }
+                    }
+                },
+            },
+        },
+        chunkSizeWarningLimit: 600,
+    },
 });
 

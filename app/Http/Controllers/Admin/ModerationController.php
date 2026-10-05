@@ -15,6 +15,7 @@ use App\Models\PaymentTransaction;
 use App\Models\Teacher;
 use App\Payments\PaymentGatewayManager;
 use App\Services\AuditLoggerService;
+use App\Services\NotificationDispatcher;
 use App\Services\PaymentService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -106,6 +107,7 @@ class ModerationController extends Controller
     /** Only admin or instructor (scholar) may answer — enforced in routes middleware too. */
     public function answerFatwa(Request $request, Fatwa $fatwa)
     {
+        $fatwa->loadMissing('user');
         $data = $request->validate([
             'answer_body' => 'nullable|string',
             'status' => 'required|in:pending,answered,published,rejected',
@@ -132,6 +134,9 @@ class ModerationController extends Controller
         }
 
         $fatwa->update($updates);
+        if ($data['status'] === 'published') {
+            app(NotificationDispatcher::class)->fatwaAnswered($fatwa);
+        }
 
         return back()->with('success', 'ফাতওয়া ও গবেষণা ডাটা সফলভাবে সংরক্ষিত হয়েছে।');
     }
@@ -227,6 +232,7 @@ class ModerationController extends Controller
 
         $reason = $request->input('reason', 'প্রদত্ত তথ্য অনুযায়ী পেমেন্ট যাচাই করা সম্ভব হয়নি।');
         $order->update(['status' => 'cancelled']);
+        app(NotificationDispatcher::class)->paymentCancelled($order->fresh(['user', 'course']));
 
         PaymentTransaction::create([
             'order_id' => $order->id,
@@ -304,6 +310,7 @@ class ModerationController extends Controller
 
         // 2. Mark order as cancelled
         $order->update(['status' => 'cancelled']);
+        app(NotificationDispatcher::class)->paymentCancelled($order->fresh(['user', 'course']));
 
         // 3. Revoke enrollment (status => cancelled)
         $enrollment = Enrollment::where('user_id', $order->user_id)

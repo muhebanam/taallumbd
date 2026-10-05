@@ -2,7 +2,8 @@ import React from 'react';
 import { Link } from '@inertiajs/react';
 
 export default function ArticlesSection({ articles = [] }) {
-    if (!articles || articles.length === 0) return null;
+    const articleList = Array.isArray(articles) ? articles : (articles && typeof articles === 'object' ? Object.values(articles) : []);
+    if (articleList.length === 0) return null;
 
     return (
         <section className="py-16 sm:py-24 bg-[#F8FAF8]">
@@ -34,7 +35,7 @@ export default function ArticlesSection({ articles = [] }) {
 
                 {/* Articles Grid */}
                 <div className="mt-12 grid grid-cols-1 gap-8 md:grid-cols-3">
-                    {articles.map((art) => (
+                    {articleList.map((art) => (
                         <article
                             key={art.id}
                             className="group flex flex-col justify-between overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl hover:border-[#1A2E2F]/30"

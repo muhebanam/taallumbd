@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\InstructorApplication;
 use App\Models\User;
+use App\Services\NotificationDispatcher;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -31,6 +32,7 @@ class InstructorApplicationController extends Controller
             'reviewed_at' => now(),
             'admin_notes' => $data['admin_notes'] ?? null,
         ]);
+        app(NotificationDispatcher::class)->instructorDecision($application->fresh(['user']));
 
         if ($application->user_id) {
             $user = User::find($application->user_id);
@@ -56,6 +58,7 @@ class InstructorApplicationController extends Controller
             'reviewed_at' => now(),
             'admin_notes' => $data['admin_notes'] ?? null,
         ]);
+        app(NotificationDispatcher::class)->instructorDecision($application->fresh(['user']));
 
         return back()->with('success', 'আবেদনটি প্রত্যাখ্যান করা হয়েছে।');
     }

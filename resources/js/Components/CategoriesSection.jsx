@@ -61,8 +61,9 @@ const DEFAULT_CATEGORIES = [
 ];
 
 export default function CategoriesSection({ categories = [] }) {
+    const catList = Array.isArray(categories) ? categories : (categories && typeof categories === 'object' ? Object.values(categories) : []);
     // Merge dynamic categories if available
-    const displayList = categories.length > 0 ? categories.map((cat, idx) => {
+    const displayList = catList.length > 0 ? catList.map((cat, idx) => {
         const fallback = DEFAULT_CATEGORIES[idx % DEFAULT_CATEGORIES.length];
         return {
             name: cat.name,

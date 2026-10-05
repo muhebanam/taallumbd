@@ -7,6 +7,7 @@ use App\Models\Course;
 use App\Models\ForumComment;
 use App\Models\ForumLike;
 use App\Models\ForumPost;
+use App\Services\NotificationDispatcher;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -165,6 +166,7 @@ class ForumController extends Controller
             'user_id' => $request->user()->id,
             'body' => $data['body'],
         ]);
+        app(NotificationDispatcher::class)->forumComment($post->fresh(['user']), $request->user());
 
         return back()->with('success', 'আপনার মতামত/উত্তর যুক্ত হয়েছে।');
     }
@@ -202,6 +204,9 @@ class ForumController extends Controller
         $post->update([
             'is_solved' => ! $post->is_solved,
         ]);
+        if ($post->is_solved) {
+            app(NotificationDispatcher::class)->forumSolved($post->fresh(['user']));
+        }
 
         $message = $post->is_solved
             ? 'আলোচনাটি সফলভাবে সমাধানকৃত হিসেবে চিহ্নিত হয়েছে।'

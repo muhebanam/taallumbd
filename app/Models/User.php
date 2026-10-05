@@ -99,4 +99,17 @@ class User extends Authenticatable
         return $this->enrollments()->where('course_id', $course->id)
             ->whereIn('status', ['active', 'completed'])->exists();
     }
+
+    public function notificationPreferences()
+    {
+        return $this->hasMany(NotificationPreference::class);
+    }
+
+    public function notificationChannelEnabled(string $type, string $channel): bool
+    {
+        return $this->notificationPreferences()
+            ->where('notification_type', $type)
+            ->where('channel', $channel)
+            ->value('enabled') ?? true;
+    }
 }

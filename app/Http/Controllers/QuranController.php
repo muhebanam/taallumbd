@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\MemorizationProgress;
 use App\Models\Surah;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Inertia\Inertia;
 
 class QuranController extends Controller
@@ -16,19 +17,22 @@ class QuranController extends Controller
     {
         $search = $request->query('search');
 
-        $surahs = Surah::query()
-            ->when($search, function ($query, $s) {
-                $query->where('name_bangla', 'like', "%{$s}%")
-                    ->orWhere('name_arabic', 'like', "%{$s}%")
-                    ->orWhere('name_transliteration', 'like', "%{$s}%")
-                    ->orWhere('number', $s);
-            })
-            ->orderBy('number')
-            ->get();
+        if (! $search) {
+            $surahs = Cache::remember('quran_surahs_catalog_all', 86400, function () {
+                $items = Surah::orderBy('number')->get();
 
-        // If database is not yet seeded, provide comprehensive default list of 114 Surahs
-        if ($surahs->isEmpty()) {
-            $surahs = $this->getDefaultSurahs();
+                return $items->isEmpty() ? $this->getDefaultSurahs() : $items;
+            });
+        } else {
+            $surahs = Surah::query()
+                ->where(function ($query) use ($search) {
+                    $query->where('name_bangla', 'like', "%{$search}%")
+                        ->orWhere('name_arabic', 'like', "%{$search}%")
+                        ->orWhere('name_transliteration', 'like', "%{$search}%")
+                        ->orWhere('number', $search);
+                })
+                ->orderBy('number')
+                ->get();
         }
 
         $userProgress = [];
@@ -50,19 +54,23 @@ class QuranController extends Controller
      */
     public function show(int $number)
     {
-        $surah = Surah::where('number', $number)
-            ->with(['ayahs' => function ($q) {
-                $q->with(['banglaTranslation', 'tafsirs'])->orderBy('number');
-            }])
-            ->first();
+        $surah = Cache::remember("quran_surah_details_{$number}", 86400, function () use ($number) {
+            $s = Surah::where('number', $number)
+                ->with(['ayahs' => function ($q) {
+                    $q->with(['banglaTranslation', 'tafsirs'])->orderBy('number');
+                }])
+                ->first();
 
-        // If not found in DB yet, load standard structured data for this Surah
-        if (! $surah) {
-            $surah = $this->getSurahFallback($number);
-        }
+            return $s ?: $this->getSurahFallback($number);
+        });
 
-        $prevSurah = Surah::where('number', $number - 1)->first(['number', 'name_bangla', 'name_arabic']);
-        $nextSurah = Surah::where('number', $number + 1)->first(['number', 'name_bangla', 'name_arabic']);
+        $prevSurah = Cache::remember("quran_surah_nav_prev_{$number}", 86400, function () use ($number) {
+            return Surah::where('number', $number - 1)->first(['number', 'name_bangla', 'name_arabic']);
+        });
+
+        $nextSurah = Cache::remember("quran_surah_nav_next_{$number}", 86400, function () use ($number) {
+            return Surah::where('number', $number + 1)->first(['number', 'name_bangla', 'name_arabic']);
+        });
 
         return Inertia::render('Quran/Show', [
             'surah' => $surah,

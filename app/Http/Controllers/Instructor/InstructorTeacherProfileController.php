@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Instructor;
 use App\Http\Controllers\Controller;
 use App\Models\Fatwa;
 use App\Models\Teacher;
+use App\Services\NotificationDispatcher;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -168,6 +169,7 @@ class InstructorTeacherProfileController extends Controller
     {
         $teacher = Teacher::where('user_id', auth()->id())->firstOrFail();
         $question = Fatwa::where('teacher_id', $teacher->id)->findOrFail($id);
+        $question->loadMissing('user');
 
         $request->validate([
             'answer_body' => 'required|string',
@@ -178,6 +180,7 @@ class InstructorTeacherProfileController extends Controller
             'status' => 'published',
             'published_at' => now(),
         ]);
+        app(NotificationDispatcher::class)->teacherQuestionAnswered($question);
 
         return back()->with('success', 'প্রশ্নের উত্তর সফলভাবে প্রকাশিত হয়েছে।');
     }

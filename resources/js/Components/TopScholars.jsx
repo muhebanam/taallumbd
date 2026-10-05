@@ -3,7 +3,8 @@ import { Link } from '@inertiajs/react';
 import TeacherCard from './TeacherCard';
 
 export default function TopScholars({ teachers = [] }) {
-    if (!teachers || teachers.length === 0) return null;
+    const teacherList = Array.isArray(teachers) ? teachers : (teachers && typeof teachers === 'object' ? Object.values(teachers) : []);
+    if (teacherList.length === 0) return null;
 
     return (
         <section className="py-16 sm:py-24 bg-white">
@@ -35,7 +36,7 @@ export default function TopScholars({ teachers = [] }) {
 
                 {/* Teachers Grid */}
                 <div className="mt-12 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-                    {teachers.map((teacher) => (
+                    {teacherList.map((teacher) => (
                         <TeacherCard key={teacher.id} teacher={teacher} />
                     ))}
                 </div>

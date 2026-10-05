@@ -39,8 +39,12 @@ RUN docker-php-ext-install \
     gd \
     zip \
     xml \
+    opcache \
     && pecl install redis \
     && docker-php-ext-enable redis
+
+# Copy OPcache configuration
+COPY docker/opcache.ini $PHP_INI_DIR/conf.d/opcache.ini
 
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer

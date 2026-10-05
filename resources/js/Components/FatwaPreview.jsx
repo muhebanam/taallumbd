@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from '@inertiajs/react';
 
 export default function FatwaPreview({ fatawa = [] }) {
+    const fatwaList = Array.isArray(fatawa) ? fatawa : (fatawa && typeof fatawa === 'object' ? Object.values(fatawa) : []);
     return (
         <section className="py-16 sm:py-24 bg-white border-y border-slate-200/60">
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -41,8 +42,8 @@ export default function FatwaPreview({ fatawa = [] }) {
 
                 {/* Fatawa Cards Grid */}
                 <div className="mt-12 grid grid-cols-1 gap-6 md:grid-cols-2">
-                    {fatawa.length > 0 ? (
-                        fatawa.map((f) => (
+                    {fatwaList.length > 0 ? (
+                        fatwaList.map((f) => (
                             <div
                                 key={f.id}
                                 className="group flex flex-col justify-between rounded-2xl border border-slate-200/80 bg-[#F8FAF8] p-6 transition-all duration-300 hover:border-[#1A2E2F]/40 hover:bg-white hover:shadow-lg"

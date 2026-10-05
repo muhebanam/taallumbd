@@ -24,6 +24,9 @@ export default function UserMenu({ user }) {
                     <Link href="/dashboard/certificates" className="block px-4 py-2 text-sm text-brand-text hover:bg-brand-light">আমার সার্টিফিকেট</Link>
                     <Link href="/dashboard/my-questions" className="block px-4 py-2 text-sm text-brand-text hover:bg-brand-light">আমার দ্বীনি প্রশ্নসমূহ</Link>
                     <Link href="/dashboard/orders" className="block px-4 py-2 text-sm text-brand-text hover:bg-brand-light">অর্ডার ও রসিদ</Link>
+                    <Link href="/dashboard/notifications" className="block px-4 py-2 text-sm text-brand-text hover:bg-brand-light">নোটিফিকেশন</Link>
+                    <Link href="/profile/notifications" className="block px-4 py-2 text-sm text-brand-text hover:bg-brand-light">নোটিফিকেশন পছন্দ</Link>
+                    <Link href="/profile" className="block px-4 py-2 text-sm text-brand-text hover:bg-brand-light">প্রোফাইল</Link>
                     <Link href="/logout" method="post" as="button" className="block w-full px-4 py-2 text-left text-sm text-red-700 hover:bg-red-50 border-t border-gray-100 mt-1">লগআউট</Link>
                 </div>
             )}

@@ -6,6 +6,7 @@ use App\Models\Category;
 use App\Models\Fatwa;
 use App\Models\Teacher;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Inertia\Inertia;
 
 class FatwaController extends Controller
@@ -43,20 +44,26 @@ class FatwaController extends Controller
 
         $fatawa = $fatawaQuery->paginate(12)->withQueryString();
 
-        $categories = Category::ofType('fatwa')
-            ->whereNull('parent_id')
-            ->orderBy('sort_order')
-            ->with(['children' => fn ($query) => $query->where('status', 'active')->orderBy('sort_order')])
-            ->get(['id', 'name', 'slug']);
+        $categories = Cache::remember('fatwa_categories_tree', 3600, function () {
+            return Category::ofType('fatwa')
+                ->whereNull('parent_id')
+                ->orderBy('sort_order')
+                ->with(['children' => fn ($query) => $query->where('status', 'active')->orderBy('sort_order')])
+                ->get(['id', 'name', 'slug']);
+        });
 
-        $scholars = Teacher::with('user:id,name')
-            ->where('status', 'active')
-            ->get(['id', 'user_id', 'name', 'designation', 'slug']);
+        $scholars = Cache::remember('fatwa_scholars_list', 1800, function () {
+            return Teacher::with('user:id,name')
+                ->where('status', 'active')
+                ->get(['id', 'user_id', 'name', 'designation', 'slug']);
+        });
 
-        $stats = [
-            'total_fatawa' => Fatwa::published()->count(),
-            'answered_this_month' => Fatwa::published()->where('published_at', '>=', now()->startOfMonth())->count(),
-        ];
+        $stats = Cache::remember('fatawa_stats', 1800, function () {
+            return [
+                'total_fatawa' => Fatwa::published()->count(),
+                'answered_this_month' => Fatwa::published()->where('published_at', '>=', now()->startOfMonth())->count(),
+            ];
+        });
 
         return Inertia::render('Fatawa/Index', [
             'fatawa' => $fatawa,

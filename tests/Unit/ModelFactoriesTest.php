@@ -104,6 +104,8 @@ class ModelFactoriesTest extends TestCase
         $this->assertDatabaseHas('quizzes', ['id' => $quiz->id]);
         $this->assertDatabaseHas('curriculum_items', ['id' => $curriculumLesson->id]);
         $this->assertDatabaseHas('curriculum_items', ['id' => $curriculumQuiz->id]);
+
+        $quiz->load('questions.options');
         $this->assertCount(2, $quiz->questions);
         $this->assertCount(3, $quiz->questions->first()->options);
     }
