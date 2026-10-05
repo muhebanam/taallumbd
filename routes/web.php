@@ -31,7 +31,7 @@ Route::post('/contact', [C\ContactController::class, 'submit'])->name('contact.s
 Route::get('/become-instructor', [C\BecomeInstructorController::class, 'index'])->name('become-instructor');
 Route::get('/verify/{identifier}', [C\CertificateVerificationController::class, 'verify'])->name('certificates.verify');
 Route::get('/health', [C\HealthController::class, 'check'])->name('system.health');
-Route::get('/internal/cron', [C\InternalCronController::class, 'run'])->name('internal.cron');
+Route::get('/internal/cron', [C\InternalCronController::class, 'run'])->middleware('throttle:internal_cron')->name('internal.cron');
 
 /* ---------------- Payment Gateway Callbacks & IPN Webhooks ---------------- */
 Route::match(['get', 'post'], '/payments/{gateway}/callback/{order}/{status?}', [C\PaymentGatewayController::class, 'callback'])->name('payments.callback');

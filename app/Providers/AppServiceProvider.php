@@ -4,6 +4,8 @@ namespace App\Providers;
 
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Vite;
@@ -38,7 +40,20 @@ class AppServiceProvider extends ServiceProvider
             return app()->isProduction() ? $rule->uncompromised() : $rule;
         });
 
+        // Slow query logging (> 500ms)
+        DB::listen(function ($query) {
+            if ($query->time > 500) {
+                Log::warning("Slow database query ({$query->time}ms): {$query->sql}", [
+                    'time_ms' => $query->time,
+                ]);
+            }
+        });
+
         // Rate Limiters
+        RateLimiter::for('internal_cron', function (Request $request) {
+            return Limit::perMinute(20)->by($request->ip());
+        });
+
         RateLimiter::for('login', function (Request $request) {
             return Limit::perMinute(5)->by($request->ip().'|'.$request->input('email'));
         });

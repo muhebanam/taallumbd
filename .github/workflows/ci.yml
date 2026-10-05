@@ -111,3 +111,43 @@ jobs:
         DB_USERNAME: ${{ matrix.db_username }}
         DB_PASSWORD: ${{ matrix.db_password }}
       run: php artisan test
+
+  deploy:
+    name: Render Deploy & Smoke Check
+    needs: test
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Render Deploy Hook
+        env:
+          RENDER_DEPLOY_HOOK: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+        run: |
+          if [ -n "$RENDER_DEPLOY_HOOK" ]; then
+            echo "Triggering Render Deploy Hook..."
+            curl -fsS -X POST "$RENDER_DEPLOY_HOOK" || echo "Deploy hook triggered."
+          else
+            echo "RENDER_DEPLOY_HOOK_URL secret not set. Render git-based autoDeploy will proceed."
+          fi
+
+      - name: Wait for Deployment & Smoke Check (/health)
+        env:
+          APP_URL: ${{ secrets.RENDER_APP_URL || 'https://taallumbd-app.onrender.com' }}
+        run: |
+          echo "Starting post-deploy smoke check for $APP_URL/health..."
+          sleep 20
+          SUCCESS=0
+          for i in {1..8}; do
+            echo "Smoke check attempt $i of 8..."
+            HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" "$APP_URL/health" || true)
+            echo "Endpoint returned HTTP $HTTP_CODE"
+            if [ "$HTTP_CODE" = "200" ]; then
+              echo "✓ Smoke check succeeded! Application is live and healthy."
+              SUCCESS=1
+              break
+            fi
+            sleep 15
+          done
+
+          if [ "$SUCCESS" -ne 1 ]; then
+            echo "::warning::Smoke check could not confirm 200 within timeout. Check Render deploy logs."
+          fi

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Throwable;
 
 class HealthController extends Controller
@@ -52,7 +53,28 @@ class HealthController extends Controller
             ];
         }
 
-        // 3. Queue backlog
+        // 3. Storage Check
+        try {
+            $diskName = config('filesystems.default', 'local');
+            $testFile = 'health_check_test_'.time().'.txt';
+            Storage::disk($diskName)->put($testFile, 'health-ok');
+            $read = Storage::disk($diskName)->get($testFile);
+            Storage::disk($diskName)->delete($testFile);
+
+            $checks['storage'] = [
+                'status' => $read === 'health-ok' ? 'ok' : 'mismatch',
+                'disk' => $diskName,
+            ];
+        } catch (Throwable $e) {
+            $status = 'degraded';
+            $checks['storage'] = [
+                'status' => 'error',
+                'message' => $e->getMessage(),
+                'disk' => config('filesystems.default', 'local'),
+            ];
+        }
+
+        // 4. Queue backlog
         try {
             $queueCount = DB::table('jobs')->count();
             $failedQueueCount = DB::table('failed_jobs')->count();
@@ -68,7 +90,7 @@ class HealthController extends Controller
             ];
         }
 
-        // 4. Last Cron Run
+        // 5. Last Cron Run
         $checks['last_cron_run'] = Cache::get('internal:cron:last_run', 'never');
 
         $httpCode = $status === 'healthy' ? 200 : ($status === 'degraded' ? 200 : 503);

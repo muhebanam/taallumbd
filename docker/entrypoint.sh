@@ -50,6 +50,11 @@ mkdir -p /var/www/html/storage/framework/cache/data \
 chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
 
+# If custom command was passed (e.g. queue worker, scheduler, artisan command)
+if [ "$#" -gt 0 ]; then
+    exec "$@"
+fi
+
 # ─── Start PHP-FPM first, then wait for it to be ready ───────────────────────
 php-fpm -D
 

@@ -23,7 +23,10 @@ RUN apk add --no-cache \
     oniguruma-dev \
     libzip-dev \
     mysql-client \
-    postgresql-dev
+    postgresql-dev \
+    linux-headers \
+    autoconf \
+    build-base
 
 # Install PHP extensions required for Laravel
 RUN docker-php-ext-install \
@@ -35,7 +38,9 @@ RUN docker-php-ext-install \
     bcmath \
     gd \
     zip \
-    xml
+    xml \
+    && pecl install redis \
+    && docker-php-ext-enable redis
 
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer

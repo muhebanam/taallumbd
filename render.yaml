@@ -5,6 +5,7 @@ services:
     plan: free
     region: singapore
     dockerfilePath: ./Dockerfile
+    autoDeploy: true
     # Health check – Laravel responds on /up
     healthCheckPath: /up
     envVars:
@@ -21,7 +22,7 @@ services:
       - key: APP_URL
         value: https://taallumbd-app.onrender.com
       - key: APP_LOCALE
-        value: en
+        value: bn
       - key: APP_TIMEZONE
         value: Asia/Dhaka
 
@@ -33,15 +34,17 @@ services:
       - key: DB_SSLMODE
         value: require
 
-      # ── Session / Cache / Queue ───────────────────────────────────────────────
+      # ── Session / Cache / Queue (Database Default, Optional Upstash Redis) ────
       - key: SESSION_DRIVER
-        value: cookie
+        value: database
       - key: SESSION_LIFETIME
         value: "120"
       - key: QUEUE_CONNECTION
-        value: sync
+        value: database
       - key: CACHE_STORE
-        value: file
+        value: database
+      - key: REDIS_URL
+        sync: false
 
       # ── Storage (Local or Cloudflare R2 Free) ─────────────────────────────────
       - key: FILESYSTEM_DISK
@@ -58,14 +61,36 @@ services:
         value: taallum-private
       - key: R2_PUBLIC_URL
         sync: false
+
+      # ── Logging & Monitoring (JSON Stderr + Sentry Free) ─────────────────────
       - key: LOG_CHANNEL
         value: stderr
+      - key: LOG_STDERR_FORMATTER
+        value: json
       - key: LOG_LEVEL
-        value: error
+        value: warning
+      - key: SENTRY_DSN
+        sync: false
+      - key: SENTRY_TRACES_SAMPLE_RATE
+        value: "0.05"
 
-      # ── Mail (disable in production unless configured) ────────────────────────
+      # ── Mail (Brevo / Resend Free SMTP) ──────────────────────────────────────
       - key: MAIL_MAILER
-        value: log
+        value: smtp
+      - key: MAIL_HOST
+        value: smtp-relay.brevo.com
+      - key: MAIL_PORT
+        value: "587"
+      - key: MAIL_ENCRYPTION
+        value: tls
+      - key: MAIL_USERNAME
+        sync: false
+      - key: MAIL_PASSWORD
+        sync: false
+      - key: MAIL_FROM_ADDRESS
+        value: support@taallumbd.com
+      - key: MAIL_FROM_NAME
+        value: "Taallum BD"
 
       # ── Payments (Manual bKash/Nagad/Rocket) ──────────────────────────────────
       - key: PAYMENT_DEFAULT_GATEWAY
@@ -108,6 +133,3 @@ services:
         sync: false
       - key: BKASH_PASSWORD
         sync: false
-
-
-
