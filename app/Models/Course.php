@@ -13,16 +13,19 @@ class Course extends Model
         'instructor_id', 'category_id', 'title', 'slug', 'short_description', 'description',
         'thumbnail', 'price', 'is_free', 'level', 'duration', 'learn_points', 'requirements', 'status',
         'enrollment_limit', 'enrollment_start', 'enrollment_end', 'completion_requirements',
+        'is_certified', 'certified_by_scholar_id', 'certified_at', 'certification_note',
     ];
 
     protected $casts = [
         'is_free' => 'boolean',
+        'is_certified' => 'boolean',
         'price' => 'decimal:2',
         'learn_points' => 'array',
         'requirements' => 'array',
         'completion_requirements' => 'array',
         'enrollment_start' => 'datetime',
         'enrollment_end' => 'datetime',
+        'certified_at' => 'datetime',
     ];
 
     protected static function booted(): void
@@ -85,6 +88,16 @@ class Course extends Model
     public function curriculumItems()
     {
         return $this->hasMany(CurriculumItem::class);
+    }
+
+    public function certifiedByScholar()
+    {
+        return $this->belongsTo(Teacher::class, 'certified_by_scholar_id');
+    }
+
+    public function contentReviews()
+    {
+        return $this->morphMany(ContentReview::class, 'reviewable')->latest();
     }
 
     public function scopePublished($q)

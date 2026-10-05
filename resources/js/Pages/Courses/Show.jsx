@@ -1,11 +1,23 @@
 import { Head, Link } from '@inertiajs/react';
 import AppLayout from '../../Layouts/AppLayout';
+import SeoHead from '../../Components/SeoHead';
 
-export default function CourseShow({ course, isEnrolled }) {
+export default function CourseShow({ course, isEnrolled, seo }) {
     const isFree = course.is_free || Number(course.price) === 0;
     return (
         <AppLayout>
-            <Head title={course.title} />
+            {seo ? (
+                <SeoHead
+                    title={seo.title}
+                    description={seo.description}
+                    canonical={seo.canonical}
+                    ogImage={seo.ogImage}
+                    type="website"
+                    jsonLd={seo.jsonLd}
+                />
+            ) : (
+                <Head title={course.title} />
+            )}
 
             {/* Course hero */}
             <section className="hero-pattern text-white">
@@ -15,6 +27,14 @@ export default function CourseShow({ course, isEnrolled }) {
                         <p className="mt-3 text-white/85">{course.short_description}</p>
                         <p className="mt-4 text-sm text-white/70">উস্তায: <span className="font-semibold text-white">{course.instructor?.name}</span></p>
                         <div className="mt-4 flex flex-wrap gap-2 text-sm">
+                            {course.is_certified && (
+                                <span className="rounded-full bg-emerald-500/30 border border-emerald-400/50 px-3.5 py-1 text-[#FFF99A] font-bold flex items-center gap-1.5 shadow-sm">
+                                    <span>★</span> স্কলার অনুমোদিত কোর্স
+                                    {course.certified_by_scholar && (
+                                        <span className="text-white/80 font-normal">({course.certified_by_scholar.name})</span>
+                                    )}
+                                </span>
+                            )}
                             <span className="rounded-full bg-brand-cream/20 px-3 py-1 text-brand-cream">♾️ আজীবন প্রবেশাধিকার</span>
                             <span className="rounded-full bg-brand-cream/20 px-3 py-1 text-brand-cream">🎓 সার্টিফিকেট</span>
                             {course.level && <span className="rounded-full bg-white/10 px-3 py-1">📚 {course.level}</span>}
@@ -50,6 +70,34 @@ export default function CourseShow({ course, isEnrolled }) {
 
             <div className="mx-auto grid max-w-7xl gap-10 px-4 py-12 lg:grid-cols-3">
                 <div className="space-y-10 lg:col-span-2">
+                    {/* Scholar Certification Trust Card */}
+                    {course.is_certified && (
+                        <section className="rounded-2xl border border-amber-300 bg-amber-50/70 p-6 text-amber-950 shadow-sm">
+                            <div className="flex items-start gap-4">
+                                <span className="text-3xl">📜</span>
+                                <div className="space-y-1.5 flex-1">
+                                    <div className="flex items-center gap-2">
+                                        <h3 className="font-bold font-bangla text-base text-amber-900">
+                                            স্কলার ও শরিয়াহ প্রত্যয়নপত্র (Certified by Scholar)
+                                        </h3>
+                                        <span className="rounded-full bg-amber-200/80 px-2 py-0.5 text-[11px] font-bold text-amber-800">
+                                            সত্যায়িত
+                                        </span>
+                                    </div>
+                                    <p className="text-xs text-amber-800 leading-relaxed font-bangla">
+                                        এই কোর্সটির সিলেবাস ও বিষয়বস্তু সম্মানিত স্কলার{' '}
+                                        <strong>{course.certified_by_scholar?.name || 'আত-তাআল্লুম শরিয়াহ বোর্ড'}</strong> ({course.certified_by_scholar?.designation || 'সিনিয়র ইসলামিক স্কলার'}) কর্তৃক পুঙ্খানুপুঙ্খভাবে পর্যালোচনা ও শরিয়াহ নীতিমালার আলোকে অনুমোদিত হয়েছে।
+                                    </p>
+                                    {course.certification_note && (
+                                        <p className="mt-2 text-xs italic text-amber-900 bg-white/80 p-3 rounded-xl border border-amber-200">
+                                            "{course.certification_note}"
+                                        </p>
+                                    )}
+                                </div>
+                            </div>
+                        </section>
+                    )}
+
                     {/* What you'll learn */}
                     {course.learn_points?.length > 0 && (
                         <section className="card p-6">

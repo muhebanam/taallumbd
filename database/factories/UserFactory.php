@@ -44,6 +44,20 @@ class UserFactory extends Factory
         ]);
     }
 
+    public function editor(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'role' => 'editor',
+        ]);
+    }
+
+    public function scholarReviewer(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'role' => 'scholar_reviewer',
+        ]);
+    }
+
     public function unverified(): static
     {
         return $this->state(fn (array $attributes) => [

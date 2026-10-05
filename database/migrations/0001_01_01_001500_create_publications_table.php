@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('file_url')->nullable();
             $table->string('external_url')->nullable();
             $table->string('thumbnail')->nullable();
-            $table->enum('status', ['draft', 'pending', 'published', 'rejected'])->default('draft')->index();
+            $table->string('status', 30)->default('draft')->index();
             $table->timestamp('published_at')->nullable();
             $table->timestamps();
         });

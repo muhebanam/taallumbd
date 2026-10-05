@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Category;
 use App\Models\Course;
+use App\Services\SeoService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Inertia\Inertia;
@@ -46,13 +47,33 @@ class CourseController extends Controller
         abort_unless(in_array($course->status, ['published', 'coming_soon']), 404);
         $user = $request->user();
 
+        $course->load([
+            'instructor:id,name,avatar',
+            'certifiedByScholar:id,name,designation,avatar',
+            'category:id,name,slug',
+            'sections.curriculumItems.itemable',
+        ])->loadCount('lessons');
+
+        $seoService = app(SeoService::class);
+
         return Inertia::render('Courses/Show', [
-            'course' => $course->load([
-                'instructor:id,name,avatar',
-                'category:id,name,slug',
-                'sections.curriculumItems.itemable',
-            ])->loadCount('lessons'),
+            'course' => $course,
             'isEnrolled' => $user ? $user->isEnrolled($course) : false,
+            'seo' => [
+                'title' => $course->title.' — আত-তাআল্লুম',
+                'description' => $course->short_description ?: substr(strip_tags((string) $course->description), 0, 160),
+                'canonical' => url('/courses/'.$course->slug),
+                'ogImage' => $course->thumbnail ? (str_starts_with($course->thumbnail, 'http') ? $course->thumbnail : url('/storage/'.$course->thumbnail)) : url('/images/logo.png'),
+                'jsonLd' => [
+                    $seoService->organization(),
+                    $seoService->course($course),
+                    $seoService->breadcrumbs([
+                        ['name' => 'হোম', 'url' => url('/')],
+                        ['name' => 'কোর্সসমূহ', 'url' => url('/courses')],
+                        ['name' => $course->title, 'url' => url('/courses/'.$course->slug)],
+                    ]),
+                ],
+            ],
         ]);
     }
 }

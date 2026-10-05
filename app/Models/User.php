@@ -5,18 +5,35 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Str;
 
 class User extends Authenticatable
 {
     use HasFactory, Notifiable;
 
-    protected $fillable = ['name', 'email', 'password', 'role', 'avatar', 'phone'];
+    protected $fillable = [
+        'name', 'email', 'password', 'role', 'avatar', 'phone',
+        'referral_code', 'referred_by_id', 'utm_source', 'utm_medium',
+        'utm_campaign', 'utm_term', 'utm_content',
+    ];
 
     protected $hidden = ['password', 'remember_token'];
 
     protected function casts(): array
     {
         return ['email_verified_at' => 'datetime', 'password' => 'hashed'];
+    }
+
+    protected static function booted(): void
+    {
+        static::creating(function ($user) {
+            if (Schema::hasColumn('users', 'referral_code')) {
+                if (empty($user->referral_code)) {
+                    $user->referral_code = strtoupper(Str::random(8));
+                }
+            }
+        });
     }
 
     public function isAdmin(): bool
@@ -27,6 +44,33 @@ class User extends Authenticatable
     public function isInstructor(): bool
     {
         return $this->role === 'instructor';
+    }
+
+    public function isEditor(): bool
+    {
+        return $this->role === 'editor' || $this->isAdmin();
+    }
+
+    public function isScholarReviewer(): bool
+    {
+        return $this->role === 'scholar_reviewer' || $this->isAdmin();
+    }
+
+    public function hasRole(string|array $roles): bool
+    {
+        $roles = (array) $roles;
+
+        return in_array($this->role, $roles, true);
+    }
+
+    public function referrer()
+    {
+        return $this->belongsTo(User::class, 'referred_by_id');
+    }
+
+    public function referrals()
+    {
+        return $this->hasMany(Referral::class, 'referrer_id');
     }
 
     public function courses()

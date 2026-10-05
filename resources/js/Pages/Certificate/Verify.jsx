@@ -2,7 +2,7 @@ import React from 'react';
 import { Head, Link } from '@inertiajs/react';
 import MainLayout from '../../Layouts/MainLayout';
 
-export default function Verify({ certificate, identifier, isValid }) {
+export default function Verify({ certificate, identifier, isValid, isRevoked, revokedReason, revokedAt }) {
     return (
         <MainLayout>
             <Head>
@@ -12,7 +12,59 @@ export default function Verify({ certificate, identifier, isValid }) {
 
             <div className="py-16 sm:py-24 bg-[#F8FAF8]">
                 <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-                    {isValid && certificate ? (
+                    {/* Revoked State */}
+                    {isRevoked && certificate ? (
+                        <div className="overflow-hidden rounded-3xl border border-rose-300 bg-white shadow-xl">
+                            <div className="h-2 w-full bg-rose-600"></div>
+                            <div className="bg-rose-950 px-8 py-10 text-center text-white relative">
+                                <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-rose-500/20 border border-rose-400/40 text-3xl text-rose-300">
+                                    ⚠️
+                                </div>
+                                <span className="mt-4 inline-block rounded-full bg-rose-500/20 border border-rose-400/40 px-4 py-1 text-xs font-bold text-rose-300">
+                                    বাতিলকৃত / প্রত্যাহারকৃত সনদপত্র (REVOKED)
+                                </span>
+                                <h1 className="mt-3 text-2xl sm:text-3xl font-extrabold text-white font-bangla">
+                                    এই সনদপত্রটি প্রত্যাহার করা হয়েছে
+                                </h1>
+                                <p className="mt-1 text-xs sm:text-sm text-rose-200">
+                                    This certificate has been revoked by Taallum Academic Authority
+                                </p>
+                            </div>
+
+                            <div className="p-8 sm:p-10 space-y-6">
+                                <div className="rounded-2xl bg-rose-50 border border-rose-200 p-5 text-sm text-rose-900">
+                                    <h4 className="font-bold text-rose-950 font-bangla text-base mb-1">
+                                        প্রত্যাহারের কারণ ও বিবরণ:
+                                    </h4>
+                                    <p className="text-rose-800 leading-relaxed">
+                                        {revokedReason || 'একাডেমিক নীতিমালা বা যাচাই ব্যত্যয়ের কারণে এই সনদটি বাতিল করা হয়েছে।'}
+                                    </p>
+                                    <div className="mt-3 pt-3 border-t border-rose-200/60 text-xs text-rose-700 flex flex-wrap gap-4">
+                                        <span><strong>প্রত্যাহারের তারিখ:</strong> {revokedAt || '—'}</span>
+                                        <span><strong>সনদ নম্বর:</strong> {certificate.certificate_no}</span>
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm text-slate-600">
+                                    <div>
+                                        <span className="text-xs text-slate-400 block uppercase">মূল সনদ প্রাপক</span>
+                                        <p className="font-bold text-slate-800 mt-1 font-bangla">{certificate.user?.name}</p>
+                                    </div>
+                                    <div>
+                                        <span className="text-xs text-slate-400 block uppercase">কোর্স</span>
+                                        <p className="font-bold text-slate-800 mt-1 font-bangla">{certificate.course?.title}</p>
+                                    </div>
+                                </div>
+
+                                <div className="pt-4 border-t border-slate-100 flex justify-center">
+                                    <Link href="/" className="btn-secondary text-xs">
+                                        প্রধান পাতায় ফিরে যান
+                                    </Link>
+                                </div>
+                            </div>
+                        </div>
+                    ) : isValid && certificate ? (
+                        /* Valid Certificate State */
                         <div className="overflow-hidden rounded-3xl border border-slate-200/90 bg-white shadow-xl">
                             {/* Top Islamic Accent Bar */}
                             <div className="h-2 w-full bg-gradient-to-r from-[#1A2E2F] via-[#FFF99A] to-[#1A2E2F]"></div>
@@ -26,9 +78,16 @@ export default function Verify({ certificate, identifier, isValid }) {
                                         ✓
                                     </div>
 
-                                    <span className="mt-4 rounded-full bg-emerald-500/20 border border-emerald-400/30 px-3.5 py-1 text-xs font-bold text-emerald-300">
-                                        সত্যায়িত ও বৈধ সনদপত্র
-                                    </span>
+                                    <div className="mt-4 flex flex-wrap justify-center gap-2">
+                                        <span className="rounded-full bg-emerald-500/20 border border-emerald-400/30 px-3.5 py-1 text-xs font-bold text-emerald-300">
+                                            সত্যায়িত ও বৈধ সনদপত্র
+                                        </span>
+                                        {certificate.course?.is_certified && (
+                                            <span className="rounded-full bg-[#FFF99A]/20 border border-[#FFF99A]/40 px-3.5 py-1 text-xs font-bold text-[#FFF99A] flex items-center gap-1">
+                                                <span>★</span> স্কলার সার্টিফাইড কোর্স
+                                            </span>
+                                        )}
+                                    </div>
 
                                     <h1 className="mt-3 text-2xl sm:text-3xl font-extrabold text-[#FFF99A] font-bangla">
                                         আত-তাআল্লুম একাডেমিক সনদ যাচাই
@@ -84,6 +143,17 @@ export default function Verify({ certificate, identifier, isValid }) {
                                             </span>
                                         </div>
                                     </div>
+
+                                    {/* Scholar Certification Note if applicable */}
+                                    {certificate.course?.is_certified && certificate.course?.certified_by_scholar && (
+                                        <div className="mt-3 p-3.5 rounded-xl bg-amber-50/70 border border-amber-200/80 text-xs text-amber-900 flex items-start gap-2.5">
+                                            <span className="text-base leading-none">📜</span>
+                                            <div>
+                                                <span className="font-bold">স্কলার অনুমোদন:</span> এই কোর্সটি বিশিষ্ট স্কলার{' '}
+                                                <strong>{certificate.course.certified_by_scholar.name}</strong> ({certificate.course.certified_by_scholar.designation || 'সিনিয়র স্কলার'}) কর্তৃক পর্যালোচনা ও শরিয়াহ মূল্যায়নে অনুমোদিত।
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
 
                                 {/* QR Code & Verification Proof */}
@@ -100,7 +170,7 @@ export default function Verify({ certificate, identifier, isValid }) {
                                                 {certificate.uuid}
                                             </p>
                                             <p className="mt-2 text-emerald-700 font-semibold">
-                                                ✓ কেন্দ্রীয় সার্ভারে রেকর্ডভুক্ত
+                                                ✓ কেন্দ্রীয় সার্ভারে রেকর্ডভুক্ত ও সংরক্ষিত
                                             </p>
                                         </div>
                                     </div>

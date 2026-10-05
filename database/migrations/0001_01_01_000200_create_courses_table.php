@@ -23,7 +23,7 @@ return new class extends Migration
             $table->string('duration')->nullable();
             $table->json('learn_points')->nullable();
             $table->json('requirements')->nullable();
-            $table->enum('status', ['draft', 'pending', 'published', 'rejected'])->default('draft')->index();
+            $table->string('status', 30)->default('draft')->index();
             $table->timestamps();
         });
     }

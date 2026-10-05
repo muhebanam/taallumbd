@@ -29,6 +29,15 @@ class FatwaFactory extends Factory
         ];
     }
 
+    public function published(): static
+    {
+        return $this->state(fn () => [
+            'status' => 'published',
+            'published_at' => now(),
+            'answered_at' => now(),
+        ]);
+    }
+
     public function pending(): static
     {
         return $this->state(fn (array $attributes) => [

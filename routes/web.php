@@ -26,6 +26,8 @@ Route::get('/publications/{parent}/{child?}', [C\PublicationController::class, '
 Route::get('/about/teachers', [C\PageController::class, 'teachers'])->name('about.teachers');
 Route::get('/teachers', [C\PageController::class, 'teachers'])->name('teachers.index');
 Route::get('/teachers/{teacher:slug}', [C\TeacherController::class, 'show'])->name('teachers.show');
+Route::get('/scholars/board', [C\PageController::class, 'scholarBoard'])->name('scholars.board');
+Route::get('/about/scholar-board', [C\PageController::class, 'scholarBoard']);
 Route::get('/scholars/{teacher:slug}', [C\TeacherController::class, 'show'])->name('scholars.show');
 Route::get('/about/{section?}', [C\PageController::class, 'about'])->name('about');
 Route::get('/contact', [C\ContactController::class, 'show'])->name('contact');
@@ -34,6 +36,23 @@ Route::get('/become-instructor', [C\BecomeInstructorController::class, 'index'])
 Route::get('/verify/{identifier}', [C\CertificateVerificationController::class, 'verify'])->name('certificates.verify');
 Route::get('/health', [C\HealthController::class, 'check'])->name('system.health');
 Route::get('/internal/cron', [C\InternalCronController::class, 'run'])->middleware('throttle:internal_cron')->name('internal.cron');
+
+/* ---------------- SEO & Sitemaps ---------------- */
+Route::get('/sitemap.xml', [C\SeoController::class, 'sitemap'])->name('seo.sitemap');
+Route::get('/robots.txt', [C\SeoController::class, 'robots'])->name('seo.robots');
+
+/* ---------------- Newsletter Subscriptions (Double Opt-In) ---------------- */
+Route::post('/newsletter/subscribe', [C\NewsletterController::class, 'subscribe'])->name('newsletter.subscribe');
+Route::get('/newsletter/verify/{token}', [C\NewsletterController::class, 'verify'])->name('newsletter.verify');
+Route::get('/newsletter/unsubscribe/{token}', [C\NewsletterController::class, 'unsubscribe'])->name('newsletter.unsubscribe');
+
+/* ---------------- Policy Pages (Public) ---------------- */
+Route::get('/terms', fn () => app(C\PolicyPageController::class)->show('terms'))->name('policy.terms');
+Route::get('/privacy', fn () => app(C\PolicyPageController::class)->show('privacy'))->name('policy.privacy');
+Route::get('/refund', fn () => app(C\PolicyPageController::class)->show('refund'))->name('policy.refund');
+Route::get('/content-policy', fn () => app(C\PolicyPageController::class)->show('content-policy'))->name('policy.content');
+Route::get('/fatwa-disclaimer', fn () => app(C\PolicyPageController::class)->show('fatwa-disclaimer'))->name('policy.fatwa');
+Route::get('/policy/{slug}', [C\PolicyPageController::class, 'show'])->name('policy.show');
 
 /* ---------------- Payment Gateway Callbacks & IPN Webhooks ---------------- */
 Route::match(['get', 'post'], '/payments/{gateway}/callback/{order}/{status?}', [C\PaymentGatewayController::class, 'callback'])->name('payments.callback');
@@ -225,6 +244,28 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('/instructor-applications', [C\Admin\InstructorApplicationController::class, 'index'])->name('instructor-applications.index');
     Route::put('/instructor-applications/{application}/approve', [C\Admin\InstructorApplicationController::class, 'approve'])->name('instructor-applications.approve');
     Route::put('/instructor-applications/{application}/reject', [C\Admin\InstructorApplicationController::class, 'reject'])->name('instructor-applications.reject');
+
+    // Scholar Verification & Governance (Admin)
+    Route::get('/teachers/{teacher}/verification', [C\Admin\ScholarVerificationController::class, 'show'])->name('teachers.verification');
+    Route::post('/teachers/{teacher}/verification/checklist', [C\Admin\ScholarVerificationController::class, 'updateChecklist'])->name('teachers.verification.checklist');
+    Route::post('/teachers/{teacher}/verification/document', [C\Admin\ScholarVerificationController::class, 'uploadDocument'])->name('teachers.verification.document');
+    Route::post('/teachers/{teacher}/verification/verify', [C\Admin\ScholarVerificationController::class, 'verify'])->name('teachers.verification.verify');
+    Route::post('/teachers/{teacher}/unverify', [C\Admin\ScholarVerificationController::class, 'unverify'])->name('teachers.unverify');
+
+    // Certificate Revocation (Admin)
+    Route::post('/certificates/{certificate}/revoke', [C\CertificateVerificationController::class, 'revoke'])->name('certificates.revoke');
+
+    // Policy Pages Management (Admin)
+    Route::get('/pages', [C\PolicyPageController::class, 'adminIndex'])->name('pages.index');
+    Route::get('/pages/{page}/edit', [C\PolicyPageController::class, 'adminEdit'])->name('pages.edit');
+    Route::put('/pages/{page}', [C\PolicyPageController::class, 'adminUpdate'])->name('pages.update');
+});
+
+/* ---------------- Editorial & Scholar Review Workflow (Admin, Editor, Scholar Reviewer, Instructor) ---------------- */
+Route::middleware(['auth', 'role:admin,editor,scholar_reviewer,instructor'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/reviews', [C\Admin\ReviewQueueController::class, 'index'])->name('reviews.index');
+    Route::get('/reviews/{type}/{id}', [C\Admin\ReviewQueueController::class, 'show'])->name('reviews.show');
+    Route::post('/reviews/{type}/{id}/decision', [C\Admin\ReviewQueueController::class, 'decision'])->name('reviews.decision');
 });
 
 /* Fatwa answering: admin OR instructor (scholar) */

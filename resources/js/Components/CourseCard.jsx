@@ -34,6 +34,11 @@ export default function CourseCard({ course }) {
                             {course.category.name}
                         </span>
                     )}
+                    {course.is_certified && (
+                        <span className="rounded-lg bg-emerald-700/90 border border-emerald-400/40 backdrop-blur-md px-2 py-1 text-[11px] font-bold text-[#FFF99A] flex items-center gap-1 shadow-sm">
+                            <span>★</span> স্কলার অনুমোদিত
+                        </span>
+                    )}
                     {course.status === 'coming_soon' && (
                         <span className="rounded-lg bg-amber-500/90 backdrop-blur-md px-2.5 py-1 text-xs font-bold text-white">
                             শীঘ্রই আসছে

@@ -10,11 +10,30 @@ class Certificate extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['uuid', 'user_id', 'course_id', 'certificate_no', 'issued_at', 'file_path'];
+    protected $fillable = [
+        'uuid', 'user_id', 'course_id', 'certificate_no', 'issued_at', 'file_path',
+        'revoked_at', 'revoked_reason', 'revoked_by',
+    ];
 
     protected $casts = [
         'issued_at' => 'datetime',
+        'revoked_at' => 'datetime',
     ];
+
+    public function isRevoked(): bool
+    {
+        return $this->revoked_at !== null;
+    }
+
+    public function revokedBy()
+    {
+        return $this->belongsTo(User::class, 'revoked_by');
+    }
+
+    public function verifications()
+    {
+        return $this->hasMany(CertificateVerification::class);
+    }
 
     protected $appends = ['verification_url', 'qr_code_url'];
 

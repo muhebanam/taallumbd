@@ -29,4 +29,9 @@ class Publication extends Model
     {
         return $q->where('status', 'published');
     }
+
+    public function contentReviews()
+    {
+        return $this->morphMany(ContentReview::class, 'reviewable')->latest();
+    }
 }

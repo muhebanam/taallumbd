@@ -16,7 +16,8 @@ class Teacher extends Model
         'instagram_url', 'telegram_url', 'specialties', 'knowledge_path',
         'expertise_map', 'qualifications', 'experiences', 'office_hours',
         'consultation_enabled', 'consultation_note', 'status', 'featured',
-        'is_verified', 'verified_at', 'allow_follow', 'show_email',
+        'is_verified', 'verified_at', 'verified_by', 'verification_documents',
+        'verification_checklist', 'verification_notes', 'allow_follow', 'show_email',
         'show_phone', 'sort_order',
     ];
 
@@ -27,6 +28,8 @@ class Teacher extends Model
         'qualifications' => 'array',
         'experiences' => 'array',
         'office_hours' => 'array',
+        'verification_documents' => 'array',
+        'verification_checklist' => 'array',
         'consultation_enabled' => 'boolean',
         'featured' => 'boolean',
         'is_verified' => 'boolean',
@@ -271,5 +274,10 @@ class Teacher extends Model
         }
 
         return $suggestions;
+    }
+
+    public function verifiedBy()
+    {
+        return $this->belongsTo(User::class, 'verified_by');
     }
 }

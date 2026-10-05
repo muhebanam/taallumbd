@@ -21,7 +21,7 @@ return new class extends Migration
             $table->longText('question_body');
             $table->longText('answer_body')->nullable();
             $table->boolean('is_private')->default(false);
-            $table->enum('status', ['pending', 'answered', 'rejected', 'published'])->default('pending')->index();
+            $table->string('status', 30)->default('pending')->index();
             $table->timestamp('published_at')->nullable();
             $table->timestamps();
         });

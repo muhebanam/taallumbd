@@ -25,4 +25,12 @@ class ArticleFactory extends Factory
             'published_at' => now(),
         ];
     }
+
+    public function published(): static
+    {
+        return $this->state(fn () => [
+            'status' => 'published',
+            'published_at' => now(),
+        ]);
+    }
 }

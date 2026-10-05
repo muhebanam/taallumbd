@@ -77,4 +77,9 @@ class Fatwa extends Model
     {
         return $this->question_title;
     }
+
+    public function contentReviews()
+    {
+        return $this->morphMany(ContentReview::class, 'reviewable')->latest();
+    }
 }

@@ -14,9 +14,16 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
-            $table->enum('role', ['admin', 'instructor', 'student'])->default('student')->index();
+            $table->enum('role', ['admin', 'instructor', 'student', 'editor', 'scholar_reviewer'])->default('student')->index();
             $table->string('avatar')->nullable();
             $table->string('phone')->nullable();
+            $table->string('referral_code', 32)->nullable()->unique();
+            $table->foreignId('referred_by_id')->nullable()->constrained('users')->nullOnDelete();
+            $table->string('utm_source', 100)->nullable();
+            $table->string('utm_medium', 100)->nullable();
+            $table->string('utm_campaign', 100)->nullable();
+            $table->string('utm_term', 100)->nullable();
+            $table->string('utm_content', 100)->nullable();
             $table->rememberToken();
             $table->timestamps();
         });

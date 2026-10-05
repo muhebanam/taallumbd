@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Category;
 use App\Models\Fatwa;
 use App\Models\Teacher;
+use App\Services\SeoService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Inertia\Inertia;
@@ -111,9 +112,26 @@ class FatwaController extends Controller
             ->take(5)
             ->get(['id', 'question_title', 'published_at', 'category_id', 'views_count']);
 
+        $seoService = app(SeoService::class);
+
         return Inertia::render('Fatawa/Show', [
             'fatwa' => $fatwa,
             'relatedFatawa' => $relatedFatawa,
+            'seo' => [
+                'title' => $fatwa->question_title.' — ফাতাওয়া ও শরঈ সমাধান',
+                'description' => substr(strip_tags((string) $fatwa->question_body), 0, 160),
+                'canonical' => url('/fatawa/'.$fatwa->id),
+                'type' => 'article',
+                'jsonLd' => [
+                    $seoService->organization(),
+                    $seoService->qaPage($fatwa),
+                    $seoService->breadcrumbs([
+                        ['name' => 'হোম', 'url' => url('/')],
+                        ['name' => 'ফাতাওয়া', 'url' => url('/fatawa')],
+                        ['name' => $fatwa->question_title, 'url' => url('/fatawa/'.$fatwa->id)],
+                    ]),
+                ],
+            ],
         ]);
     }
 

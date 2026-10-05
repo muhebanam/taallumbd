@@ -115,4 +115,25 @@ class PageController extends Controller
             ],
         ]);
     }
+
+    public function scholarBoard(Request $request)
+    {
+        $boardMembers = Teacher::active()
+            ->verified()
+            ->withCount(['courses' => function ($q) {
+                $q->published();
+            }, 'fatawa' => function ($q) {
+                $q->published();
+            }, 'articles' => function ($q) {
+                $q->published();
+            }])
+            ->orderByDesc('featured')
+            ->orderBy('sort_order')
+            ->get();
+
+        return Inertia::render('About/ScholarBoard', [
+            'boardMembers' => $boardMembers,
+            'scholars' => $boardMembers,
+        ]);
+    }
 }
