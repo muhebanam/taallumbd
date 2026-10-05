@@ -8,6 +8,7 @@ use App\Models\Order;
 use App\Models\Payment;
 use App\Models\PaymentTransaction;
 use App\Models\Setting;
+use App\Payments\PaymentGatewayManager;
 use App\Services\CourseEnrollmentService;
 use App\Services\FileUploadService;
 use App\Services\PaymentService;
@@ -39,9 +40,12 @@ class CheckoutController extends Controller
             ->where('status', 'pending')
             ->first();
 
+        $availableGateways = app(PaymentGatewayManager::class)->getAvailableGateways();
+
         return Inertia::render('Payment/Checkout', [
             'course' => $course->load('instructor:id,name'),
             'pendingOrder' => $pendingOrder,
+            'availableGateways' => $availableGateways,
         ]);
     }
 
@@ -81,6 +85,7 @@ class CheckoutController extends Controller
         }
 
         $couponCode = $request->input('coupon_code');
+        $gateway = $request->input('gateway', 'manual');
 
         // Free course: enroll directly
         if ($course->is_free || (float) $course->price <= 0) {
@@ -98,6 +103,11 @@ class CheckoutController extends Controller
 
             return redirect()->route('student.courses.show', $course)
                 ->with('success', 'কুপনের মাধ্যমে শতভাগ ছাড়ে কোর্সে ভর্তি সম্পন্ন হয়েছে!');
+        }
+
+        $gatewayManager = app(PaymentGatewayManager::class);
+        if ($gateway !== 'manual' && $gateway !== 'mock' && $gatewayManager->isGatewayEnabled($gateway)) {
+            return redirect()->route('payments.init', ['gateway' => $gateway, 'order' => $order->id]);
         }
 
         return redirect()->route('payment.mock', $order);

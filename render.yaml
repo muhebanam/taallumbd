@@ -87,4 +87,27 @@ services:
       - key: CRON_SECRET
         generateValue: true
 
+      # ── Automated Payment Gateways (Disabled by default, live on merchant credentials) ──
+      - key: SSLCOMMERZ_ENABLED
+        value: "false"
+      - key: SSLCOMMERZ_MODE
+        value: sandbox
+      - key: SSLCOMMERZ_STORE_ID
+        sync: false
+      - key: SSLCOMMERZ_STORE_PASSWORD
+        sync: false
+      - key: BKASH_ENABLED
+        value: "false"
+      - key: BKASH_MODE
+        value: sandbox
+      - key: BKASH_APP_KEY
+        sync: false
+      - key: BKASH_APP_SECRET
+        sync: false
+      - key: BKASH_USERNAME
+        sync: false
+      - key: BKASH_PASSWORD
+        sync: false
+
+
 

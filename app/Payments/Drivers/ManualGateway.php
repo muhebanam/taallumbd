@@ -97,6 +97,22 @@ class ManualGateway implements PaymentGateway
         ];
     }
 
+    public function handleCallback(\Illuminate\Http\Request $request, Order $order): array
+    {
+        return [
+            'success' => false,
+            'message' => 'Manual gateway does not support automated browser callbacks.',
+        ];
+    }
+
+    public function handleIpn(\Illuminate\Http\Request $request): array
+    {
+        return [
+            'success' => false,
+            'message' => 'Manual gateway does not support IPN notifications.',
+        ];
+    }
+
     public function verify(Order $order, ?array $payload = null): bool
     {
         return $order->transaction_id !== null && $order->status === 'paid';

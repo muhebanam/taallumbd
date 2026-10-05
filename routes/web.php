@@ -33,6 +33,10 @@ Route::get('/verify/{identifier}', [C\CertificateVerificationController::class, 
 Route::get('/health', [C\HealthController::class, 'check'])->name('system.health');
 Route::get('/internal/cron', [C\InternalCronController::class, 'run'])->name('internal.cron');
 
+/* ---------------- Payment Gateway Callbacks & IPN Webhooks ---------------- */
+Route::match(['get', 'post'], '/payments/{gateway}/callback/{order}/{status?}', [C\PaymentGatewayController::class, 'callback'])->name('payments.callback');
+Route::post('/webhooks/{gateway}/ipn', [C\PaymentGatewayController::class, 'ipn'])->name('payments.ipn');
+
 /* ---------------- Quran & Hadith Library ---------------- */
 Route::get('/quran', [C\QuranController::class, 'index'])->name('quran.index');
 Route::get('/quran/{number}', [C\QuranController::class, 'show'])->name('quran.show');
@@ -99,6 +103,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/mock-payment/{order}/success', [C\CheckoutController::class, 'mockSuccess'])->name('payment.mock.success');
     }
     Route::post('/payment/{order}/manual-submit', [C\CheckoutController::class, 'submitManualPayment'])->name('payment.manual.submit');
+    Route::match(['get', 'post'], '/payments/{gateway}/init/{order}', [C\PaymentGatewayController::class, 'initiate'])->name('payments.init');
     Route::get('/orders/{order}/invoice', [C\CheckoutController::class, 'invoice'])->name('orders.invoice');
     Route::get('/invoice/{order}', [C\CheckoutController::class, 'invoice'])->name('invoice');
 
@@ -177,6 +182,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('/orders', [C\Admin\ModerationController::class, 'orders'])->name('orders.index');
     Route::post('/orders/{order}/approve', [C\Admin\ModerationController::class, 'approveOrder'])->name('orders.approve');
     Route::post('/orders/{order}/reject', [C\Admin\ModerationController::class, 'rejectOrder'])->name('orders.reject');
+    Route::post('/orders/{order}/refund', [C\Admin\ModerationController::class, 'refundOrder'])->name('orders.refund');
     Route::get('/orders/{order}/screenshot', [C\Admin\ModerationController::class, 'viewScreenshot'])->name('orders.screenshot');
     Route::get('/contact-messages', [C\Admin\ModerationController::class, 'contactMessages'])->name('messages.index');
     Route::put('/contact-messages/{message}/read', [C\Admin\ModerationController::class, 'markMessageRead'])->name('messages.read');

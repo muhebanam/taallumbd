@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import MainLayout from '../../Layouts/MainLayout';
 
-export default function Checkout({ course, pendingOrder }) {
+export default function Checkout({ course, pendingOrder, availableGateways = [] }) {
     const { auth, errors: pageErrors, flash } = usePage().props;
     const user = auth?.user;
 
@@ -14,9 +14,19 @@ export default function Checkout({ course, pendingOrder }) {
     const [couponApplied, setCouponApplied] = useState(Boolean(flash?.coupon_success));
     const [couponError, setCouponError] = useState('');
     const [applying, setApplying] = useState(false);
+    const [submitting, setSubmitting] = useState(false);
     const [agreePledge, setAgreePledge] = useState(true);
 
+    // Default to first enabled gateway or 'manual'
+    const [selectedGateway, setSelectedGateway] = useState(() => {
+        if (availableGateways && availableGateways.length > 0) {
+            return availableGateways[0].id;
+        }
+        return 'manual';
+    });
+
     const finalAmount = Math.max(0, basePrice - discount);
+    const errorMessage = flash?.error || pageErrors?.error;
 
     const applyCoupon = (e) => {
         e.preventDefault();
@@ -48,8 +58,12 @@ export default function Checkout({ course, pendingOrder }) {
             return;
         }
 
+        setSubmitting(true);
         router.post(`/checkout/${course.slug}`, {
             coupon_code: couponApplied ? couponCode : undefined,
+            gateway: selectedGateway,
+        }, {
+            onFinish: () => setSubmitting(false),
         });
     };
 
@@ -73,6 +87,16 @@ export default function Checkout({ course, pendingOrder }) {
             </div>
 
             <div className="mx-auto max-w-4xl px-4 py-10 sm:px-6 lg:px-8">
+                {/* Flash Error Banner (e.g. from failed callback or cancelled payment) */}
+                {errorMessage && (
+                    <div className="mb-6 rounded-2xl bg-rose-50 border border-rose-200 p-4 text-xs font-semibold text-rose-800 flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                            <span className="text-base">⚠️</span>
+                            <span>{errorMessage}</span>
+                        </div>
+                    </div>
+                )}
+
                 <div className="grid gap-8 md:grid-cols-5">
                     {/* Course Summary Card (3 cols) */}
                     <div className="md:col-span-3 space-y-6">
@@ -134,26 +158,63 @@ export default function Checkout({ course, pendingOrder }) {
                             </div>
                         </div>
 
-                        {/* Payment Partner Badges */}
-                        <div className="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm">
-                            <h4 className="font-bold text-xs text-gray-600 uppercase tracking-wider mb-3">
-                                সমর্থিত পেমেন্ট মাধ্যমসমূহ:
-                            </h4>
-                            <div className="flex flex-wrap items-center gap-4 text-xs font-semibold text-gray-700">
-                                <span className="flex items-center gap-1.5 rounded-xl border border-pink-200 bg-pink-50 px-3 py-1.5 text-pink-700">
-                                    🟣 বিকাশ (bKash)
-                                </span>
-                                <span className="flex items-center gap-1.5 rounded-xl border border-orange-200 bg-orange-50 px-3 py-1.5 text-orange-700">
-                                    🟠 নগদ (Nagad)
-                                </span>
-                                <span className="flex items-center gap-1.5 rounded-xl border border-purple-200 bg-purple-50 px-3 py-1.5 text-purple-700">
-                                    🟣 রকেট (Rocket)
-                                </span>
-                                <span className="flex items-center gap-1.5 rounded-xl border border-blue-200 bg-blue-50 px-3 py-1.5 text-blue-700">
-                                    💳 ডেবিট/ক্রেডিট কার্ড
-                                </span>
+                        {/* Payment Gateway Selector */}
+                        {!isFree && (
+                            <div className="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm space-y-4">
+                                <h3 className="font-bold text-sm text-[#102526]">
+                                    পেমেন্ট গেটওয়ে নির্বাচন করুন
+                                </h3>
+
+                                <div className="space-y-3">
+                                    {availableGateways && availableGateways.length > 0 ? (
+                                        availableGateways.map((gw) => {
+                                            const isSelected = selectedGateway === gw.id;
+                                            return (
+                                                <label
+                                                    key={gw.id}
+                                                    onClick={() => setSelectedGateway(gw.id)}
+                                                    className={`flex items-center justify-between p-4 rounded-2xl border-2 cursor-pointer transition ${
+                                                        isSelected
+                                                            ? 'border-[#102526] bg-[#102526]/5 shadow-sm'
+                                                            : 'border-gray-100 hover:border-gray-200 bg-white'
+                                                    }`}
+                                                >
+                                                    <div className="flex items-center gap-3">
+                                                        <input
+                                                            type="radio"
+                                                            name="payment_gateway"
+                                                            value={gw.id}
+                                                            checked={isSelected}
+                                                            onChange={() => setSelectedGateway(gw.id)}
+                                                            className="h-4 w-4 text-[#102526] focus:ring-[#102526]"
+                                                        />
+                                                        <div>
+                                                            <div className="font-bold text-xs sm:text-sm text-gray-900">
+                                                                {gw.name}
+                                                            </div>
+                                                            <div className="text-[11px] text-gray-500">
+                                                                {gw.type === 'automated' ? 'সরাসরি গেটওয়ের মাধ্যমে তাৎক্ষণিক লেনদেন' : 'বিকাশ, নগদ ও রকেটের মাধ্যমে ম্যানুয়াল ভেরিফিকেশন'}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                                                        gw.type === 'automated'
+                                                            ? 'bg-emerald-100 text-emerald-800'
+                                                            : 'bg-amber-100 text-amber-800'
+                                                    }`}>
+                                                        {gw.badge}
+                                                    </span>
+                                                </label>
+                                            );
+                                        })
+                                    ) : (
+                                        <div className="p-3 bg-gray-50 rounded-xl text-xs text-gray-600">
+                                            ম্যানুয়াল পেমেন্ট (bKash / Nagad / Rocket) সক্রিয় রয়েছে।
+                                        </div>
+                                    )}
+                                </div>
                             </div>
-                        </div>
+                        )}
                     </div>
 
                     {/* Order Summary & Pay Card (2 cols) */}
@@ -224,9 +285,12 @@ export default function Checkout({ course, pendingOrder }) {
                             {/* CTA Proceed Button */}
                             <button
                                 onClick={proceedToPay}
-                                className="mt-6 w-full rounded-2xl bg-[#102526] py-3.5 text-center text-sm font-bold text-[#FFF99A] shadow-lg transition hover:bg-[#1A2E2F] hover:shadow-xl"
+                                disabled={submitting}
+                                className="mt-6 w-full rounded-2xl bg-[#102526] py-3.5 text-center text-sm font-bold text-[#FFF99A] shadow-lg transition hover:bg-[#1A2E2F] hover:shadow-xl disabled:opacity-60"
                             >
-                                {isFree || finalAmount <= 0
+                                {submitting
+                                    ? 'পেমেন্ট গেটওয়েতে সংযোগ হচ্ছে...'
+                                    : isFree || finalAmount <= 0
                                     ? 'ফ্রি ভর্তি সম্পন্ন করুন'
                                     : `পেমেন্টে এগিয়ে যান — ৳${finalAmount.toFixed(0)}`}
                             </button>

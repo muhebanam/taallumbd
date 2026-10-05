@@ -68,6 +68,9 @@ return Application::configure(basePath: dirname(__DIR__))
             'init-neon-db',
             'init-neon-db/*',
             'internal/cron',
+            'webhooks/*',
+            'payments/*/callback/*',
+            'payments/*/callback',
         ]);
         $middleware->web(append: [
             SecurityHeaders::class,

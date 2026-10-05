@@ -9,6 +9,8 @@ export default function Orders({ orders, filters = {}, counts = {} }) {
     const [activeScreenshot, setActiveScreenshot] = useState(null);
     const [rejectingOrder, setRejectingOrder] = useState(null);
     const [rejectReason, setRejectReason] = useState('প্রদত্ত তথ্য অনুযায়ী পেমেন্ট যাচাই করা সম্ভব হয়নি।');
+    const [refundingOrder, setRefundingOrder] = useState(null);
+    const [refundReason, setRefundReason] = useState('প্রশাসনিক নীতিমালা অনুযায়ী রিফান্ড প্রদান করা হয়েছে।');
 
     const handleSearch = (e) => {
         e.preventDefault();
@@ -54,6 +56,22 @@ export default function Orders({ orders, filters = {}, counts = {} }) {
             onFinish: () => {
                 setProcessingId(null);
                 setRejectingOrder(null);
+            },
+        });
+    };
+
+    const submitRefund = (e) => {
+        e.preventDefault();
+        if (!refundingOrder) return;
+
+        setProcessingId(refundingOrder.id);
+        router.post(`/admin/orders/${refundingOrder.id}/refund`, {
+            reason: refundReason,
+        }, {
+            preserveScroll: true,
+            onFinish: () => {
+                setProcessingId(null);
+                setRefundingOrder(null);
             },
         });
     };
@@ -298,6 +316,19 @@ export default function Orders({ orders, filters = {}, counts = {} }) {
                                                             </button>
                                                         </>
                                                     )}
+                                                    {isPaid && (
+                                                        <button
+                                                            type="button"
+                                                            disabled={processingId === o.id}
+                                                            onClick={() => {
+                                                                setRefundingOrder(o);
+                                                                setRefundReason('প্রশাসনিক নীতিমালা অনুযায়ী রিফান্ড প্রদান করা হয়েছে।');
+                                                            }}
+                                                            className="rounded-xl bg-rose-50 border border-rose-200 px-2.5 py-1.5 text-xs font-bold text-rose-700 hover:bg-rose-100 disabled:opacity-50 transition"
+                                                        >
+                                                            রিফান্ড
+                                                        </button>
+                                                    )}
                                                     <Link
                                                         href={`/orders/${o.id}/invoice`}
                                                         className="rounded-xl border border-gray-200 bg-white px-2.5 py-1.5 text-xs font-semibold text-gray-700 hover:bg-gray-50"
@@ -414,6 +445,67 @@ export default function Orders({ orders, filters = {}, counts = {} }) {
                                 className="rounded-xl bg-rose-600 px-4 py-2 text-xs font-bold text-white shadow hover:bg-rose-700 disabled:opacity-50"
                             >
                                 {processingId === rejectingOrder.id ? 'বাতিল হচ্ছে...' : 'নিশ্চিত বাতিল করুন'}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            )}
+
+            {/* Refund Modal with Reason */}
+            {refundingOrder && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+                    <form onSubmit={submitRefund} className="relative max-w-md w-full rounded-3xl bg-white p-6 shadow-2xl space-y-4">
+                        <div className="flex items-center justify-between border-b border-gray-100 pb-3">
+                            <h3 className="font-bold text-base text-rose-700">
+                                অর্ডার #{refundingOrder.id} রিফান্ড করুন
+                            </h3>
+                            <button
+                                type="button"
+                                onClick={() => setRefundingOrder(null)}
+                                className="text-gray-400 hover:text-gray-700 text-lg font-bold"
+                            >
+                                ✕
+                            </button>
+                        </div>
+
+                        <p className="text-xs text-gray-600">
+                            শিক্ষার্থীর নাম: <strong>{refundingOrder.user?.name}</strong><br />
+                            কোর্স: <strong>{refundingOrder.course?.title}</strong><br />
+                            পেমেন্ট মাধ্যম: <strong className="uppercase">{refundingOrder.payment_method || 'MANUAL'}</strong><br />
+                            রিফান্ডযোগ্য পরিমাণ: <strong className="text-emerald-700">৳{Number(refundingOrder.amount).toFixed(0)}</strong>
+                        </p>
+
+                        <div className="rounded-xl bg-amber-50 border border-amber-200 p-3 text-[11px] text-amber-900 leading-relaxed">
+                            ⚠️ <strong>সতর্কতা:</strong> রিফান্ড সম্পন্ন হলে গেটওয়েতে রিফান্ড রিকোয়েস্ট পাঠানো হবে, শিক্ষার্থীর কোর্সের এনরোলমেন্ট বাতিল করা হবে এবং অডিট লগে রেকর্ড সংরক্ষিত হবে।
+                        </div>
+
+                        <div>
+                            <label className="block text-xs font-bold text-gray-700 mb-1">
+                                রিফান্ডের কারণ (অডিট লগে সংরক্ষিত হবে):
+                            </label>
+                            <textarea
+                                rows="3"
+                                required
+                                value={refundReason}
+                                onChange={(e) => setRefundReason(e.target.value)}
+                                className="w-full rounded-2xl border border-gray-300 p-3 text-xs focus:border-rose-500 focus:outline-none"
+                            ></textarea>
+                        </div>
+
+                        <div className="flex justify-end gap-2 pt-2">
+                            <button
+                                type="button"
+                                onClick={() => setRefundingOrder(null)}
+                                className="rounded-xl bg-gray-100 px-4 py-2 text-xs font-bold text-gray-700 hover:bg-gray-200"
+                            >
+                                ফিরে যান
+                            </button>
+                            <button
+                                type="submit"
+                                disabled={processingId === refundingOrder.id}
+                                className="rounded-xl bg-rose-600 px-4 py-2 text-xs font-bold text-white shadow hover:bg-rose-700 disabled:opacity-50"
+                            >
+                                {processingId === refundingOrder.id ? 'রিফান্ড হচ্ছে...' : 'নিশ্চিত রিফান্ড প্রদান করুন'}
                             </button>
                         </div>
                     </form>

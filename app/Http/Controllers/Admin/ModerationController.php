@@ -13,6 +13,7 @@ use App\Models\Fatwa;
 use App\Models\Order;
 use App\Models\PaymentTransaction;
 use App\Models\Teacher;
+use App\Payments\PaymentGatewayManager;
 use App\Services\AuditLoggerService;
 use App\Services\PaymentService;
 use Illuminate\Http\Request;
@@ -263,6 +264,72 @@ class ModerationController extends Controller
         }
 
         return back()->with('info', "অর্ডার #{$order->id} বাতিল করা হয়েছে।");
+    }
+
+    public function refundOrder(Request $request, Order $order, PaymentGatewayManager $gatewayManager)
+    {
+        abort_unless($order->status === 'paid', 400, 'শুধুমাত্র পরিশোধিত অর্ডার রিফান্ড করা সম্ভব।');
+
+        $reason = $request->input('reason', 'প্রশাসনিক নীতিমালা অনুযায়ী রিফান্ড প্রদান করা হয়েছে।');
+
+        // 1. If payment method is automated gateway, call gateway refund API
+        $method = $order->payment_method;
+        if (in_array($method, ['sslcommerz', 'bkash']) && $gatewayManager->isGatewayEnabled($method)) {
+            try {
+                $driver = $gatewayManager->driver($method);
+                $driver->refund($order, $reason);
+            } catch (\Throwable $e) {
+                Log::error("Gateway refund failed for order #{$order->id}: {$e->getMessage()}");
+
+                return back()->with('error', 'গেটওয়ে রিফান্ড ব্যর্থ হয়েছে: '.$e->getMessage());
+            }
+        } else {
+            // For manual / mock payments, record a refund transaction
+            PaymentTransaction::create([
+                'order_id' => $order->id,
+                'gateway' => $method ?: 'manual',
+                'type' => 'refund',
+                'gateway_ref' => $order->transaction_id,
+                'amount' => $order->final_payable_amount,
+                'currency' => 'BDT',
+                'status' => 'refunded',
+                'payload' => [
+                    'reason' => $reason,
+                    'refunded_by' => $request->user()->id,
+                    'refunded_at' => now()->toIso8601String(),
+                ],
+                'ip_address' => $request->ip(),
+            ]);
+        }
+
+        // 2. Mark order as cancelled
+        $order->update(['status' => 'cancelled']);
+
+        // 3. Revoke enrollment (status => cancelled)
+        $enrollment = Enrollment::where('user_id', $order->user_id)
+            ->where('course_id', $order->course_id)
+            ->first();
+
+        if ($enrollment) {
+            $enrollment->update(['status' => 'cancelled']);
+        }
+
+        // 4. Audit Log
+        AuditLoggerService::log(
+            action: 'order.refunded',
+            modelType: Order::class,
+            modelId: $order->id,
+            payload: [
+                'order_id' => $order->id,
+                'user_id' => $order->user_id,
+                'course_id' => $order->course_id,
+                'amount' => $order->final_payable_amount,
+                'gateway' => $method,
+                'reason' => $reason,
+            ]
+        );
+
+        return back()->with('success', "অর্ডার #{$order->id} সফলভাবে রিফান্ড করা হয়েছে এবং কোর্সের এনরোলমেন্ট বাতিল করা হয়েছে।");
     }
 
     public function enrollments()
