@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Mail\OrderApprovedMail;
+use App\Mail\OrderRejectedMail;
 use App\Models\Article;
 use App\Models\ContactMessage;
 use App\Models\Course;
@@ -14,6 +16,9 @@ use App\Models\Teacher;
 use App\Services\AuditLoggerService;
 use App\Services\PaymentService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 
 /** Central admin moderation: approve/reject member-submitted courses, articles, fatawa. */
@@ -130,16 +135,72 @@ class ModerationController extends Controller
         return back()->with('success', 'ফাতওয়া ও গবেষণা ডাটা সফলভাবে সংরক্ষিত হয়েছে।');
     }
 
-    public function orders()
+    public function orders(Request $request)
     {
+        $status = $request->input('status');
+        $search = $request->input('search');
+
+        $orders = Order::with(['user:id,name,email,phone', 'course:id,title', 'payments'])
+            ->when($status, fn ($q, $s) => $q->where('status', $s))
+            ->when($search, function ($q, $term) {
+                $q->where(function ($sub) use ($term) {
+                    $sub->where('transaction_id', 'like', "%{$term}%")
+                        ->orWhere('sender_phone', 'like', "%{$term}%")
+                        ->orWhereHas('user', fn ($uq) => $uq->where('name', 'like', "%{$term}%")->orWhere('email', 'like', "%{$term}%"));
+                });
+            })
+            ->latest()
+            ->paginate(20)
+            ->withQueryString();
+
+        $sevenDaysAgo = now()->subDays(7);
+        $orders->getCollection()->transform(function ($order) use ($sevenDaysAgo) {
+            $order->is_overdue = ($order->status === 'pending_verification' && $order->created_at <= $sevenDaysAgo);
+            $order->screenshot_url = $order->screenshot_path ? route('orders.screenshot', $order) : null;
+
+            return $order;
+        });
+
+        $counts = [
+            'all' => Order::count(),
+            'pending_verification' => Order::where('status', 'pending_verification')->count(),
+            'overdue' => Order::where('status', 'pending_verification')->where('created_at', '<=', $sevenDaysAgo)->count(),
+            'paid' => Order::where('status', 'paid')->count(),
+            'pending' => Order::where('status', 'pending')->count(),
+            'cancelled' => Order::where('status', 'cancelled')->count(),
+        ];
+
         return Inertia::render('Admin/Orders', [
-            'orders' => Order::with(['user:id,name,email', 'course:id,title', 'payments'])->latest()->paginate(20),
+            'orders' => $orders,
+            'filters' => [
+                'status' => $status,
+                'search' => $search,
+            ],
+            'counts' => $counts,
+        ]);
+    }
+
+    public function viewScreenshot(Order $order)
+    {
+        abort_unless($order->screenshot_path, 404, 'কোনো স্ক্রিনশট সংযুক্ত নেই।');
+
+        $diskName = config('filesystems.private_disk', 'local');
+        $disk = Storage::disk($diskName);
+
+        abort_unless($disk->exists($order->screenshot_path), 404, 'ফাইলটি পাওয়া যায়নি।');
+
+        $mime = $disk->mimeType($order->screenshot_path) ?: 'image/png';
+
+        return response($disk->get($order->screenshot_path), 200, [
+            'Content-Type' => $mime,
+            'Content-Disposition' => 'inline; filename="screenshot-'.$order->id.'.png"',
+            'X-Content-Type-Options' => 'nosniff',
         ]);
     }
 
     public function approveOrder(Request $request, Order $order, PaymentService $payments)
     {
-        abort_unless($order->status === 'pending', 400, 'এই অর্ডারটি পেন্ডিং নয়।');
+        abort_unless(in_array($order->status, ['pending', 'pending_verification']), 400, 'এই অর্ডারটি পেন্ডিং নয়।');
 
         $payments->confirm(
             $order,
@@ -148,12 +209,20 @@ class ModerationController extends Controller
             $order->sender_phone
         );
 
+        if ($order->user?->email) {
+            try {
+                Mail::to($order->user->email)->queue(new OrderApprovedMail($order));
+            } catch (\Throwable $e) {
+                Log::warning("Failed to queue order approval email: {$e->getMessage()}");
+            }
+        }
+
         return back()->with('success', "অর্ডার #{$order->id} সফলভাবে অনুমোদন করা হয়েছে এবং শিক্ষার্থীকে কোর্সে যুক্ত করা হয়েছে।");
     }
 
     public function rejectOrder(Request $request, Order $order)
     {
-        abort_unless($order->status === 'pending', 400, 'শুধুমাত্র পেন্ডিং অর্ডার বাতিল করা সম্ভব।');
+        abort_unless(in_array($order->status, ['pending', 'pending_verification']), 400, 'শুধুমাত্র অপেক্ষমাণ অর্ডার বাতিল করা সম্ভব।');
 
         $reason = $request->input('reason', 'প্রদত্ত তথ্য অনুযায়ী পেমেন্ট যাচাই করা সম্ভব হয়নি।');
         $order->update(['status' => 'cancelled']);
@@ -185,7 +254,15 @@ class ModerationController extends Controller
             ]
         );
 
-        return back()->with('info', "অর্ডার #{$order->id} সফলভাবে বাতিল করা হয়েছে।");
+        if ($order->user?->email) {
+            try {
+                Mail::to($order->user->email)->queue(new OrderRejectedMail($order, $reason));
+            } catch (\Throwable $e) {
+                Log::warning("Failed to queue order rejection email: {$e->getMessage()}");
+            }
+        }
+
+        return back()->with('info', "অর্ডার #{$order->id} বাতিল করা হয়েছে।");
     }
 
     public function enrollments()

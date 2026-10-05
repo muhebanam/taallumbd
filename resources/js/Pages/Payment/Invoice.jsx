@@ -52,7 +52,7 @@ export default function Invoice({ order }) {
                                     ✅ পরিশোধিত (PAID)
                                 </span>
                             )}
-                            {order.status === 'pending' && order.transaction_id && (
+                            {(order.status === 'pending_verification' || (order.status === 'pending' && order.transaction_id)) && (
                                 <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-bold text-amber-800">
                                     ⏳ যাচাইকরণাধীন (PENDING VERIFICATION)
                                 </span>
@@ -79,7 +79,7 @@ export default function Invoice({ order }) {
                     </div>
 
                     {/* Status Alert Banners */}
-                    {order.status === 'pending' && order.transaction_id && (
+                    {(order.status === 'pending_verification' || (order.status === 'pending' && order.transaction_id)) && (
                         <div className="mt-4 rounded-2xl bg-amber-50 border border-amber-200 p-4 text-xs text-amber-900 flex items-start gap-3">
                             <span className="text-lg">⏳</span>
                             <div>

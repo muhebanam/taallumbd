@@ -19,6 +19,7 @@ class Order extends Model
         'payment_method',
         'sender_phone',
         'transaction_id',
+        'screenshot_path',
     ];
 
     protected $casts = [
@@ -39,6 +40,16 @@ class Order extends Model
     public function payments()
     {
         return $this->hasMany(Payment::class);
+    }
+
+    public function paymentTransactions()
+    {
+        return $this->hasMany(PaymentTransaction::class);
+    }
+
+    public function isPendingVerification(): bool
+    {
+        return $this->status === 'pending_verification' || ($this->status === 'pending' && ! empty($this->transaction_id));
     }
 
     public function getFinalPayableAmountAttribute(): float

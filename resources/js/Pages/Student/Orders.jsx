@@ -4,13 +4,15 @@ import Pagination from '../../Components/Pagination';
 
 const STATUS_BN = {
     pending: 'অপেক্ষমাণ',
+    pending_verification: 'যাচাই অপেক্ষমাণ',
     paid: 'পরিশোধিত',
     failed: 'ব্যর্থ',
     cancelled: 'বাতিল'
 };
 
 const STATUS_CLS = {
-    pending: 'bg-amber-100 text-amber-800',
+    pending: 'bg-gray-100 text-gray-700',
+    pending_verification: 'bg-amber-100 text-amber-900 font-bold',
     paid: 'bg-green-100 text-green-700',
     failed: 'bg-red-100 text-red-700',
     cancelled: 'bg-gray-100 text-gray-700'
@@ -66,10 +68,17 @@ export default function Orders({ orders }) {
                                                     >
                                                         ইনভয়েস
                                                     </a>
+                                                ) : o.status === 'pending_verification' ? (
+                                                    <a
+                                                        href={`/orders/${o.id}/invoice`}
+                                                        className="inline-flex items-center gap-1 rounded-lg bg-amber-600 px-2.5 py-1 text-xs font-bold text-white hover:bg-amber-700"
+                                                    >
+                                                        যাচাইাধীন রসিদ
+                                                    </a>
                                                 ) : o.status === 'pending' ? (
                                                     <a
                                                         href={`/mock-payment/${o.id}`}
-                                                        className="inline-flex items-center gap-1 rounded-lg bg-amber-600 px-2.5 py-1 text-xs font-bold text-white hover:bg-amber-700"
+                                                        className="inline-flex items-center gap-1 rounded-lg bg-emerald-700 px-2.5 py-1 text-xs font-bold text-white hover:bg-emerald-800"
                                                     >
                                                         পে করুন
                                                     </a>

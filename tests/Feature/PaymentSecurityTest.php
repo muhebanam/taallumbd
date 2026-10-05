@@ -5,8 +5,11 @@ namespace Tests\Feature;
 use App\Models\Course;
 use App\Models\Order;
 use App\Models\Payment;
+use App\Models\Setting;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class PaymentSecurityTest extends TestCase
@@ -98,7 +101,7 @@ class PaymentSecurityTest extends TestCase
         $response->assertRedirect('/invoice/'.$order->id);
 
         $order->refresh();
-        $this->assertEquals('pending', $order->status);
+        $this->assertEquals('pending_verification', $order->status);
         $this->assertEquals('TRX123456TEST', $order->transaction_id);
         $this->assertEquals('01712345678', $order->sender_phone);
 
@@ -256,5 +259,80 @@ class PaymentSecurityTest extends TestCase
         $response->assertHeader('X-Frame-Options', 'SAMEORIGIN');
         $response->assertHeader('X-Content-Type-Options', 'nosniff');
         $response->assertHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+    }
+
+    public function test_admin_can_update_payment_settings(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+        $student = User::factory()->create(['role' => 'student']);
+
+        $settingsPayload = [
+            'settings' => [
+                'bkash' => [
+                    'number' => '01711223344',
+                    'type' => 'merchant',
+                    'instructions' => 'বিকাশ পেমেন্ট করুন',
+                    'enabled' => true,
+                ],
+                'nagad' => [
+                    'number' => '01811223344',
+                    'type' => 'personal',
+                    'instructions' => 'নগদ সেন্ড মানি করুন',
+                    'enabled' => true,
+                ],
+            ],
+        ];
+
+        // Student cannot update
+        $res = $this->actingAs($student)->post('/admin/settings/payments', $settingsPayload);
+        $res->assertStatus(403);
+
+        // Admin can update
+        $res = $this->actingAs($admin)->post('/admin/settings/payments', $settingsPayload);
+        $res->assertRedirect();
+
+        $this->assertEquals('01711223344', Setting::get('payment_manual_bkash_number'));
+        $this->assertEquals('merchant', Setting::get('payment_manual_bkash_type'));
+    }
+
+    public function test_manual_payment_with_screenshot_upload(): void
+    {
+        Storage::fake('local');
+
+        $user = User::factory()->create();
+        $instructor = User::factory()->create(['role' => 'instructor']);
+        $course = Course::create([
+            'instructor_id' => $instructor->id,
+            'title' => 'কোর্স ছবি টেস্ট',
+            'slug' => 'course-screenshot-test',
+            'short_description' => 'বর্ণনা',
+            'description' => 'বিস্তারিত',
+            'price' => 1000,
+            'is_free' => false,
+            'status' => 'published',
+        ]);
+
+        $order = Order::create([
+            'user_id' => $user->id,
+            'course_id' => $course->id,
+            'amount' => 1000,
+            'status' => 'pending',
+        ]);
+
+        $file = UploadedFile::fake()->image('payment_receipt.png', 400, 300);
+
+        $response = $this->actingAs($user)->post('/payment/'.$order->id.'/manual-submit', [
+            'method' => 'bkash',
+            'sender_phone' => '01712345678',
+            'transaction_id' => 'TRXSCREENSHOT123',
+            'screenshot' => $file,
+        ]);
+
+        $response->assertRedirect('/invoice/'.$order->id);
+
+        $order->refresh();
+        $this->assertEquals('pending_verification', $order->status);
+        $this->assertNotNull($order->screenshot_path);
+        Storage::disk('local')->assertExists($order->screenshot_path);
     }
 }

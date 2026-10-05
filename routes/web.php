@@ -94,7 +94,10 @@ Route::middleware('auth')->group(function () {
     Route::post('/checkout/{course}', [C\CheckoutController::class, 'process'])->name('checkout.process');
     Route::post('/checkout/{course}/coupon', [C\CheckoutController::class, 'checkCoupon'])->name('checkout.coupon');
     Route::get('/mock-payment/{order}', [C\CheckoutController::class, 'mockPayment'])->name('payment.mock');
-    Route::post('/mock-payment/{order}/success', [C\CheckoutController::class, 'mockSuccess'])->name('payment.mock.success');
+    Route::get('/payment/{order}/pay', [C\CheckoutController::class, 'mockPayment'])->name('payment.pay');
+    if (app()->environment('local', 'testing') || config('payments.mock_enabled')) {
+        Route::post('/mock-payment/{order}/success', [C\CheckoutController::class, 'mockSuccess'])->name('payment.mock.success');
+    }
     Route::post('/payment/{order}/manual-submit', [C\CheckoutController::class, 'submitManualPayment'])->name('payment.manual.submit');
     Route::get('/orders/{order}/invoice', [C\CheckoutController::class, 'invoice'])->name('orders.invoice');
     Route::get('/invoice/{order}', [C\CheckoutController::class, 'invoice'])->name('invoice');
@@ -174,9 +177,12 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('/orders', [C\Admin\ModerationController::class, 'orders'])->name('orders.index');
     Route::post('/orders/{order}/approve', [C\Admin\ModerationController::class, 'approveOrder'])->name('orders.approve');
     Route::post('/orders/{order}/reject', [C\Admin\ModerationController::class, 'rejectOrder'])->name('orders.reject');
+    Route::get('/orders/{order}/screenshot', [C\Admin\ModerationController::class, 'viewScreenshot'])->name('orders.screenshot');
     Route::get('/contact-messages', [C\Admin\ModerationController::class, 'contactMessages'])->name('messages.index');
     Route::put('/contact-messages/{message}/read', [C\Admin\ModerationController::class, 'markMessageRead'])->name('messages.read');
     Route::get('/audit-logs', [C\Admin\AuditLogController::class, 'index'])->name('audit-logs.index');
+    Route::get('/settings/payments', [C\Admin\SettingController::class, 'payments'])->name('settings.payments');
+    Route::post('/settings/payments', [C\Admin\SettingController::class, 'updatePayments'])->name('settings.payments.update');
 
     // Teacher management
     Route::get('/teachers', [C\Admin\AdminTeacherController::class, 'index'])->name('teachers.index');

@@ -13,7 +13,7 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->foreignId('course_id')->constrained()->cascadeOnDelete();
             $table->decimal('amount', 10, 2);
-            $table->enum('status', ['pending', 'paid', 'failed', 'cancelled'])->default('pending')->index();
+            $table->enum('status', ['pending', 'pending_verification', 'paid', 'failed', 'cancelled'])->default('pending')->index();
             $table->string('payment_method')->nullable();
             $table->timestamps();
         });
