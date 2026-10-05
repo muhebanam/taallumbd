@@ -15,13 +15,14 @@ class CourseSeeder extends Seeder
 {
     public function run(): void
     {
-        // Fetch seeded instructor users
-        $inst1 = User::where('email', 'instructor@taallumbd.local')->first();
-        $inst2 = User::where('email', 'instructor2@taallumbd.local')->first();
-        $inst3 = User::where('email', 'mahmud@taallumbd.local')->first();
-        $inst4 = User::where('email', 'yahya@taallumbd.local')->first();
-        $inst5 = User::where('email', 'abubakr@taallumbd.local')->first();
-        $inst6 = User::where('email', 'umar@taallumbd.local')->first();
+        // Fetch seeded instructor users with fallback
+        $defaultInstructor = User::where('role', 'instructor')->first() ?? User::first();
+        $inst1 = User::where('email', 'instructor@taallumbd.local')->first() ?? $defaultInstructor;
+        $inst2 = User::where('email', 'instructor2@taallumbd.local')->first() ?? $defaultInstructor;
+        $inst3 = User::where('email', 'mahmud@taallumbd.local')->first() ?? $defaultInstructor;
+        $inst4 = User::where('email', 'yahya@taallumbd.local')->first() ?? $defaultInstructor;
+        $inst5 = User::where('email', 'abubakr@taallumbd.local')->first() ?? $defaultInstructor;
+        $inst6 = User::where('email', 'umar@taallumbd.local')->first() ?? $defaultInstructor;
 
         // Helper function to resolve category ID
         $cat = fn (string $slug) => Category::where('type', 'course')->where('slug', $slug)->first()?->id;
