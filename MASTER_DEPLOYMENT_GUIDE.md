@@ -6,10 +6,10 @@
 
 ## 🛠️ প্রযুক্তি স্ট্যাক (Tech Stack)
 
-- **ব্যাকএন্ড**: Laravel 11 (PHP 8.2+)
-- **ফ্রন্টএন্ড**: React 18 + Inertia.js v1
+- **ব্যাকএন্ড**: Laravel 13 (PHP 8.3+)
+- **ফ্রন্টএন্ড**: React 18 + Inertia.js v2
 - **স্টাইলিং**: Tailwind CSS + Custom Islamic Typography & Brand Palettes
-- **ডেটাবেজ**: MySQL 8.0+ / MariaDB
+- **ডেটাবেজ**: PostgreSQL 16 (প্রোডাকশন Neon Free), লোকাল Docker Postgres, টেস্ট SQLite in-memory
 - **ফন্টসমূহ**: Amiri (আরবি ক্যালিগ্রাফি), Hind Siliguri (বাংলা), Outfit (ইংরেজি)
 - **পেমেন্ট গেটওয়ে**: বিকাশ (bKash), নগদ (Nagad), রকেট (Rocket), কার্ড (SSLCommerz) এবং ম্যানুয়াল TrxID ভেরিফিকেশন।
 
@@ -24,7 +24,92 @@
 
 ---
 
-## 🚀 লোকাল সেটআপ নির্দেশিকা (Local Installation Guide)
+## 🐳 Docker দিয়ে লোকাল সেটআপ (Docker Compose — শূন্য হোস্ট ডিপেন্ডেন্সি)
+
+লোকাল কম্পিউটারে কোনো PHP, Composer বা Node.js ইনস্টল করার প্রয়োজন নেই। সব কিছু Docker Compose-এর মাধ্যমে আইসোলেটেড ও ফ্রি-ফার্স্ট নীতিতে চলবে।
+
+### ধাপ ১: রিপোজিটরি ক্লোন ও কনফিগারেশন
+```bash
+git clone https://github.com/muhebanam/taallumbd.git
+cd taallumbd
+
+# .env ফাইল তৈরি করুন (Docker ডিফল্ট কনফিগসহ)
+cp .env.example .env
+```
+
+### ধাপ ২: Docker সার্ভিসসমূহ চালু করুন
+Windows-এ হেল্পার স্ক্রিপ্ট দিয়ে:
+```powershell
+.\scripts\dev.ps1 up
+```
+অথবা স্ট্যান্ডার্ড Docker Compose দিয়ে:
+```bash
+docker compose up -d
+```
+> **সার্ভিসসমূহ চালু হবে:**
+> - `app`: Laravel 13 API ও ওয়েব সার্ভার (`http://localhost:8000`)
+> - `node`: Vite ৫ HMR সার্ভার (`http://localhost:5173`)
+> - `postgres`: PostgreSQL 16 ডেটাবেজ (`localhost:5432`)
+> - `redis`: Redis 7 ক্যাশ ও সেশন স্টোর (`localhost:6379`)
+> - `mailpit`: লোকাল টেস্ট ইমেইল ইনবক্স (`http://localhost:8025`)
+>
+> **উইন্ডোজ পারফরম্যান্স অপ্টিমাইজেশন:** Windows 9P ফাইল-সিস্টেম স্লোডাউন এড়াতে `vendor` এবং `node_modules`-কে Docker Named Volumes-এ মাউন্ট করা হয়েছে।
+
+### ধাপ ৩: ডিপেন্ডেন্সি ইনস্টল ও ইনিশিয়ালাইজেশন
+```bash
+# Composer ডিপেন্ডেন্সি ইনস্টল
+docker compose exec app composer install
+# অথবা: .\scripts\dev.ps1 composer install
+
+# NPM ডিপেন্ডেন্সি ইনস্টল
+docker compose exec node npm install
+# অথবা: .\scripts\dev.ps1 npm install
+
+# অ্যাপ্লিকেশন কি (Key) তৈরি
+docker compose exec app php artisan key:generate
+# অথবা: .\scripts\dev.ps1 artisan key:generate
+
+# ডেটাবেজ মাইগ্রেশন ও সম্পূর্ণ সিডিং
+docker compose exec app php artisan migrate --seed
+# অথবা: .\scripts\dev.ps1 fresh
+```
+
+### ধাপ ৪: ডেভেলপমেন্ট রান ও ব্রাউজারে প্রবেশ
+- **ওয়েব অ্যাপ্লিকেশন**: [http://localhost:8000](http://localhost:8000)
+- **Vite HMR**: [http://localhost:5173](http://localhost:5173)
+- **Mailpit ইমেইল ইনবক্স**: [http://localhost:8025](http://localhost:8025)
+
+---
+
+## 🧪 টেস্ট চালানো (Testing & Code Quality)
+
+লোকাল টেস্টগুলো বিদ্যুৎগতিতে SQLite In-Memory ডেটাবেজে রান করে।
+
+### কন্টেইনারের ভেতরে টেস্ট রান:
+```bash
+# সব টেস্ট চালানো
+docker compose exec app php artisan test
+# অথবা: .\scripts\dev.ps1 test
+
+# নির্দিষ্ট টেস্ট ফাইল চালানো
+docker compose exec app php artisan test tests/Feature/FreeCourseEnrollmentTest.php
+```
+
+### কোড স্টাইল ও লিন্ট (Laravel Pint):
+```bash
+# কোড স্টাইল ভ্যালিডেশন
+docker compose exec app vendor/bin/pint --test
+# অথবা: docker compose exec app composer lint
+
+# কোড স্বয়ংক্রিয় ফরম্যাটিং
+docker compose exec app vendor/bin/pint
+```
+
+---
+
+## 💻 হোস্ট মেশিনে সরাসরি লোকাল সেটআপ (ঐচ্ছিক — হোস্ট ডিপেন্ডেন্সিসহ)
+
+যদি আপনি Docker ব্যবহার না করে সরাসরি আপনার লোকাল মেশিনের PHP/Node দিয়ে রান করতে চান:
 
 ### ১. ডিপেন্ডেন্সি ইনস্টল করুন
 ```bash
@@ -37,29 +122,17 @@ npm install
 
 ### ২. এনভায়রনমেন্ট কনফিগারেশন (.env)
 ```bash
-# .env ফাইল তৈরি করুন
 cp .env.example .env
-
-# অ্যাপ্লিকেশন কি (Key) তৈরি করুন
 php artisan key:generate
 ```
-`.env` ফাইলে আপনার লোকাল ডেটাবেজ ক্রেডেনশিয়াল (`DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD`) সেট করুন।
 
 ### ৩. ডেটাবেজ মাইগ্রেশন ও সিডিং
 ```bash
-# সম্পূর্ণ ডেটাবেজ মাইগ্রেশন রান করুন
 php artisan migrate
-
-# ক্যাটাগরি, কোর্স, উলামা, হাদীস, ফাতাওয়া ও ফোরাম ডেমো ডেটা সিড করুন
 php artisan db:seed
 ```
 
-### ৪. স্টোরেজ সিমলিংক তৈরি
-```bash
-php artisan storage:link
-```
-
-### ৫. লোকাল সার্ভার ও Vite ডেভেলপমেন্ট রান করুন
+### ৪. লোকাল সার্ভার ও Vite ডেভেলপমেন্ট রান করুন
 ```bash
 # টার্মিনাল ১ (Laravel Server):
 php artisan serve
@@ -67,7 +140,6 @@ php artisan serve
 # টার্মিনাল ২ (Vite HMR Server):
 npm run dev
 ```
-ব্রাউজারে ভিজিট করুন: `http://localhost:8000`
 
 ---
 

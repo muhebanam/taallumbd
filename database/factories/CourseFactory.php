@@ -13,16 +13,46 @@ class CourseFactory extends Factory
         $title = fake()->sentence(3);
 
         return [
-            'instructor_id' => User::factory()->state(['role' => 'instructor']),
+            'instructor_id' => User::factory()->instructor(),
             'title' => $title,
-            'slug' => Str::slug($title).'-'.Str::random(4),
+            'slug' => Str::slug($title).'-'.Str::random(6),
             'short_description' => fake()->sentence(10),
             'description' => fake()->paragraphs(3, true),
-            'price' => fake()->randomElement([0, 300, 500, 800]),
-            'is_free' => fake()->boolean(40),
+            'price' => 500,
+            'is_free' => false,
             'level' => fake()->randomElement(['শুরু থেকে', 'মাধ্যমিক', 'উচ্চতর']),
             'duration' => fake()->numberBetween(4, 16).' সপ্তাহ',
             'status' => 'published',
         ];
+    }
+
+    public function free(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'price' => 0,
+            'is_free' => true,
+        ]);
+    }
+
+    public function paid(float $price = 500): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'price' => $price,
+            'is_free' => false,
+        ]);
+    }
+
+    public function published(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'status' => 'published',
+        ]);
+    }
+
+    public function draft(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'status' => 'draft',
+        ]);
     }
 }

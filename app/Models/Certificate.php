@@ -2,11 +2,14 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 
 class Certificate extends Model
 {
+    use HasFactory;
+
     protected $fillable = ['uuid', 'user_id', 'course_id', 'certificate_no', 'issued_at', 'file_path'];
 
     protected $casts = [

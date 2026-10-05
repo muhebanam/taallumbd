@@ -62,4 +62,28 @@ class BasicRoutesTest extends TestCase
         $response = $this->get('/contact');
         $response->assertStatus(200);
     }
+
+    public function test_community_page_is_accessible(): void
+    {
+        $response = $this->get('/community');
+        $response->assertStatus(200);
+    }
+
+    public function test_become_instructor_page_is_accessible(): void
+    {
+        $response = $this->get('/become-instructor');
+        $response->assertStatus(200);
+    }
+
+    public function test_about_page_is_accessible(): void
+    {
+        $response = $this->get('/about');
+        $response->assertStatus(200);
+    }
+
+    public function test_fatawa_ask_page_is_accessible(): void
+    {
+        $response = $this->get('/fatawa/ask');
+        $response->assertStatus(200);
+    }
 }

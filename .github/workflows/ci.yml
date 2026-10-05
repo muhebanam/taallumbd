@@ -7,17 +7,61 @@ on:
     branches: [ "main" ]
 
 jobs:
-  laravel-tests:
+  test:
+    name: Test on ${{ matrix.database }} (PHP 8.3 & Node 20)
     runs-on: ubuntu-latest
 
+    strategy:
+      fail-fast: false
+      matrix:
+        database: [postgresql, mysql]
+        include:
+          - database: postgresql
+            db_connection: pgsql
+            db_port: 5432
+            db_username: postgres
+            db_password: password
+            db_database: taallumbd_test
+          - database: mysql
+            db_connection: mysql
+            db_port: 3306
+            db_username: root
+            db_password: rootpassword
+            db_database: taallumbd_test
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: rootpassword
+          MYSQL_DATABASE: taallumbd_test
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: taallumbd_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
-    - uses: actions/checkout@v4
+    - name: Checkout code
+      uses: actions/checkout@v4
 
     - name: Setup PHP
       uses: shivammathur/setup-php@v2
       with:
         php-version: '8.3'
-        extensions: mbstring, xml, ctype, iconv, intl, pdo, pdo_sqlite, pdo_pgsql, bcmath, zip, gd
+        extensions: mbstring, xml, ctype, iconv, intl, pdo, pdo_sqlite, pdo_mysql, pdo_pgsql, bcmath, zip, gd, pcntl
+        tools: composer:v2
         coverage: none
 
     - name: Setup Node.js
@@ -25,6 +69,17 @@ jobs:
       with:
         node-version: 20
         cache: 'npm'
+
+    - name: Get Composer Cache Directory
+      id: composer-cache
+      run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+
+    - name: Cache Composer dependencies
+      uses: actions/cache@v4
+      with:
+        path: ${{ steps.composer-cache.outputs.dir }}
+        key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+        restore-keys: ${{ runner.os }}-composer-
 
     - name: Install NPM dependencies
       run: npm ci --legacy-peer-deps || npm install --legacy-peer-deps
@@ -38,14 +93,21 @@ jobs:
     - name: Install Composer dependencies
       run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
 
-    - name: Generate key
+    - name: Generate Application Key
       run: php artisan key:generate
 
     - name: Directory Permissions
       run: chmod -R 777 storage bootstrap/cache
 
-    - name: Run Pint Check
+    - name: Run Pint Code Style Check
       run: vendor/bin/pint --test
 
     - name: Execute Tests via PHPUnit
+      env:
+        DB_CONNECTION: ${{ matrix.db_connection }}
+        DB_HOST: 127.0.0.1
+        DB_PORT: ${{ matrix.db_port }}
+        DB_DATABASE: ${{ matrix.db_database }}
+        DB_USERNAME: ${{ matrix.db_username }}
+        DB_PASSWORD: ${{ matrix.db_password }}
       run: php artisan test

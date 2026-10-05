@@ -2,13 +2,13 @@ services:
   app:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: docker/dev/php.Dockerfile
     container_name: taallumbd_app
     restart: unless-stopped
     ports:
-      - "8000:80"
+      - "8000:8000"
     environment:
-      APP_NAME: "TaallumBD"
+      APP_NAME: "আত-তাআল্লুম | TaallumBD"
       APP_ENV: local
       APP_DEBUG: "true"
       APP_KEY: base64:o9gVzMh9oK3H7Wj2bZ4R6eS8uT1vX3yZ5aB7cD9eF1g=
@@ -19,19 +19,42 @@ services:
       DB_DATABASE: taallumbd_dev
       DB_USERNAME: postgres
       DB_PASSWORD: devsecretpassword
-      SESSION_DRIVER: cookie
-      CACHE_STORE: file
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      CACHE_STORE: redis
       QUEUE_CONNECTION: sync
       MAIL_MAILER: smtp
       MAIL_HOST: mailpit
       MAIL_PORT: 1025
+      MAIL_FROM_ADDRESS: "info@taallumbd.com"
+      MAIL_FROM_NAME: "TaallumBD"
+      VITE_APP_NAME: "আত-তাআল্লুম | TaallumBD"
     depends_on:
       postgres:
         condition: service_healthy
+      redis:
+        condition: service_healthy
+      mailpit:
+        condition: service_started
     volumes:
       - .:/var/www/html
-      - /var/www/html/vendor
-      - /var/www/html/node_modules
+      - app_vendor:/var/www/html/vendor
+
+  node:
+    image: node:20-alpine
+    container_name: taallumbd_node
+    restart: unless-stopped
+    working_dir: /app
+    ports:
+      - "5173:5173"
+    environment:
+      VITE_HMR_HOST: localhost
+    volumes:
+      - .:/app
+      - app_node_modules:/app/node_modules
+    command: sh -c "npm install && npm run dev -- --host 0.0.0.0"
+    depends_on:
+      - app
 
   postgres:
     image: postgres:16-alpine
@@ -51,6 +74,20 @@ services:
       timeout: 5s
       retries: 5
 
+  redis:
+    image: redis:7-alpine
+    container_name: taallumbd_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
   mailpit:
     image: axllent/mailpit:latest
     container_name: taallumbd_mailpit
@@ -61,3 +98,6 @@ services:
 
 volumes:
   postgres_data:
+  redis_data:
+  app_vendor:
+  app_node_modules:
