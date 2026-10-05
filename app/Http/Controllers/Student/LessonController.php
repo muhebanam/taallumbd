@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Student;
 use App\Http\Controllers\Controller;
 use App\Models\Lesson;
 use App\Models\LessonProgress;
+use App\Services\EventTracker;
 use App\Services\ProgressService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -33,6 +34,11 @@ class LessonController extends Controller
             ->orderBy('curriculum_items.sort_order')
             ->get();
         $index = $lessons->search(fn ($l) => $l->id === $lesson->id);
+
+        try {
+            app(EventTracker::class)->trackLessonStarted($request->user(), $lesson->id, $lesson->course_id);
+        } catch (\Throwable $e) {
+        }
 
         return Inertia::render('Student/LessonView', [
             'lesson' => $lesson->load('course:id,title,slug', 'quizzes:id,lesson_id,title'),

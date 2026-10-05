@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\MemorizationProgress;
 use App\Models\Surah;
+use App\Services\EventTracker;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Inertia\Inertia;
@@ -35,6 +36,13 @@ class QuranController extends Controller
                 ->get();
         }
 
+        if ($search) {
+            try {
+                app(EventTracker::class)->trackSearchPerformed(auth()->user(), $search, $surahs->count());
+            } catch (\Throwable $e) {
+            }
+        }
+
         $userProgress = [];
         if (auth()->check()) {
             $userProgress = MemorizationProgress::where('user_id', auth()->id())
@@ -54,6 +62,13 @@ class QuranController extends Controller
      */
     public function show(int $number)
     {
+        if (auth()->check()) {
+            try {
+                app(EventTracker::class)->trackQuranRead(auth()->user(), $number);
+            } catch (\Throwable $e) {
+            }
+        }
+
         $surah = Cache::remember("quran_surah_details_{$number}", 86400, function () use ($number) {
             $s = Surah::where('number', $number)
                 ->with(['ayahs' => function ($q) {

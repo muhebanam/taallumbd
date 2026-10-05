@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Student;
 use App\Http\Controllers\Controller;
 use App\Models\Assignment;
 use App\Models\AssignmentSubmission;
+use App\Services\EventTracker;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -36,6 +37,11 @@ class AssignmentController extends Controller
             'file_path' => $request->hasFile('file') ? $request->file('file')->store('assignments', 'public') : null,
             'status' => 'submitted',
         ]);
+
+        try {
+            app(EventTracker::class)->trackAssignmentSubmitted($request->user(), $assignment->id, $assignment->course_id);
+        } catch (\Throwable $e) {
+        }
 
         return back()->with('success', 'অ্যাসাইনমেন্ট জমা হয়েছে।');
     }

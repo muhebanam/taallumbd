@@ -150,6 +150,18 @@ class PaymentService
                 ]
             );
 
+            try {
+                app(EventTracker::class)->trackCheckoutCompleted(
+                    $lockedOrder->user,
+                    $lockedOrder->id,
+                    $lockedOrder->course_id,
+                    (float) $lockedOrder->final_payable_amount,
+                    $method
+                );
+            } catch (\Throwable $e) {
+                // Non-blocking tracking
+            }
+
             return $this->enroll($lockedOrder->user, $lockedOrder->course);
         });
 
@@ -177,6 +189,12 @@ class PaymentService
             'progress' => 0,
             'enrolled_at' => now(),
         ]);
+
+        try {
+            app(EventTracker::class)->trackCourseEnrolled($user, $course->id);
+        } catch (\Throwable $e) {
+            // Non-blocking tracking
+        }
 
         app(NotificationDispatcher::class)->enrollment($enrollment->load(['user', 'course']));
 

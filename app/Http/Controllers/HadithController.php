@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Hadith;
 use App\Models\HadithBook;
 use App\Models\HadithChapter;
+use App\Services\EventTracker;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Inertia\Inertia;
@@ -54,6 +55,18 @@ class HadithController extends Controller
             ->orderBy('number');
 
         $hadiths = $hadithsQuery->paginate(20)->withQueryString();
+
+        if ($search) {
+            try {
+                app(EventTracker::class)->trackSearchPerformed(auth()->user(), $search, $hadiths->total());
+            } catch (\Throwable $e) {
+            }
+        }
+
+        try {
+            app(EventTracker::class)->trackHadithViewed(auth()->user(), $slug, 1);
+        } catch (\Throwable $e) {
+        }
 
         // If no records in DB yet, fallback sample hadiths
         if ($hadiths->isEmpty()) {

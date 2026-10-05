@@ -20,6 +20,12 @@ class ProgressService
             ['course_id' => $lesson->course_id, 'is_completed' => true, 'completed_at' => now()]
         );
 
+        try {
+            app(EventTracker::class)->trackLessonCompleted($user, $lesson->id, $lesson->course_id);
+        } catch (\Throwable $e) {
+            // Non-blocking tracking
+        }
+
         return $this->syncEnrollmentProgress($user, $lesson->course);
     }
 
@@ -35,6 +41,14 @@ class ProgressService
             'status' => $progress === 100 ? 'completed' : 'active',
             'completed_at' => $progress === 100 ? now() : null,
         ]);
+
+        if ($progress === 100) {
+            try {
+                app(EventTracker::class)->trackCourseCompleted($user, $course->id);
+            } catch (\Throwable $e) {
+                // Non-blocking tracking
+            }
+        }
 
         return $progress;
     }

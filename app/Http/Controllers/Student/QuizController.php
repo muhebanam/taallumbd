@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Student;
 use App\Http\Controllers\Controller;
 use App\Models\Quiz;
 use App\Models\QuizAttempt;
+use App\Services\EventTracker;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -41,6 +42,15 @@ class QuizController extends Controller
             'status' => $score >= $quiz->pass_marks ? 'passed' : 'failed',
             'submitted_at' => now(),
         ]);
+
+        try {
+            $tracker = app(EventTracker::class);
+            $tracker->trackQuizAttempted($request->user(), $quiz->id, $quiz->course_id, ['score' => $score]);
+            if ($attempt->status === 'passed') {
+                $tracker->trackQuizPassed($request->user(), $quiz->id, $quiz->course_id, (float) $score);
+            }
+        } catch (\Throwable $e) {
+        }
 
         return back()->with('success', $attempt->status === 'passed'
             ? "মাবরূক! আপনি কুইজে পাস করেছেন। স্কোর: {$score}/{$quiz->total_marks}"

@@ -5,6 +5,7 @@ import AppLayout from './AppLayout';
 const MENUS = {
     admin: [
         { label: 'ড্যাশবোর্ড', href: '/admin/dashboard', enabled: true },
+        { label: 'অ্যানালিটিক্স', href: '/admin/analytics', enabled: true },
         { label: 'এনরোলমেন্ট', href: '/admin/enrollments', enabled: true },
         { label: 'সেলস রিপোর্ট', href: '/admin/sales-reports', enabled: false, badge: 'শীঘ্রই' },
         { label: 'লেনদেন', href: '/admin/transactions', enabled: false, badge: 'শীঘ্রই' },
@@ -30,6 +31,7 @@ const MENUS = {
     ],
     instructor: [
         { label: 'ড্যাশবোর্ড', href: '/instructor/dashboard', enabled: true },
+        { label: 'অ্যানালিটিক্স', href: '/instructor/analytics', enabled: true },
         { label: 'আমার কোর্স', href: '/instructor/dashboard', enabled: true },
         { label: 'কোর্স বিল্ডার', href: '/instructor/courses/create', enabled: true },
         { label: 'এনরোলমেন্ট', href: '/instructor/enrollments', enabled: false, badge: 'শীঘ্রই' },
@@ -43,6 +45,7 @@ const MENUS = {
     ],
     student: [
         { label: 'ড্যাশবোর্ড', href: '/dashboard', enabled: true },
+        { label: 'অ্যানালিটিক্স', href: '/dashboard/analytics', enabled: true },
         { label: 'আমার কোর্স', href: '/dashboard/my-courses', enabled: true },
         { label: 'লেসন', href: '/dashboard/lessons', enabled: false, badge: 'শীঘ্রই' },
         { label: 'কুইজ', href: '/dashboard/quizzes', enabled: false, badge: 'শীঘ্রই' },
@@ -61,6 +64,13 @@ function MenuIcon({ label }) {
         return (
             <svg className={size} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+            </svg>
+        );
+    }
+    if (label.includes('অ্যানালিটিক্স') || label.includes('রিপোর্ট')) {
+        return (
+            <svg className={size} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
             </svg>
         );
     }

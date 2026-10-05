@@ -10,6 +10,7 @@ use App\Models\PaymentTransaction;
 use App\Models\Setting;
 use App\Payments\PaymentGatewayManager;
 use App\Services\CourseEnrollmentService;
+use App\Services\EventTracker;
 use App\Services\FileUploadService;
 use App\Services\PaymentService;
 use Illuminate\Http\Request;
@@ -41,6 +42,11 @@ class CheckoutController extends Controller
             ->first();
 
         $availableGateways = app(PaymentGatewayManager::class)->getAvailableGateways();
+
+        try {
+            app(EventTracker::class)->trackCheckoutStarted($user, $course->id, (float) $course->price);
+        } catch (\Throwable $e) {
+        }
 
         return Inertia::render('Payment/Checkout', [
             'course' => $course->load('instructor:id,name'),

@@ -156,4 +156,9 @@ class User extends Authenticatable
             ->where('channel', $channel)
             ->value('enabled') ?? true;
     }
+
+    public function learningEvents()
+    {
+        return $this->hasMany(LearningEvent::class);
+    }
 }

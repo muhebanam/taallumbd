@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Category;
 use App\Models\Fatwa;
 use App\Models\Teacher;
+use App\Services\EventTracker;
 use App\Services\SeoService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -91,6 +92,11 @@ class FatwaController extends Controller
 
         // Increment views
         $fatwa->increment('views_count');
+
+        try {
+            app(EventTracker::class)->trackFatwaViewed($user, $fatwa->id, $fatwa->category);
+        } catch (\Throwable $e) {
+        }
 
         $fatwa->load([
             'category:id,name,slug',

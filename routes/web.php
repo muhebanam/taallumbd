@@ -58,6 +58,10 @@ Route::get('/policy/{slug}', [C\PolicyPageController::class, 'show'])->name('pol
 Route::match(['get', 'post'], '/payments/{gateway}/callback/{order}/{status?}', [C\PaymentGatewayController::class, 'callback'])->name('payments.callback');
 Route::post('/webhooks/{gateway}/ipn', [C\PaymentGatewayController::class, 'ipn'])->name('payments.ipn');
 
+/* ---------------- Learning Event Tracking Ingestion (Rate Limited, Batch) ---------------- */
+Route::post('/events', [C\Api\EventIngestionController::class, 'store'])->middleware('throttle:120,1')->name('events.store');
+Route::post('/api/events', [C\Api\EventIngestionController::class, 'store'])->middleware('throttle:120,1')->name('api.events.store');
+
 /* ---------------- Quran & Hadith Library ---------------- */
 Route::get('/quran', [C\QuranController::class, 'index'])->name('quran.index');
 Route::get('/quran/{number}', [C\QuranController::class, 'show'])->name('quran.show');
@@ -95,7 +99,11 @@ Route::middleware('auth')->group(function () {
     Route::post('/dashboard/notifications/{notification}/read', [C\NotificationController::class, 'read'])->name('notifications.read');
     Route::post('/dashboard/notifications/read-all', [C\NotificationController::class, 'readAll'])->name('notifications.read-all');
     Route::get('/dashboard', [C\Student\DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard/analytics', [C\Student\LearningAnalyticsController::class, 'index'])->name('student.analytics');
+    Route::get('/profile/privacy/export-data', [C\ProfilePrivacyController::class, 'exportData'])->name('profile.privacy.export');
+    Route::delete('/profile/privacy/delete-data', [C\ProfilePrivacyController::class, 'deleteData'])->name('profile.privacy.delete');
     Route::get('/dashboard/my-courses', [C\Student\DashboardController::class, 'index'])->name('student.courses.index');
+
     Route::get('/dashboard/courses/{course}', [C\Student\CourseController::class, 'show'])->name('student.courses.show');
     Route::get('/dashboard/lessons/{lesson}', [C\Student\LessonController::class, 'show'])->name('student.lessons.show');
     Route::post('/dashboard/lessons/{lesson}/complete', [C\Student\LessonController::class, 'complete'])->name('student.lessons.complete');
@@ -146,6 +154,7 @@ Route::middleware('auth')->group(function () {
 /* ---------------- Instructor ---------------- */
 Route::middleware(['auth', 'role:instructor,admin'])->prefix('instructor')->name('instructor.')->group(function () {
     Route::get('/dashboard', [C\Instructor\DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/analytics', [C\Instructor\TeacherAnalyticsController::class, 'index'])->name('analytics');
     Route::redirect('/course-builder', '/instructor/courses/create')->name('course-builder');
     Route::get('/courses/create', [C\Instructor\CourseController::class, 'create'])->name('courses.create');
     Route::post('/courses', [C\Instructor\CourseController::class, 'store'])->name('courses.store');
@@ -199,6 +208,8 @@ Route::middleware(['auth', 'role:instructor,admin'])->prefix('instructor')->name
 /* ---------------- Admin ---------------- */
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [C\Admin\DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/analytics', [C\Admin\AdminAnalyticsController::class, 'index'])->name('analytics.index');
+    Route::get('/analytics/export', [C\Admin\AdminAnalyticsController::class, 'export'])->name('analytics.export');
     Route::get('/users', [C\Admin\UserController::class, 'index'])->name('users.index');
     Route::get('/students', [C\Admin\UserController::class, 'index'])->name('students.index');
     Route::put('/users/{user}/role', [C\Admin\UserController::class, 'updateRole'])->name('users.role');

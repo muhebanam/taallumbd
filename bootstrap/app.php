@@ -72,6 +72,9 @@ return Application::configure(basePath: dirname(__DIR__))
             'webhooks/*',
             'payments/*/callback/*',
             'payments/*/callback',
+            'events',
+            'events/*',
+            'api/events',
         ]);
         $middleware->web(append: [
             SecurityHeaders::class,
