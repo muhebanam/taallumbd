@@ -1,0 +1,509 @@
+{
+  "info": {
+    "_postman_id": "taallum-bd-api-v1-collection",
+    "name": "Taallum BD REST API v1",
+    "description": "Comprehensive Postman collection for Taallum BD Mobile App & 3rd Party API v1 with Sanctum Bearer Token support.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{bearer_token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8000/api/v1",
+      "type": "string"
+    },
+    {
+      "key": "bearer_token",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Authentication",
+      "item": [
+        {
+          "name": "Register Student",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Accept", "value": "application/json"},
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"আব্দুল্লাহ আল মাহমুদ\",\n  \"email\": \"student@example.com\",\n  \"phone\": \"01711223344\",\n  \"password\": \"Secret1234\",\n  \"password_confirmation\": \"Secret1234\",\n  \"device_name\": \"flutter-android\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/register",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "register"]
+            }
+          }
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Accept", "value": "application/json"},
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"student@example.com\",\n  \"password\": \"Secret1234\",\n  \"device_name\": \"flutter-android\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "Get Profile (Me)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {"key": "Accept", "value": "application/json"}
+            ],
+            "url": {
+              "raw": "{{base_url}}/auth/me",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "me"]
+            }
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Accept", "value": "application/json"}
+            ],
+            "url": {
+              "raw": "{{base_url}}/auth/logout",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "logout"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Courses & Curriculum",
+      "item": [
+        {
+          "name": "List Courses (Paginated)",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Accept", "value": "application/json"}],
+            "url": {
+              "raw": "{{base_url}}/courses?category=fiqh&is_free=false&sort=newest&per_page=15",
+              "host": ["{{base_url}}"],
+              "path": ["courses"],
+              "query": [
+                {"key": "category", "value": "fiqh"},
+                {"key": "is_free", "value": "false"},
+                {"key": "sort", "value": "newest"},
+                {"key": "per_page", "value": "15"}
+              ]
+            }
+          }
+        },
+        {
+          "name": "Course Details",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Accept", "value": "application/json"}],
+            "url": {
+              "raw": "{{base_url}}/courses/1",
+              "host": ["{{base_url}}"],
+              "path": ["courses", "1"]
+            }
+          }
+        },
+        {
+          "name": "Course Curriculum Outline",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Accept", "value": "application/json"}],
+            "url": {
+              "raw": "{{base_url}}/courses/1/curriculum",
+              "host": ["{{base_url}}"],
+              "path": ["courses", "1", "curriculum"]
+            }
+          }
+        },
+        {
+          "name": "Lesson Content & Video Stream",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Accept", "value": "application/json"}],
+            "url": {
+              "raw": "{{base_url}}/lessons/1",
+              "host": ["{{base_url}}"],
+              "path": ["lessons", "1"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Progress & Quizzes",
+      "item": [
+        {
+          "name": "Update Lesson Progress",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Accept", "value": "application/json"},
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"is_completed\": true,\n  \"last_position_seconds\": 245\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/lessons/1/progress",
+              "host": ["{{base_url}}"],
+              "path": ["lessons", "1", "progress"]
+            }
+          }
+        },
+        {
+          "name": "Get Course Progress",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Accept", "value": "application/json"}],
+            "url": {
+              "raw": "{{base_url}}/courses/1/progress",
+              "host": ["{{base_url}}"],
+              "path": ["courses", "1", "progress"]
+            }
+          }
+        },
+        {
+          "name": "Get Quiz",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Accept", "value": "application/json"}],
+            "url": {
+              "raw": "{{base_url}}/quizzes/1",
+              "host": ["{{base_url}}"],
+              "path": ["quizzes", "1"]
+            }
+          }
+        },
+        {
+          "name": "Submit Quiz Attempt",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Accept", "value": "application/json"},
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"answers\": {\n    \"1\": 2,\n    \"2\": 6\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/quizzes/1/submit",
+              "host": ["{{base_url}}"],
+              "path": ["quizzes", "1", "submit"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Payments & Checkout",
+      "item": [
+        {
+          "name": "Initiate Course Payment",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Accept", "value": "application/json"},
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"course_id\": 1,\n  \"coupon_code\": \"WELCOME10\",\n  \"payment_method\": \"bkash\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/payments/initiate",
+              "host": ["{{base_url}}"],
+              "path": ["payments", "initiate"]
+            }
+          }
+        },
+        {
+          "name": "Submit Manual Payment TrxID",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Accept", "value": "application/json"},
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"order_id\": 1,\n  \"payment_method\": \"bkash\",\n  \"sender_phone\": \"01711223344\",\n  \"transaction_id\": \"TRX778899A\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/payments/manual",
+              "host": ["{{base_url}}"],
+              "path": ["payments", "manual"]
+            }
+          }
+        },
+        {
+          "name": "Check Order Payment Status",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Accept", "value": "application/json"}],
+            "url": {
+              "raw": "{{base_url}}/payments/status/1",
+              "host": ["{{base_url}}"],
+              "path": ["payments", "status", "1"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Scholars & Directory",
+      "item": [
+        {
+          "name": "List Scholars",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Accept", "value": "application/json"}],
+            "url": {
+              "raw": "{{base_url}}/teachers?is_verified=true&per_page=15",
+              "host": ["{{base_url}}"],
+              "path": ["teachers"],
+              "query": [{"key": "is_verified", "value": "true"}]
+            }
+          }
+        },
+        {
+          "name": "Scholar Profile",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Accept", "value": "application/json"}],
+            "url": {
+              "raw": "{{base_url}}/teachers/mawlana-abdullah",
+              "host": ["{{base_url}}"],
+              "path": ["teachers", "mawlana-abdullah"]
+            }
+          }
+        },
+        {
+          "name": "Toggle Follow Scholar",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Accept", "value": "application/json"}],
+            "url": {
+              "raw": "{{base_url}}/teachers/mawlana-abdullah/follow",
+              "host": ["{{base_url}}"],
+              "path": ["teachers", "mawlana-abdullah", "follow"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "6. Certificates",
+      "item": [
+        {
+          "name": "My Certificates",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Accept", "value": "application/json"}],
+            "url": {
+              "raw": "{{base_url}}/certificates",
+              "host": ["{{base_url}}"],
+              "path": ["certificates"]
+            }
+          }
+        },
+        {
+          "name": "Verify Certificate Public",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Accept", "value": "application/json"}],
+            "url": {
+              "raw": "{{base_url}}/certificates/verify/TLM-2026-9988",
+              "host": ["{{base_url}}"],
+              "path": ["certificates", "verify", "TLM-2026-9988"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "7. Quran & Hadith",
+      "item": [
+        {
+          "name": "Surah List",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Accept", "value": "application/json"}],
+            "url": {
+              "raw": "{{base_url}}/quran/surahs",
+              "host": ["{{base_url}}"],
+              "path": ["quran", "surahs"]
+            }
+          }
+        },
+        {
+          "name": "Surah Detail with Ayahs & Audio",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Accept", "value": "application/json"}],
+            "url": {
+              "raw": "{{base_url}}/quran/surahs/1",
+              "host": ["{{base_url}}"],
+              "path": ["quran", "surahs", "1"]
+            }
+          }
+        },
+        {
+          "name": "Hadith Books",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Accept", "value": "application/json"}],
+            "url": {
+              "raw": "{{base_url}}/hadith/books",
+              "host": ["{{base_url}}"],
+              "path": ["hadith", "books"]
+            }
+          }
+        },
+        {
+          "name": "Hadiths of a Book",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Accept", "value": "application/json"}],
+            "url": {
+              "raw": "{{base_url}}/hadith/books/sahih-bukhari/hadiths?per_page=20",
+              "host": ["{{base_url}}"],
+              "path": ["hadith", "books", "sahih-bukhari", "hadiths"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "8. Fatawa & Ask Scholar",
+      "item": [
+        {
+          "name": "List Public Fatawa",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Accept", "value": "application/json"}],
+            "url": {
+              "raw": "{{base_url}}/fatawa?search=রোজা&per_page=15",
+              "host": ["{{base_url}}"],
+              "path": ["fatawa"]
+            }
+          }
+        },
+        {
+          "name": "Ask Fatwa Question",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Accept", "value": "application/json"},
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"question_title\": \"মুসাফিরের জন্য সালাত কসরের বিধান কী?\",\n  \"question_body\": \"আমি ঢাকা থেকে সিলেট ভ্রমণ করার সময় ৪ রাকাত ফরজ নামাজ কীভাবে আদায় করব?\",\n  \"is_private\": false\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/fatawa/ask",
+              "host": ["{{base_url}}"],
+              "path": ["fatawa", "ask"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "9. Notifications & Devices",
+      "item": [
+        {
+          "name": "List Notifications",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Accept", "value": "application/json"}],
+            "url": {
+              "raw": "{{base_url}}/notifications",
+              "host": ["{{base_url}}"],
+              "path": ["notifications"]
+            }
+          }
+        },
+        {
+          "name": "Register Mobile Device Token (FCM/APNs)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {"key": "Accept", "value": "application/json"},
+              {"key": "Content-Type", "value": "application/json"}
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"fcm_device_token_sample_123456789\",\n  \"platform\": \"android\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/devices/register",
+              "host": ["{{base_url}}"],
+              "path": ["devices", "register"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "10. Subscriptions",
+      "item": [
+        {
+          "name": "Get Subscription Plans",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Accept", "value": "application/json"}],
+            "url": {
+              "raw": "{{base_url}}/subscriptions/plans",
+              "host": ["{{base_url}}"],
+              "path": ["subscriptions", "plans"]
+            }
+          }
+        },
+        {
+          "name": "User Subscription Status",
+          "request": {
+            "method": "GET",
+            "header": [{"key": "Accept", "value": "application/json"}],
+            "url": {
+              "raw": "{{base_url}}/subscriptions/status",
+              "host": ["{{base_url}}"],
+              "path": ["subscriptions", "status"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

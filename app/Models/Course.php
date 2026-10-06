@@ -45,6 +45,13 @@ class Course extends Model
         return 'slug';
     }
 
+    public function resolveRouteBinding($value, $field = null)
+    {
+        return $this->where($field ?? $this->getRouteKeyName(), $value)
+            ->orWhere('id', is_numeric($value) ? (int) $value : 0)
+            ->first();
+    }
+
     public function instructor()
     {
         return $this->belongsTo(User::class, 'instructor_id');

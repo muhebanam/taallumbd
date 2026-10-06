@@ -7,10 +7,11 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
+use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
-    use HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable;
 
     protected $fillable = [
         'name', 'email', 'password', 'role', 'avatar', 'phone',
@@ -44,6 +45,11 @@ class User extends Authenticatable
     public function isInstructor(): bool
     {
         return $this->role === 'instructor';
+    }
+
+    public function isStudent(): bool
+    {
+        return $this->role === 'student';
     }
 
     public function isEditor(): bool
@@ -148,10 +154,17 @@ class User extends Authenticatable
         return $this->hasMany(Review::class);
     }
 
-    public function isEnrolled(Course $course): bool
+    public function isEnrolled(Course|int|string $course): bool
     {
-        return $this->enrollments()->where('course_id', $course->id)
+        $courseId = $course instanceof Course ? $course->id : (int) $course;
+
+        return $this->enrollments()->where('course_id', $courseId)
             ->whereIn('status', ['active', 'completed'])->exists();
+    }
+
+    public function isEnrolledIn(Course|int|string $course): bool
+    {
+        return $this->isEnrolled($course);
     }
 
     public function notificationPreferences()

@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Course;
+use App\Models\Enrollment;
 use App\Models\User;
 use Exception;
 
@@ -41,5 +42,25 @@ class CourseEnrollmentService
                 throw new Exception('কোর্সের আসন সংখ্যা পূর্ণ হয়ে গেছে। দুঃখিত!');
             }
         }
+    }
+
+    public function enrollFree(User $user, Course $course): Enrollment
+    {
+        $this->validateEnrollment($user, $course);
+
+        $enrollment = Enrollment::create([
+            'user_id' => $user->id,
+            'course_id' => $course->id,
+            'status' => 'active',
+            'enrolled_at' => now(),
+        ]);
+
+        try {
+            app(EventTracker::class)->trackCourseEnrolled($user, $course->id, true);
+        } catch (\Throwable $e) {
+            // Non-blocking
+        }
+
+        return $enrollment;
     }
 }

@@ -6,6 +6,7 @@ use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\URL;
@@ -30,6 +31,15 @@ class AppServiceProvider extends ServiceProvider
         if (app()->environment('production') || str_starts_with(config('app.url', ''), 'https://')) {
             URL::forceScheme('https');
         }
+
+        // Gate for OpenAPI / Scramble documentation access
+        Gate::define('viewApiDocs', function ($user = null) {
+            if (app()->environment('local', 'testing')) {
+                return true;
+            }
+
+            return $user && $user->isAdmin();
+        });
 
         // Prevent lazy loading in non-production to eliminate N+1 queries
         Model::preventLazyLoading(! app()->isProduction());
@@ -85,6 +95,14 @@ class AppServiceProvider extends ServiceProvider
 
         RateLimiter::for('contact_form', function (Request $request) {
             return Limit::perHour(5)->by($request->ip());
+        });
+
+        RateLimiter::for('api', function (Request $request) {
+            return Limit::perMinute(60)->by($request->user()?->id ?: $request->ip());
+        });
+
+        RateLimiter::for('api_auth', function (Request $request) {
+            return Limit::perMinute(10)->by($request->ip());
         });
     }
 }
