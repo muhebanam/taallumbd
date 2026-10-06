@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Contracts\RecommendationService;
 use App\Models\Article;
 use App\Models\Category;
 use App\Models\Course;
@@ -12,8 +13,11 @@ use Inertia\Inertia;
 
 class HomeController extends Controller
 {
-    public function __invoke()
+    public function __invoke(RecommendationService $recommendationService)
     {
+        $user = request()->user();
+        $recommendedCourses = $recommendationService->recommendForUser($user, 4);
+
         $popularCourses = Cache::remember('homepage_popular_courses', 1800, function () {
             return Course::published()
                 ->with(['instructor:id,name', 'category:id,name,slug'])
@@ -83,6 +87,7 @@ class HomeController extends Controller
 
         return Inertia::render('Home', [
             'popularCourses' => $popularCourses,
+            'recommendedCourses' => $recommendedCourses,
             'featuredTeachers' => $featuredTeachers,
             'categories' => $categories,
             'latestFatawa' => $latestFatawa,

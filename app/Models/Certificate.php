@@ -11,7 +11,7 @@ class Certificate extends Model
     use HasFactory;
 
     protected $fillable = [
-        'uuid', 'user_id', 'course_id', 'certificate_no', 'issued_at', 'file_path',
+        'uuid', 'user_id', 'course_id', 'learning_path_id', 'certificate_no', 'issued_at', 'file_path',
         'revoked_at', 'revoked_reason', 'revoked_by',
     ];
 
@@ -56,6 +56,11 @@ class Certificate extends Model
     public function course()
     {
         return $this->belongsTo(Course::class);
+    }
+
+    public function learningPath()
+    {
+        return $this->belongsTo(LearningPath::class);
     }
 
     public function getVerificationUrlAttribute(): string

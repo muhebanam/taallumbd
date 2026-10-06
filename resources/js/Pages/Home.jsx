@@ -4,6 +4,7 @@ import MainLayout from '../Layouts/MainLayout';
 import HeroSection from '../Components/HeroSection';
 import LearningPaths from '../Components/LearningPaths';
 import FeaturedCourses from '../Components/FeaturedCourses';
+import RecommendedSection from '../Components/RecommendedSection';
 import TopScholars from '../Components/TopScholars';
 import CategoriesSection from '../Components/CategoriesSection';
 import FatwaPreview from '../Components/FatwaPreview';
@@ -13,6 +14,7 @@ import Newsletter from '../Components/Newsletter';
 
 export default function Home({
     popularCourses = [],
+    recommendedCourses = [],
     featuredTeachers = [],
     categories = [],
     latestFatawa = [],
@@ -32,28 +34,38 @@ export default function Home({
             {/* 1. Hero with Calligraphy and CTAs */}
             <HeroSection stats={stats} />
 
-            {/* 2. Structured Learning Paths (Beginner → Intermediate → Advanced) */}
+            {/* 2. Personalized Recommendations for Learner */}
+            {recommendedCourses.length > 0 && (
+                <RecommendedSection
+                    title="আপনার জন্য প্রস্তাবিত কোর্সসমূহ"
+                    subtitle="আপনার শিক্ষা আগ্রহ, উস্তাযের অ্যাফিনিটি ও জনপ্রিয়তার ভিত্তিতে নির্বাচিত"
+                    badge="আপনার জন্য"
+                    courses={recommendedCourses}
+                />
+            )}
+
+            {/* 3. Structured Learning Paths (Beginner → Intermediate → Advanced) */}
             <LearningPaths />
 
-            {/* 3. Featured Courses Grid with Enrollment CTA */}
+            {/* 4. Featured Courses Grid with Enrollment CTA */}
             <FeaturedCourses courses={popularCourses} />
 
-            {/* 4. Top Verified Scholars and Teachers */}
+            {/* 5. Top Verified Scholars and Teachers */}
             <TopScholars teachers={featuredTeachers} />
 
-            {/* 5. Knowledge Categories (Quran, Hadith, Fiqh, Aqeedah, Arabic) */}
+            {/* 6. Knowledge Categories (Quran, Hadith, Fiqh, Aqeedah, Arabic) */}
             <CategoriesSection categories={categories} />
 
-            {/* 6. Recent Answered Fatawa and Direct Q&A CTA */}
+            {/* 7. Recent Answered Fatawa and Direct Q&A CTA */}
             <FatwaPreview fatawa={latestFatawa} />
 
-            {/* 7. Research Articles and Islamic Writings */}
+            {/* 8. Research Articles and Islamic Writings */}
             <ArticlesSection articles={latestArticles} />
 
-            {/* 8. Student Testimonials */}
+            {/* 9. Student Testimonials */}
             <Testimonials />
 
-            {/* 9. Newsletter Subscription */}
+            {/* 10. Newsletter Subscription */}
             <Newsletter />
         </MainLayout>
     );

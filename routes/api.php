@@ -22,7 +22,10 @@ Route::middleware(['throttle:api'])->group(function () {
         Route::post('/reset-password', [ApiV1\AuthController::class, 'resetPassword'])->middleware('throttle:api_auth');
     });
 
-    /* ─── 2. Courses & Curriculum (Public / Preview) ─── */
+    /* ─── 2. Unified Search ─── */
+    Route::get('/search', [ApiV1\UnifiedSearchApiController::class, 'index']);
+
+    /* ─── 3. Courses & Curriculum (Public / Preview) ─── */
     Route::get('/courses', [ApiV1\CourseController::class, 'index']);
     Route::get('/courses/{course}', [ApiV1\CourseController::class, 'show']);
     Route::get('/courses/{course}/curriculum', [ApiV1\CurriculumController::class, 'curriculum']);

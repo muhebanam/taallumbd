@@ -1,12 +1,25 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, usePage } from '@inertiajs/react';
 import UserMenu from './UserMenu';
 import CourseMegaMenu from './CourseMegaMenu';
 import NotificationBell from './NotificationBell';
+import CommandPalette from './CommandPalette';
 
 export default function NavBar() {
     const { auth } = usePage().props;
     const [mobileOpen, setMobileOpen] = useState(false);
+    const [paletteOpen, setPaletteOpen] = useState(false);
+
+    useEffect(() => {
+        const handleGlobalKeyDown = (e) => {
+            if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+                e.preventDefault();
+                setPaletteOpen(true);
+            }
+        };
+        window.addEventListener('keydown', handleGlobalKeyDown);
+        return () => window.removeEventListener('keydown', handleGlobalKeyDown);
+    }, []);
 
     return (
         <nav className="sticky top-0 z-50 bg-[#1A2E2F] border-b border-[#254244] shadow-md">
@@ -40,6 +53,13 @@ export default function NavBar() {
                     </Link>
 
                     <CourseMegaMenu />
+
+                    <Link 
+                        href="/learning-paths" 
+                        className="rounded-lg px-3 py-2 text-sm font-semibold text-white/90 transition hover:bg-white/10 hover:text-[#FFF99A]"
+                    >
+                        লার্নিং পাথ
+                    </Link>
 
                     <Link 
                         href="/about/teachers" 
@@ -91,50 +111,67 @@ export default function NavBar() {
                     </Link>
                 </div>
 
-                {/* Right Side: Auth / CTA */}
-                <div className="hidden sm:flex items-center gap-3">
-                    {auth?.user ? (
-                        <>
-                            <NotificationBell />
-                            <UserMenu user={auth.user} />
-                        </>
-                    ) : (
-                        <div className="flex items-center gap-2.5">
-                            <Link 
-                                href="/login" 
-                                className="rounded-xl border border-[#FFF99A]/40 px-4 py-2 text-xs font-bold text-[#FFF99A] transition hover:bg-[#FFF99A] hover:text-[#102526]"
-                            >
-                                লগইন
-                            </Link>
-                            <Link 
-                                href="/register" 
-                                className="rounded-xl bg-[#FFF99A] px-4 py-2 text-xs font-bold text-[#102526] shadow-sm transition hover:bg-[#fff780] hover:shadow-md"
-                            >
-                                যোগ দিন
-                            </Link>
-                        </div>
-                    )}
-                </div>
-
-                {/* Mobile Menu Toggle Button */}
-                <div className="flex lg:hidden items-center gap-2">
-                    {auth?.user && <div className="sm:hidden flex items-center gap-1"><NotificationBell /><UserMenu user={auth.user} /></div>}
+                {/* Right Side: Global Search Trigger & Auth */}
+                <div className="flex items-center gap-2 sm:gap-3">
+                    {/* Command Palette Button */}
                     <button
                         type="button"
-                        onClick={() => setMobileOpen(!mobileOpen)}
-                        className="rounded-xl p-2 text-white/90 hover:bg-white/10 transition"
-                        aria-label="মেনু টগল"
+                        onClick={() => setPaletteOpen(true)}
+                        className="flex items-center gap-2 rounded-xl bg-black/25 border border-white/15 px-3 py-1.5 text-xs text-white/80 hover:text-white hover:border-[#FFF99A]/40 hover:bg-white/10 transition shadow-inner"
+                        title="গ্লোবাল সার্চ (Ctrl+K)"
                     >
-                        {mobileOpen ? (
-                            <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                        ) : (
-                            <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                            </svg>
-                        )}
+                        <svg className="h-4 w-4 text-[#FFF99A]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                        <span className="hidden md:inline font-bangla">অনুসন্ধান...</span>
+                        <kbd className="hidden sm:inline-block rounded bg-white/10 px-1.5 py-0.5 text-[10px] font-mono text-white/60">Ctrl+K</kbd>
                     </button>
+
+                    {/* Auth links or User Menu */}
+                    <div className="hidden sm:flex items-center gap-3">
+                        {auth?.user ? (
+                            <>
+                                <NotificationBell />
+                                <UserMenu user={auth.user} />
+                            </>
+                        ) : (
+                            <div className="flex items-center gap-2.5">
+                                <Link 
+                                    href="/login" 
+                                    className="rounded-xl border border-[#FFF99A]/40 px-4 py-2 text-xs font-bold text-[#FFF99A] transition hover:bg-[#FFF99A] hover:text-[#102526]"
+                                >
+                                    লগইন
+                                </Link>
+                                <Link 
+                                    href="/register" 
+                                    className="rounded-xl bg-[#FFF99A] px-4 py-2 text-xs font-bold text-[#102526] shadow-sm transition hover:bg-[#fff780] hover:shadow-md"
+                                >
+                                    যোগ দিন
+                                </Link>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Mobile Menu Toggle Button */}
+                    <div className="flex lg:hidden items-center gap-2">
+                        {auth?.user && <div className="sm:hidden flex items-center gap-1"><NotificationBell /><UserMenu user={auth.user} /></div>}
+                        <button
+                            type="button"
+                            onClick={() => setMobileOpen(!mobileOpen)}
+                            className="rounded-xl p-2 text-white/90 hover:bg-white/10 transition"
+                            aria-label="মেনু টগল"
+                        >
+                            {mobileOpen ? (
+                                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            ) : (
+                                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                                </svg>
+                            )}
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -154,6 +191,13 @@ export default function NavBar() {
                         className="block rounded-lg px-3 py-2 text-base font-medium text-white hover:bg-white/10 hover:text-[#FFF99A]"
                     >
                         কোর্সসমূহ
+                    </Link>
+                    <Link
+                        href="/learning-paths"
+                        onClick={() => setMobileOpen(false)}
+                        className="block rounded-lg px-3 py-2 text-base font-medium text-white hover:bg-white/10 hover:text-[#FFF99A]"
+                    >
+                        লার্নিং পাথ
                     </Link>
                     <Link
                         href="/about/teachers"
@@ -239,6 +283,9 @@ export default function NavBar() {
                     )}
                 </div>
             )}
+
+            {/* Global Command Palette Modal */}
+            <CommandPalette isOpen={paletteOpen} onClose={() => setPaletteOpen(false)} />
         </nav>
     );
 }

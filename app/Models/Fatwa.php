@@ -4,10 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Laravel\Scout\Searchable;
 
 class Fatwa extends Model
 {
-    use HasFactory;
+    use HasFactory, Searchable;
 
     protected $table = 'fatawa';
 
@@ -81,5 +82,15 @@ class Fatwa extends Model
     public function contentReviews()
     {
         return $this->morphMany(ContentReview::class, 'reviewable')->latest();
+    }
+
+    public function toSearchableArray(): array
+    {
+        return [
+            'id' => $this->id,
+            'question_title' => $this->question_title,
+            'question_body' => strip_tags($this->question_body ?? ''),
+            'answer_body' => strip_tags($this->answer_body ?? ''),
+        ];
     }
 }

@@ -2,6 +2,10 @@
 
 namespace App\Providers;
 
+use App\Contracts\RecommendationService;
+use App\Contracts\SearchEngine;
+use App\Services\Recommendation\StatisticalRecommendationService;
+use App\Services\Search\DatabaseSearchEngine;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
@@ -21,6 +25,14 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         require_once __DIR__.'/../helpers.php';
+
+        $this->app->singleton(SearchEngine::class, function () {
+            return new DatabaseSearchEngine;
+        });
+
+        $this->app->singleton(RecommendationService::class, function () {
+            return new StatisticalRecommendationService;
+        });
     }
 
     /**

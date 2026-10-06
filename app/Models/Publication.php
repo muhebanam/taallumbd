@@ -3,9 +3,12 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Laravel\Scout\Searchable;
 
 class Publication extends Model
 {
+    use Searchable;
+
     protected $fillable = ['category_id', 'user_id', 'title', 'slug', 'description', 'type', 'file_url', 'external_url', 'thumbnail', 'status', 'published_at'];
 
     protected $casts = ['published_at' => 'datetime'];
@@ -33,5 +36,15 @@ class Publication extends Model
     public function contentReviews()
     {
         return $this->morphMany(ContentReview::class, 'reviewable')->latest();
+    }
+
+    public function toSearchableArray(): array
+    {
+        return [
+            'id' => $this->id,
+            'title' => $this->title,
+            'description' => strip_tags($this->description ?? ''),
+            'type' => $this->type,
+        ];
     }
 }

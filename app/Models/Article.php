@@ -4,10 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Laravel\Scout\Searchable;
 
 class Article extends Model
 {
-    use HasFactory;
+    use HasFactory, Searchable;
 
     protected $fillable = ['user_id', 'category_id', 'title', 'slug', 'excerpt', 'body', 'thumbnail', 'status', 'published_at'];
 
@@ -46,5 +47,15 @@ class Article extends Model
     public function contentReviews()
     {
         return $this->morphMany(ContentReview::class, 'reviewable')->latest();
+    }
+
+    public function toSearchableArray(): array
+    {
+        return [
+            'id' => $this->id,
+            'title' => $this->title,
+            'excerpt' => $this->excerpt,
+            'body' => strip_tags($this->body ?? ''),
+        ];
     }
 }

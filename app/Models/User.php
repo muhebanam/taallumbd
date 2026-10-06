@@ -184,4 +184,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(LearningEvent::class);
     }
+
+    public function learningPathEnrollments()
+    {
+        return $this->hasMany(LearningPathEnrollment::class);
+    }
 }

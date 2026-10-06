@@ -23,6 +23,16 @@ Route::get('/fatawa/{fatwa}', [C\FatwaController::class, 'show'])->name('fatawa.
 Route::get('/publications', [C\PublicationController::class, 'index'])->name('publications.index');
 Route::get('/publications/{parent}/{child?}', [C\PublicationController::class, 'index'])->name('publications.category');
 
+/* ---------------- Global Search & Command Palette ---------------- */
+Route::get('/search', [C\SearchController::class, 'index'])->name('search.index');
+Route::get('/search/live', [C\SearchController::class, 'live'])->name('search.live');
+
+/* ---------------- Learning Paths & Roadmaps ---------------- */
+Route::get('/learning-paths', [C\LearningPathController::class, 'index'])->name('learning-paths.index');
+Route::get('/learning-paths/{learningPath}', [C\LearningPathController::class, 'show'])->name('learning-paths.show');
+Route::post('/learning-paths/{learningPath}/enroll', [C\LearningPathController::class, 'enroll'])->middleware('auth')->name('learning-paths.enroll');
+Route::post('/learning-paths/{learningPath}/claim-certificate', [C\LearningPathController::class, 'claimCertificate'])->middleware('auth')->name('learning-paths.claim-certificate');
+
 Route::get('/about/teachers', [C\PageController::class, 'teachers'])->name('about.teachers');
 Route::get('/teachers', [C\PageController::class, 'teachers'])->name('teachers.index');
 Route::get('/teachers/{teacher:slug}', [C\TeacherController::class, 'show'])->name('teachers.show');

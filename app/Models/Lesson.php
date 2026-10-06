@@ -4,10 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Laravel\Scout\Searchable;
 
 class Lesson extends Model
 {
-    use HasFactory;
+    use HasFactory, Searchable;
 
     protected $fillable = ['course_id', 'section_id', 'title', 'slug', 'content', 'video_url', 'lecture_sheet', 'is_preview', 'sort_order'];
 
@@ -46,5 +47,13 @@ class Lesson extends Model
     public function getIsFreeAttribute(): bool
     {
         return (bool) ($this->attributes['is_preview'] ?? false);
+    }
+
+    public function toSearchableArray(): array
+    {
+        return [
+            'id' => $this->id,
+            'title' => $this->title,
+        ];
     }
 }

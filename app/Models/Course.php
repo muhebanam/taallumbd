@@ -4,10 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Laravel\Scout\Searchable;
 
 class Course extends Model
 {
-    use HasFactory;
+    use HasFactory, Searchable;
 
     protected $fillable = [
         'instructor_id', 'category_id', 'title', 'slug', 'short_description', 'description',
@@ -133,5 +134,16 @@ class Course extends Model
                 $query->whereNull('enrollment_end')
                     ->orWhere('enrollment_end', '>=', now());
             });
+    }
+
+    public function toSearchableArray(): array
+    {
+        return [
+            'id' => $this->id,
+            'title' => $this->title,
+            'short_description' => $this->short_description,
+            'description' => strip_tags($this->description ?? ''),
+            'level' => $this->level,
+        ];
     }
 }

@@ -4,10 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Laravel\Scout\Searchable;
 
 class Ayah extends Model
 {
-    use HasFactory;
+    use HasFactory, Searchable;
 
     protected $fillable = [
         'surah_id', 'number', 'number_in_quran', 'text_uthmani', 'juz', 'sajdah',
@@ -35,5 +36,13 @@ class Ayah extends Model
     public function tafsirs()
     {
         return $this->hasMany(AyahTafsir::class);
+    }
+
+    public function toSearchableArray(): array
+    {
+        return [
+            'id' => $this->id,
+            'text_uthmani' => $this->text_uthmani,
+        ];
     }
 }

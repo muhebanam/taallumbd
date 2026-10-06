@@ -1,8 +1,9 @@
 import { Head, Link } from '@inertiajs/react';
 import AppLayout from '../../Layouts/AppLayout';
 import SeoHead from '../../Components/SeoHead';
+import RecommendedSection from '../../Components/RecommendedSection';
 
-export default function CourseShow({ course, isEnrolled, seo }) {
+export default function CourseShow({ course, isEnrolled, seo, learnersAlsoEnrolled = [], similarCourses = [] }) {
     const isFree = course.is_free || Number(course.price) === 0;
     return (
         <AppLayout>
@@ -175,6 +176,30 @@ export default function CourseShow({ course, isEnrolled, seo }) {
                     )}
                 </aside>
             </div>
+
+            {/* Recommendations: Learners Also Enrolled (Co-Enrollment) */}
+            {learnersAlsoEnrolled && learnersAlsoEnrolled.length > 0 && (
+                <RecommendedSection
+                    title="যারা এই কোর্সটি নিয়েছেন তারা আরও নিয়েছেন"
+                    subtitle="সহ-শিক্ষার্থীদের যৌথ পছন্দের পরিসংখ্যান অনুযায়ী"
+                    badge="Co-Enrollment"
+                    courses={learnersAlsoEnrolled}
+                    theme="light"
+                    className="py-12 bg-slate-50"
+                />
+            )}
+
+            {/* Recommendations: Similar & Affinity Courses */}
+            {similarCourses && similarCourses.length > 0 && (
+                <RecommendedSection
+                    title="সম্পর্কিত অন্যান্য কোর্স"
+                    subtitle="একই বিষয় বা উস্তাযের অন্যান্য জনপ্রিয় কোর্স"
+                    badge="Related Courses"
+                    courses={similarCourses}
+                    theme="light"
+                    className="py-12 bg-white"
+                />
+            )}
         </AppLayout>
     );
 }

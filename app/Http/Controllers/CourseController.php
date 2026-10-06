@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Contracts\RecommendationService;
 use App\Models\Category;
 use App\Models\Course;
 use App\Services\SeoService;
@@ -42,7 +43,7 @@ class CourseController extends Controller
         ]);
     }
 
-    public function show(Request $request, Course $course)
+    public function show(Request $request, Course $course, RecommendationService $recommendationService)
     {
         abort_unless(in_array($course->status, ['published', 'coming_soon']), 404);
         $user = $request->user();
@@ -55,10 +56,14 @@ class CourseController extends Controller
         ])->loadCount('lessons');
 
         $seoService = app(SeoService::class);
+        $learnersAlsoEnrolled = $recommendationService->recommendLearnersAlsoEnrolled($course, $user, 4);
+        $similarCourses = $recommendationService->recommendSimilarCourses($course, $user, 4);
 
         return Inertia::render('Courses/Show', [
             'course' => $course,
             'isEnrolled' => $user ? $user->isEnrolled($course) : false,
+            'learnersAlsoEnrolled' => $learnersAlsoEnrolled,
+            'similarCourses' => $similarCourses,
             'seo' => [
                 'title' => $course->title.' — আত-তাআল্লুম',
                 'description' => $course->short_description ?: substr(strip_tags((string) $course->description), 0, 160),

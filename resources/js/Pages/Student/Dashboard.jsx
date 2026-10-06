@@ -1,8 +1,16 @@
 import { Head, Link } from '@inertiajs/react';
 import DashboardLayout from '../../Layouts/DashboardLayout';
 import StatCard from '../../Components/StatCard';
+import CourseCard from '../../Components/CourseCard';
 
-export default function StudentDashboard({ enrollments, certificates, quizAttempts, submissions }) {
+export default function StudentDashboard({
+    enrollments = [],
+    certificates = [],
+    quizAttempts = [],
+    submissions = [],
+    recommendedCourses = [],
+    learningPathEnrollments = []
+}) {
     const enrolledCount = enrollments.length;
     const completedCount = enrollments.filter((e) => Number(e.progress) === 100).length;
     const quizAttemptsCount = quizAttempts.length;
@@ -99,6 +107,53 @@ export default function StudentDashboard({ enrollments, certificates, quizAttemp
                 </div>
             )}
 
+            {/* Active Learning Paths */}
+            {learningPathEnrollments && learningPathEnrollments.length > 0 && (
+                <div className="mt-8 card p-6 bg-white border border-brand/10 shadow-card">
+                    <div className="flex items-center justify-between border-b border-brand/5 pb-4 mb-4">
+                        <div>
+                            <h2 className="text-lg font-bold text-brand-deep">আমার সক্রিয় লার্নিং পাথ</h2>
+                            <p className="text-xs text-brand-text/60 mt-0.5">ধারাবাহিক রোডম্যাপ ও বিশেষায়িত সার্টিফিকেট অগ্রগতি</p>
+                        </div>
+                        <Link href="/learning-paths" className="text-xs font-bold text-brand hover:underline">
+                            সকল পাথ &rarr;
+                        </Link>
+                    </div>
+
+                    <div className="grid gap-4 md:grid-cols-2">
+                        {learningPathEnrollments.map((lpe) => (
+                            <div key={lpe.id} className="p-4 rounded-xl bg-brand-light/60 border border-brand/10 flex flex-col justify-between">
+                                <div>
+                                    <div className="flex items-center justify-between mb-2">
+                                        <h3 className="font-bold text-brand-deep text-sm">
+                                            {lpe.learning_path?.title}
+                                        </h3>
+                                        <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-brand-deep/10 text-brand-deep">
+                                            {lpe.status === 'completed' ? 'সম্পন্ন' : `${lpe.progress_percentage}%`}
+                                        </span>
+                                    </div>
+                                    <div className="w-full h-2 rounded-full bg-slate-200 overflow-hidden mb-3">
+                                        <div
+                                            className="h-full bg-emerald-600 transition-all"
+                                            style={{ width: `${lpe.progress_percentage}%` }}
+                                        />
+                                    </div>
+                                </div>
+                                <div className="flex items-center justify-between text-xs pt-2">
+                                    <span className="text-brand-text/60">{lpe.completed_courses_count || 0} / {lpe.total_courses_count || 0} কোর্স সম্পন্ন</span>
+                                    <Link
+                                        href={`/learning-paths/${lpe.learning_path?.slug}`}
+                                        className="font-bold text-brand hover:underline"
+                                    >
+                                        রোডম্যাপ দেখুন &rarr;
+                                    </Link>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
+
             <div className="mt-8 grid gap-6 lg:grid-cols-3">
                 <div className="card p-5 bg-white border border-brand/5 shadow-card">
                     <h2 className="font-bold text-brand-deep border-b border-brand/5 pb-3">সাম্প্রতিক কুইজ ফলাফল</h2>
@@ -141,7 +196,7 @@ export default function StudentDashboard({ enrollments, certificates, quizAttemp
                         <ul className="mt-3 space-y-2 text-sm">
                             {certificates.map((c) => (
                                 <li key={c.id} className="flex justify-between items-center rounded-xl bg-brand-light px-4 py-3 border border-brand/5">
-                                    <span className="font-semibold text-brand-deep">{c.course?.title}</span>
+                                    <span className="font-semibold text-brand-deep">{c.course?.title || c.learning_path?.title || 'সার্টিফিকেট'}</span>
                                     <Link href={`/certificates/${c.id}`} className="font-bold text-brand hover:underline flex items-center gap-1">দেখুন →</Link>
                                 </li>
                             ))}
@@ -149,6 +204,27 @@ export default function StudentDashboard({ enrollments, certificates, quizAttemp
                     ) : <p className="mt-3 text-sm text-brand-text/50 p-4 text-center">কোর্স সম্পন্ন করলে সার্টিফিকেট এখানে দেখা যাবে।</p>}
                 </div>
             </div>
+
+            {/* Recommended Courses ("আপনার জন্য") */}
+            {recommendedCourses && recommendedCourses.length > 0 && (
+                <div className="mt-10">
+                    <div className="flex items-center justify-between mb-4">
+                        <div>
+                            <h2 className="text-xl font-bold text-brand-deep">আপনার জন্য প্রস্তাবিত কোর্স</h2>
+                            <p className="text-xs text-brand-text/60 mt-0.5">আপনার বিষয়ভিত্তিক আগ্রহ ও অন্যান্য শিক্ষার্থীদের পছন্দ অনুযায়ী</p>
+                        </div>
+                        <Link href="/courses" className="text-xs font-bold text-brand hover:underline">
+                            সকল কোর্স &rarr;
+                        </Link>
+                    </div>
+
+                    <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+                        {recommendedCourses.map((course) => (
+                            <CourseCard key={course.id} course={course} />
+                        ))}
+                    </div>
+                </div>
+            )}
         </DashboardLayout>
     );
 }

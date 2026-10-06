@@ -4,10 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Laravel\Scout\Searchable;
 
 class Teacher extends Model
 {
-    use HasFactory;
+    use HasFactory, Searchable;
 
     protected $fillable = [
         'user_id', 'name', 'slug', 'designation', 'headline', 'short_bio', 'bio',
@@ -312,5 +313,17 @@ class Teacher extends Model
     public function revenueShares()
     {
         return $this->hasMany(RevenueShare::class);
+    }
+
+    public function toSearchableArray(): array
+    {
+        return [
+            'id' => $this->id,
+            'name' => $this->name,
+            'designation' => $this->designation,
+            'headline' => $this->headline,
+            'short_bio' => $this->short_bio,
+            'bio' => strip_tags($this->bio ?? ''),
+        ];
     }
 }
