@@ -17,13 +17,20 @@ class User extends Authenticatable
         'name', 'email', 'password', 'role', 'avatar', 'phone',
         'referral_code', 'referred_by_id', 'utm_source', 'utm_medium',
         'utm_campaign', 'utm_term', 'utm_content',
+        'reputation_points', 'reputation_level', 'community_muted_until', 'is_banned',
     ];
 
     protected $hidden = ['password', 'remember_token'];
 
     protected function casts(): array
     {
-        return ['email_verified_at' => 'datetime', 'password' => 'hashed'];
+        return [
+            'email_verified_at' => 'datetime',
+            'password' => 'hashed',
+            'community_muted_until' => 'datetime',
+            'is_banned' => 'boolean',
+            'reputation_points' => 'integer',
+        ];
     }
 
     protected static function booted(): void
@@ -188,5 +195,37 @@ class User extends Authenticatable
     public function learningPathEnrollments()
     {
         return $this->hasMany(LearningPathEnrollment::class);
+    }
+
+    public function reputationLogs()
+    {
+        return $this->hasMany(ReputationPoint::class)->latest();
+    }
+
+    public function badges()
+    {
+        return $this->hasMany(UserBadge::class)->latest('awarded_at');
+    }
+
+    public function studyGroupMemberships()
+    {
+        return $this->hasMany(StudyGroupMember::class);
+    }
+
+    public function studyGroups()
+    {
+        return $this->belongsToMany(StudyGroup::class, 'study_group_members')
+            ->withPivot(['role', 'status', 'weekly_goal_progress', 'weekly_goal_completed', 'joined_at'])
+            ->withTimestamps();
+    }
+
+    public function sessionRegistrations()
+    {
+        return $this->hasMany(ScholarSessionRegistration::class);
+    }
+
+    public function isMutedInCommunity(): bool
+    {
+        return (bool) ($this->community_muted_until && $this->community_muted_until->isFuture());
     }
 }

@@ -15,9 +15,11 @@ class ForumPost extends Model
         'category_id',
         'title',
         'topic',
+        'tags',
         'body',
         'views_count',
         'upvotes_count',
+        'downvotes_count',
         'status',
         'is_pinned',
         'is_solved',
@@ -28,6 +30,8 @@ class ForumPost extends Model
         'is_solved' => 'boolean',
         'views_count' => 'integer',
         'upvotes_count' => 'integer',
+        'downvotes_count' => 'integer',
+        'tags' => 'array',
     ];
 
     public function user()
@@ -55,13 +59,27 @@ class ForumPost extends Model
         return $this->hasMany(ForumLike::class);
     }
 
+    public function reports()
+    {
+        return $this->morphMany(ContentReport::class, 'reportable');
+    }
+
     public function isLikedBy(?User $user): bool
     {
         if (! $user) {
             return false;
         }
 
-        return $this->likes()->where('user_id', $user->id)->exists();
+        return $this->likes()->where('user_id', $user->id)->where('vote_type', 'upvote')->exists();
+    }
+
+    public function userVote(?User $user): ?string
+    {
+        if (! $user) {
+            return null;
+        }
+
+        return $this->likes()->where('user_id', $user->id)->value('vote_type');
     }
 
     public function scopePublished($query)

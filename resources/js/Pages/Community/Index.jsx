@@ -3,7 +3,7 @@ import { Head, Link, router, usePage } from '@inertiajs/react';
 import MainLayout from '../../Layouts/MainLayout';
 import Pagination from '../../Components/Pagination';
 
-export default function CommunityIndex({ posts, topics = [], likedPostIds = [], filters = {}, stats = {} }) {
+export default function CommunityIndex({ posts, topics = [], likedPostIds = [], leaderboard = [], filters = {}, stats = {} }) {
     const { auth } = usePage().props;
     const [search, setSearch] = useState(filters.q || '');
 
@@ -334,6 +334,67 @@ export default function CommunityIndex({ posts, topics = [], likedPostIds = [], 
                                 প্রশ্ন বা পোস্ট লিখুন
                             </Link>
                         </div>
+
+                        {/* Community Hub Quick Links */}
+                        <div className="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm space-y-3">
+                            <h4 className="font-bold text-sm text-[#102526]">কমিউনিটি হাব ও ফিচার</h4>
+                            <Link
+                                href="/community/groups"
+                                className="flex items-center justify-between rounded-xl border border-gray-100 bg-gray-50/80 p-3 hover:bg-emerald-50/50 hover:border-emerald-200 transition"
+                            >
+                                <div className="flex items-center gap-2.5">
+                                    <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-700 text-white text-sm">👥</span>
+                                    <div>
+                                        <div className="text-xs font-bold text-gray-900">ইসলামিক স্টাডি গ্রুপ</div>
+                                        <div className="text-[10px] text-gray-500">হালাকা ও সাপ্তাহিক লক্ষ্য</div>
+                                    </div>
+                                </div>
+                                <span className="text-xs font-bold text-emerald-800">যান →</span>
+                            </Link>
+
+                            <Link
+                                href="/scholar-sessions"
+                                className="flex items-center justify-between rounded-xl border border-gray-100 bg-gray-50/80 p-3 hover:bg-purple-50/50 hover:border-purple-200 transition"
+                            >
+                                <div className="flex items-center gap-2.5">
+                                    <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-purple-700 text-white text-sm">🎙️</span>
+                                    <div>
+                                        <div className="text-xs font-bold text-gray-900">লাইভ স্কলার সেশন</div>
+                                        <div className="text-[10px] text-gray-500">ওয়েবিনার ও কনসালটেশন</div>
+                                    </div>
+                                </div>
+                                <span className="text-xs font-bold text-purple-800">যান →</span>
+                            </Link>
+                        </div>
+
+                        {/* Reputation Leaderboard */}
+                        {leaderboard && leaderboard.length > 0 && (
+                            <div className="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm">
+                                <h4 className="font-bold text-sm text-[#102526] flex items-center justify-between mb-4">
+                                    <span>🏆 শীর্ষ দ্বীনি শিক্ষার্থী (লিডারবোর্ড)</span>
+                                </h4>
+                                <div className="space-y-3">
+                                    {leaderboard.map((u, idx) => (
+                                        <div key={u.id} className="flex items-center justify-between text-xs">
+                                            <div className="flex items-center gap-2.5">
+                                                <span className={`flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold ${
+                                                    idx === 0 ? 'bg-amber-400 text-black' : idx === 1 ? 'bg-gray-300 text-black' : idx === 2 ? 'bg-amber-700 text-white' : 'bg-gray-100 text-gray-600'
+                                                }`}>
+                                                    {idx + 1}
+                                                </span>
+                                                <div>
+                                                    <div className="font-bold text-gray-900">{u.name}</div>
+                                                    <div className="text-[10px] text-gray-400">{u.reputation_level || 'তালিবুল ইলম'}</div>
+                                                </div>
+                                            </div>
+                                            <span className="font-extrabold text-emerald-800">
+                                                {u.reputation_points || 0} প.
+                                            </span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
 
                         {/* Community Guidelines */}
                         <div className="rounded-3xl border border-gray-200 bg-white p-6 shadow-sm">

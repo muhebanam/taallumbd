@@ -53,13 +53,23 @@ class PaymentService
     /**
      * Confirm payment and enroll student (hardened with lockForUpdate and idempotency)
      */
+    public function markAsPaid(Order $order): ?Enrollment
+    {
+        return $this->confirm(
+            $order,
+            $order->payment_method ?: 'mock',
+            $order->transaction_id,
+            $order->sender_phone
+        );
+    }
+
     public function confirm(
         Order $order,
         string $method = 'mock',
         ?string $transactionId = null,
         ?string $senderPhone = null,
         ?array $rawResponse = null
-    ): Enrollment {
+    ): ?Enrollment {
         $alreadyPaid = $order->status === 'paid';
         $enrollment = DB::transaction(function () use ($order, $method, $transactionId, $senderPhone, $rawResponse) {
             // Lock order for update to prevent race conditions
@@ -163,6 +173,12 @@ class PaymentService
                 // Non-blocking tracking
             }
 
+            if ($lockedOrder->order_type === 'scholar_session' || $lockedOrder->live_class_id) {
+                app(ScholarSessionService::class)->completePaidRegistration($lockedOrder);
+
+                return null;
+            }
+
             // Phase 9: Credit instructor pending revenue in wallet
             try {
                 app(TeacherWalletService::class)->creditPendingRevenue($lockedOrder);
@@ -170,10 +186,10 @@ class PaymentService
                 Log::error("Teacher revenue credit failed for order #{$lockedOrder->id}: {$e->getMessage()}");
             }
 
-            return $this->enroll($lockedOrder->user, $lockedOrder->course);
+            return $lockedOrder->course ? $this->enroll($lockedOrder->user, $lockedOrder->course) : null;
         });
 
-        if (! $alreadyPaid) {
+        if (! $alreadyPaid && $order->course_id) {
             app(NotificationDispatcher::class)->paymentVerified($order->fresh(['user', 'course']));
         }
 

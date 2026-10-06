@@ -81,14 +81,35 @@ Route::post('/quran/{number}/memorize', [C\QuranController::class, 'updateProgre
 Route::get('/hadith', [C\HadithController::class, 'index'])->name('hadith.index');
 Route::get('/hadith/{slug}', [C\HadithController::class, 'book'])->name('hadith.book');
 
-/* ---------------- Islamic Community & Forum ---------------- */
+/* ---------------- Islamic Community, Forum & Study Groups ---------------- */
 Route::get('/community', [C\ForumController::class, 'index'])->name('community.index');
 Route::get('/community/create', [C\ForumController::class, 'create'])->middleware('auth')->name('community.create');
 Route::post('/community', [C\ForumController::class, 'store'])->middleware('auth')->name('community.store');
 Route::get('/community/{post}', [C\ForumController::class, 'show'])->name('community.show');
 Route::post('/community/{post}/comment', [C\ForumController::class, 'storeComment'])->middleware('auth')->name('community.comment');
 Route::post('/community/{post}/like', [C\ForumController::class, 'toggleLike'])->middleware('auth')->name('community.like');
+Route::post('/community/{post}/vote', [C\ForumController::class, 'votePost'])->middleware('auth')->name('community.vote');
+Route::post('/community/comments/{comment}/vote', [C\ForumController::class, 'voteComment'])->middleware('auth')->name('community.comment.vote');
+Route::post('/community/comments/{comment}/verify', [C\ForumController::class, 'verifyComment'])->middleware('auth')->name('community.comment.verify');
+Route::post('/community/report', [C\ForumController::class, 'report'])->middleware('auth')->name('community.report');
 Route::post('/community/{post}/solved', [C\ForumController::class, 'markSolved'])->middleware('auth')->name('community.solved');
+
+// Study Groups
+Route::get('/community/groups', [C\Community\StudyGroupController::class, 'index'])->name('community.groups.index');
+Route::get('/community/groups/create', [C\Community\StudyGroupController::class, 'create'])->middleware('auth')->name('community.groups.create');
+Route::post('/community/groups', [C\Community\StudyGroupController::class, 'store'])->middleware('auth')->name('community.groups.store');
+Route::get('/community/groups/invite/{code}', [C\Community\StudyGroupController::class, 'joinByInvite'])->name('community.groups.invite');
+Route::get('/community/groups/{group:slug}', [C\Community\StudyGroupController::class, 'show'])->name('community.groups.show');
+Route::post('/community/groups/{group:slug}/join', [C\Community\StudyGroupController::class, 'join'])->middleware('auth')->name('community.groups.join');
+Route::post('/community/groups/{group:slug}/posts', [C\Community\StudyGroupController::class, 'storePost'])->middleware('auth')->name('community.groups.posts.store');
+Route::post('/community/groups/{group:slug}/posts/{post}/comments', [C\Community\StudyGroupController::class, 'storeComment'])->middleware('auth')->name('community.groups.comments.store');
+Route::post('/community/groups/{group:slug}/goal', [C\Community\StudyGroupController::class, 'updateWeeklyGoalProgress'])->middleware('auth')->name('community.groups.goal.update');
+
+// Scholar Sessions
+Route::get('/scholar-sessions', [C\ScholarSessionController::class, 'index'])->name('scholar-sessions.index');
+Route::get('/scholar-sessions/{session}', [C\ScholarSessionController::class, 'show'])->name('scholar-sessions.show');
+Route::post('/scholar-sessions/{session}/register', [C\ScholarSessionController::class, 'register'])->middleware('auth')->name('scholar-sessions.register');
+Route::post('/scholar-sessions/{session}/check-in', [C\ScholarSessionController::class, 'checkIn'])->middleware('auth')->name('scholar-sessions.check-in');
 
 /* ---------------- Auth ---------------- */
 Route::middleware('guest')->group(function () {
@@ -226,6 +247,13 @@ Route::middleware(['auth', 'role:instructor,admin'])->prefix('instructor')->name
     Route::get('/earnings', [C\Instructor\InstructorEarningsController::class, 'index'])->name('earnings');
     Route::post('/earnings/payout', [C\Instructor\InstructorEarningsController::class, 'requestPayout'])->name('earnings.payout');
     Route::get('/earnings/statement/{year}/{month}', [C\Instructor\InstructorEarningsController::class, 'statement'])->name('earnings.statement');
+
+    // Scholar Sessions (Live Classes, Webinars, Consultations)
+    Route::get('/sessions', [C\Instructor\InstructorScholarSessionController::class, 'index'])->name('sessions.index');
+    Route::get('/sessions/create', [C\Instructor\InstructorScholarSessionController::class, 'create'])->name('sessions.create');
+    Route::post('/sessions', [C\Instructor\InstructorScholarSessionController::class, 'store'])->name('sessions.store');
+    Route::put('/sessions/{session}', [C\Instructor\InstructorScholarSessionController::class, 'update'])->name('sessions.update');
+    Route::post('/sessions/{session}/reminders', [C\Instructor\InstructorScholarSessionController::class, 'sendReminders'])->name('sessions.reminders');
 });
 
 /* ---------------- Admin ---------------- */
@@ -308,6 +336,12 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('/pages', [C\PolicyPageController::class, 'adminIndex'])->name('pages.index');
     Route::get('/pages/{page}/edit', [C\PolicyPageController::class, 'adminEdit'])->name('pages.edit');
     Route::put('/pages/{page}', [C\PolicyPageController::class, 'adminUpdate'])->name('pages.update');
+
+    // Community Moderation Queue
+    Route::get('/community/reports', [C\Admin\AdminCommunityModerationController::class, 'index'])->name('community.reports.index');
+    Route::post('/community/reports/{report}/resolve', [C\Admin\AdminCommunityModerationController::class, 'resolve'])->name('community.reports.resolve');
+    Route::post('/community/users/{user}/unmute', [C\Admin\AdminCommunityModerationController::class, 'unmute'])->name('community.users.unmute');
+    Route::post('/community/users/{user}/unban', [C\Admin\AdminCommunityModerationController::class, 'unban'])->name('community.users.unban');
 });
 
 /* ---------------- Editorial & Scholar Review Workflow (Admin, Editor, Scholar Reviewer, Instructor) ---------------- */

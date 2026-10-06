@@ -40,6 +40,10 @@ class NotificationDispatcher
 
     public const TEACHER_REVIEW = 'teacher_review';
 
+    public const SCHOLAR_SESSION_REMINDER = 'scholar_session_reminder';
+
+    public const USER_MENTION = 'user_mention';
+
     public function send(User|iterable $recipients, string $type, string $title, string $message, ?string $url = null, array $context = []): void
     {
         Notification::send($recipients, new TaallumNotification($type, $title, $message, $url, $context));
@@ -121,5 +125,29 @@ class NotificationDispatcher
     {
         $admins = User::where('role', 'admin')->get();
         $this->send($admins, self::TEACHER_REVIEW, 'নতুন শিক্ষক রিভিউ অপেক্ষমাণ', 'একটি নতুন শিক্ষক রিভিউ মডারেশনের জন্য অপেক্ষা করছে।', route('admin.teacher-reviews.index'));
+    }
+
+    public function scholarSessionReminder(LiveClass $session, User $user): void
+    {
+        $this->send(
+            $user,
+            self::SCHOLAR_SESSION_REMINDER,
+            'লাইভ স্কলার সেশন রিমাইন্ডার',
+            "আপনার নিবন্ধিত «{$session->title}» সেশনটি শীঘ্রই শুরু হতে যাচ্ছে।",
+            route('scholar-sessions.show', $session->id)
+        );
+    }
+
+    public function userMention(User $mentionedUser, User $sender, string $title, string $url): void
+    {
+        if ($mentionedUser->id !== $sender->id) {
+            $this->send(
+                $mentionedUser,
+                self::USER_MENTION,
+                'কমিউনিটিতে আপনাকে উল্লেখ করা হয়েছে',
+                "«{$sender->name}» «{$title}» আলোচনায় আপনাকে উল্লেখ (@mention) করেছেন।",
+                $url
+            );
+        }
     }
 }

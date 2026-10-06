@@ -12,6 +12,8 @@ class Order extends Model
     protected $fillable = [
         'user_id',
         'course_id',
+        'live_class_id',
+        'order_type',
         'amount',
         'coupon_code',
         'discount_amount',
@@ -35,6 +37,11 @@ class Order extends Model
     public function course()
     {
         return $this->belongsTo(Course::class);
+    }
+
+    public function liveClass()
+    {
+        return $this->belongsTo(LiveClass::class);
     }
 
     public function payments()
