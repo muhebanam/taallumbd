@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Head, Link, router } from '@inertiajs/react';
 import DashboardLayout from '../../Layouts/DashboardLayout';
+import AiLessonTutor from '../../Components/AiLessonTutor';
 
 function toEmbed(url) {
     if (!url) return null;
@@ -271,7 +272,28 @@ export default function LessonView({ lesson, isCompleted, prevLesson, nextLesson
                         <span>💬</span>
                         <span>প্রশ্নোত্তর ও আলোচনা</span>
                     </button>
+
+                    <button
+                        type="button"
+                        onClick={() => setActiveTab('ai-tutor')}
+                        className={`pb-3 px-3 transition-colors border-b-2 flex items-center gap-1.5 ${
+                            activeTab === 'ai-tutor'
+                                ? 'border-[#1A2E2F] text-[#1A2E2F] font-bold'
+                                : 'border-transparent text-slate-500 hover:text-slate-800'
+                        }`}
+                    >
+                        <span>🤖</span>
+                        <span>এআই টিউটর</span>
+                        <span className="text-[10px] bg-emerald-100 text-emerald-800 px-1 rounded font-normal">সহায়ক</span>
+                    </button>
                 </div>
+
+                {/* Tab: AI Tutor */}
+                {activeTab === 'ai-tutor' && (
+                    <div className="mt-6">
+                        <AiLessonTutor lessonId={lesson.id} lessonTitle={lesson.title} />
+                    </div>
+                )}
 
                 {/* Tab 1: Overview & Resources */}
                 {activeTab === 'overview' && (

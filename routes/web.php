@@ -26,6 +26,7 @@ Route::get('/publications/{parent}/{child?}', [C\PublicationController::class, '
 /* ---------------- Global Search & Command Palette ---------------- */
 Route::get('/search', [C\SearchController::class, 'index'])->name('search.index');
 Route::get('/search/live', [C\SearchController::class, 'live'])->name('search.live');
+Route::get('/search/summary', [C\SearchController::class, 'summary'])->name('search.summary');
 
 /* ---------------- Learning Paths & Roadmaps ---------------- */
 Route::get('/learning-paths', [C\LearningPathController::class, 'index'])->name('learning-paths.index');
@@ -126,6 +127,11 @@ Route::middleware('auth')->group(function () {
     Route::get('/dashboard/lessons/{lesson}/comments', [C\Student\LessonInteractionController::class, 'getComments'])->name('student.lessons.comments.index');
     Route::post('/dashboard/lessons/{lesson}/comments', [C\Student\LessonInteractionController::class, 'postComment'])->name('student.lessons.comments.store');
 
+    // AI Course Tutor (Phase 21, 25)
+    Route::post('/dashboard/lessons/{lesson}/ai-chat', [C\Api\V1\AiTutorApiController::class, 'ask'])->name('student.lessons.ai-chat');
+    Route::post('/dashboard/ai/interactions/{interaction}/flag', [C\Api\V1\AiTutorApiController::class, 'flag'])->name('student.ai.flag');
+    Route::post('/dashboard/ai/interactions/{interaction}/feedback', [C\Api\V1\AiTutorApiController::class, 'feedback'])->name('student.ai.feedback');
+
     Route::get('/dashboard/quizzes/{quiz}', [C\Student\QuizController::class, 'show'])->name('student.quizzes.show');
     Route::post('/dashboard/quizzes/{quiz}/submit', [C\Student\QuizController::class, 'submit'])->name('student.quizzes.submit');
     Route::get('/dashboard/assignments/{assignment}', [C\Student\AssignmentController::class, 'show'])->name('student.assignments.show');
@@ -185,6 +191,8 @@ Route::middleware(['auth', 'role:instructor,admin'])->prefix('instructor')->name
     Route::post('/courses/{course}/sections/{section}/quizzes', [C\Instructor\CurriculumController::class, 'storeQuiz'])->name('quizzes.store');
     Route::put('/courses/{course}/quizzes/{quiz}', [C\Instructor\CurriculumController::class, 'updateQuiz'])->name('quizzes.update');
     Route::delete('/courses/{course}/quizzes/{quiz}', [C\Instructor\CurriculumController::class, 'deleteQuiz'])->name('quizzes.destroy');
+    Route::post('/courses/{course}/lessons/{lesson}/ai-generate-quiz', [C\Instructor\InstructorQuizAiController::class, 'generate'])->name('lessons.ai-generate-quiz');
+    Route::post('/courses/{course}/lessons/{lesson}/ai-save-quiz', [C\Instructor\InstructorQuizAiController::class, 'saveQuiz'])->name('lessons.ai-save-quiz');
 
     // Assignments
     Route::post('/courses/{course}/sections/{section}/assignments', [C\Instructor\CurriculumController::class, 'storeAssignment'])->name('assignments.store');
@@ -252,6 +260,13 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('/audit-logs', [C\Admin\AuditLogController::class, 'index'])->name('audit-logs.index');
     Route::get('/settings/payments', [C\Admin\SettingController::class, 'payments'])->name('settings.payments');
     Route::post('/settings/payments', [C\Admin\SettingController::class, 'updatePayments'])->name('settings.payments.update');
+
+    // AI Governance, Cost & Review Queue (Phase 21, 25)
+    Route::get('/ai', [C\Admin\AdminAiController::class, 'index'])->name('ai.index');
+    Route::post('/ai/toggle', [C\Admin\AdminAiController::class, 'toggle'])->name('ai.toggle');
+    Route::get('/ai/reviews', [C\Admin\AdminAiController::class, 'reviews'])->name('ai.reviews');
+    Route::post('/ai/reviews/{interaction}/resolve', [C\Admin\AdminAiController::class, 'resolveReview'])->name('ai.reviews.resolve');
+    Route::post('/ai/proofread', [C\Admin\AdminAiController::class, 'proofread'])->name('ai.proofread');
 
     // Teacher management
     Route::get('/teachers', [C\Admin\AdminTeacherController::class, 'index'])->name('teachers.index');

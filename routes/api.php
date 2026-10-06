@@ -56,6 +56,14 @@ Route::middleware(['throttle:api'])->group(function () {
     /* ─── 8. Subscriptions (Public Plans) ─── */
     Route::get('/subscriptions/plans', [ApiV1\SubscriptionApiController::class, 'plans']);
 
+    /* ─── 9. AI Assistant & Safety (Master Plan Part 21, 25) ─── */
+    Route::prefix('ai')->group(function () {
+        Route::get('/quota', [ApiV1\AiTutorApiController::class, 'quota']);
+        Route::post('/tutor', [ApiV1\AiTutorApiController::class, 'ask']);
+        Route::post('/interactions/{interaction}/flag', [ApiV1\AiTutorApiController::class, 'flag']);
+        Route::post('/interactions/{interaction}/feedback', [ApiV1\AiTutorApiController::class, 'feedback']);
+    });
+
     /* ─── Authenticated Routes (Sanctum) ─── */
     Route::middleware(['auth:sanctum'])->group(function () {
 

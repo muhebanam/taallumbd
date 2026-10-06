@@ -2,6 +2,7 @@
 
 namespace App\Services\Recommendation;
 
+use App\AI\Contracts\EmbeddingClient;
 use App\Contracts\RecommendationService;
 use App\Models\Course;
 use App\Models\Enrollment;
@@ -11,6 +12,10 @@ use Illuminate\Support\Facades\DB;
 
 class StatisticalRecommendationService implements RecommendationService
 {
+    public function __construct(
+        protected ?EmbeddingClient $embeddingClient = null
+    ) {}
+
     /**
      * Get personalized course recommendations for a user ("আপনার জন্য").
      * Always excludes already enrolled courses.
@@ -62,6 +67,15 @@ class StatisticalRecommendationService implements RecommendationService
                 ->all();
         }
 
+        // 3. User interest profile for Embedding Semantic Similarity (Recommendation v2)
+        $userEmbedding = null;
+        if ($this->embeddingClient && config('ai.enabled', true)) {
+            $userCorpus = $userCourses->pluck('title')->implode(' ');
+            if (mb_strlen($userCorpus) > 5) {
+                $userEmbedding = $this->embeddingClient->embedText($userCorpus);
+            }
+        }
+
         // Fetch candidate courses
         $candidates = $baseQuery->get();
 
@@ -70,7 +84,7 @@ class StatisticalRecommendationService implements RecommendationService
         }
 
         // Score each candidate
-        $scored = $candidates->map(function ($course) use ($preferredCategoryIds, $preferredInstructorIds, $coEnrolledWeights) {
+        $scored = $candidates->map(function ($course) use ($preferredCategoryIds, $preferredInstructorIds, $coEnrolledWeights, $userEmbedding) {
             $score = 0.0;
 
             // Factor 1: Co-enrollment weight (Highest signal: 10 points per co-enrollment)
@@ -94,6 +108,15 @@ class StatisticalRecommendationService implements RecommendationService
             // Factor 5: Freshness (Courses created within last 60 days get up to 10 points)
             if ($course->created_at && $course->created_at->diffInDays(now()) <= 60) {
                 $score += max(0, 10 - ($course->created_at->diffInDays(now()) / 6));
+            }
+
+            // Factor 6: Embedding Semantic Similarity (Recommendation v2: up to 25 points)
+            if (! empty($userEmbedding) && $this->embeddingClient) {
+                $courseEmbedding = $this->embeddingClient->embedText($course->title.' '.$course->short_description);
+                $sim = $this->cosineSimilarity($userEmbedding, $courseEmbedding);
+                if ($sim > 0) {
+                    $score += ($sim * 25);
+                }
             }
 
             $course->recommendation_score = $score;
@@ -213,5 +236,34 @@ class StatisticalRecommendationService implements RecommendationService
             ->orderByDesc('created_at')
             ->take($limit)
             ->get();
+    }
+
+    /**
+     * Cosine similarity between two float vectors.
+     */
+    protected function cosineSimilarity(array $vecA, array $vecB): float
+    {
+        $count = count($vecA);
+        if ($count === 0 || $count !== count($vecB)) {
+            return 0.0;
+        }
+
+        $dotProduct = 0.0;
+        $normA = 0.0;
+        $normB = 0.0;
+
+        for ($i = 0; $i < $count; $i++) {
+            $a = (float) $vecA[$i];
+            $b = (float) $vecB[$i];
+            $dotProduct += $a * $b;
+            $normA += $a * $a;
+            $normB += $b * $b;
+        }
+
+        if ($normA <= 0.0 || $normB <= 0.0) {
+            return 0.0;
+        }
+
+        return $dotProduct / (sqrt($normA) * sqrt($normB));
     }
 }

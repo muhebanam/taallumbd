@@ -2,6 +2,12 @@
 
 namespace App\Providers;
 
+use App\AI\Contracts\EmbeddingClient;
+use App\AI\Contracts\LlmClient;
+use App\AI\Drivers\FakeEmbeddingClient;
+use App\AI\Drivers\FakeLlmClient;
+use App\AI\Drivers\GeminiEmbeddingClient;
+use App\AI\Drivers\GeminiLlmClient;
 use App\Contracts\RecommendationService;
 use App\Contracts\SearchEngine;
 use App\Services\Recommendation\StatisticalRecommendationService;
@@ -30,8 +36,28 @@ class AppServiceProvider extends ServiceProvider
             return new DatabaseSearchEngine;
         });
 
-        $this->app->singleton(RecommendationService::class, function () {
-            return new StatisticalRecommendationService;
+        $this->app->singleton(LlmClient::class, function () {
+            $provider = config('ai.provider', 'gemini');
+            if ($provider === 'fake' || app()->environment('testing')) {
+                return new FakeLlmClient;
+            }
+
+            return new GeminiLlmClient;
+        });
+
+        $this->app->singleton(EmbeddingClient::class, function () {
+            $provider = config('ai.provider', 'gemini');
+            if ($provider === 'fake' || app()->environment('testing')) {
+                return new FakeEmbeddingClient;
+            }
+
+            return new GeminiEmbeddingClient;
+        });
+
+        $this->app->singleton(RecommendationService::class, function ($app) {
+            $embeddingClient = $app->make(EmbeddingClient::class);
+
+            return new StatisticalRecommendationService($embeddingClient);
         });
     }
 

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\AI\Services\AiSearchService;
 use App\Services\Search\UnifiedSearchService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -11,7 +12,8 @@ use Inertia\Response;
 class SearchController extends Controller
 {
     public function __construct(
-        protected UnifiedSearchService $searchService
+        protected UnifiedSearchService $searchService,
+        protected AiSearchService $aiSearchService
     ) {}
 
     /**
@@ -26,6 +28,8 @@ class SearchController extends Controller
         }
 
         $results = [];
+        $aiSummary = null;
+
         if (trim($query) !== '') {
             $results = $this->searchService->search(
                 query: $query,
@@ -34,12 +38,28 @@ class SearchController extends Controller
                 user: $request->user(),
                 options: ['per_group_limit' => 8]
             );
+
+            // Optional AI Educational Summary (if enabled)
+            if (config('ai.enabled', true) && ! empty($results['items'])) {
+                try {
+                    $summaryResponse = $this->aiSearchService->summarizeSearch(
+                        query: $query,
+                        searchResults: $results,
+                        user: $request->user()
+                    );
+                    $aiSummary = $summaryResponse?->toArray();
+                } catch (\Throwable $e) {
+                    $aiSummary = null;
+                }
+            }
         }
 
         return Inertia::render('Search/Index', [
             'searchQuery' => $query,
             'activeType' => $type ?? 'all',
             'searchResults' => $results,
+            'aiSummary' => $aiSummary,
+            'aiEnabled' => (bool) config('ai.enabled', true),
         ]);
     }
 
@@ -60,28 +80,45 @@ class SearchController extends Controller
         $searchData = $this->searchService->search(
             query: $query,
             type: null,
-            limit: 20,
+            limit: 10,
             user: $request->user(),
-            options: ['per_group_limit' => 4]
+            options: ['per_group_limit' => 3]
         );
-
-        $flatItems = [];
-        if (! empty($searchData['groups'])) {
-            foreach ($searchData['groups'] as $items) {
-                foreach ($items as $item) {
-                    $flatItems[] = $item;
-                    if (count($flatItems) >= 12) {
-                        break 2;
-                    }
-                }
-            }
-        }
 
         return response()->json([
             'query' => $query,
             'total' => $searchData['total'] ?? 0,
-            'items' => $flatItems,
+            'items' => array_slice($searchData['items'] ?? [], 0, 10),
             'groups' => $searchData['groups'] ?? [],
+        ]);
+    }
+
+    /**
+     * On-demand AI Search Summary endpoint.
+     */
+    public function summary(Request $request): JsonResponse
+    {
+        $query = (string) $request->input('q', '');
+        if (trim($query) === '') {
+            return response()->json(['success' => false, 'summary' => null]);
+        }
+
+        $results = $this->searchService->search(
+            query: $query,
+            type: null,
+            limit: 15,
+            user: $request->user()
+        );
+
+        $response = $this->aiSearchService->summarizeSearch(
+            query: $query,
+            searchResults: $results,
+            user: $request->user()
+        );
+
+        return response()->json([
+            'success' => $response !== null,
+            'summary' => $response?->toArray(),
         ]);
     }
 }
