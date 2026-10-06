@@ -52,7 +52,14 @@ Route::middleware('auth')->group(function () {
 
     Route::post('confirm-password', [ConfirmablePasswordController::class, 'store']);
 
-    Route::put('password', [PasswordController::class, 'update'])->name('password.update');
+    Route::get('two-factor-setup', [\App\Http\Controllers\Auth\TwoFactorController::class, 'setup'])
+        ->name('two-factor.setup');
+    Route::post('two-factor-setup', [\App\Http\Controllers\Auth\TwoFactorController::class, 'confirm'])
+        ->name('two-factor.confirm');
+    Route::get('two-factor-challenge', [\App\Http\Controllers\Auth\TwoFactorController::class, 'challenge'])
+        ->name('two-factor.challenge');
+    Route::post('two-factor-challenge', [\App\Http\Controllers\Auth\TwoFactorController::class, 'verify'])
+        ->name('two-factor.verify');
 
     Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])
         ->name('logout');

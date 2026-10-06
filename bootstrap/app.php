@@ -95,11 +95,13 @@ return Application::configure(basePath: dirname(__DIR__))
             SetLocale::class,
             HandleInertiaRequests::class,
             AddLinkHeadersForPreloadedAssets::class,
+            \App\Http\Middleware\EnsureTwoFactorAuthenticated::class,
         ]);
         $middleware->alias([
             'role' => EnsureRole::class,
             'tenant' => IdentifyTenant::class,
             'org.member' => EnsureOrganizationMember::class,
+            '2fa' => \App\Http\Middleware\EnsureTwoFactorAuthenticated::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

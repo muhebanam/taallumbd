@@ -150,6 +150,12 @@ Route::post('/logout', [C\Auth\AuthenticatedSessionController::class, 'destroy']
 
 /* ---------------- Student (any authenticated user) ---------------- */
 Route::middleware('auth')->group(function () {
+    /* ---------------- 2FA (TOTP) ---------------- */
+    Route::get('/two-factor-setup', [C\Auth\TwoFactorController::class, 'setup'])->name('two-factor.setup');
+    Route::post('/two-factor-setup', [C\Auth\TwoFactorController::class, 'confirm'])->name('two-factor.confirm');
+    Route::get('/two-factor-challenge', [C\Auth\TwoFactorController::class, 'challenge'])->name('two-factor.challenge');
+    Route::post('/two-factor-challenge', [C\Auth\TwoFactorController::class, 'verify'])->name('two-factor.verify');
+
     Route::get('/profile', [C\ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [C\ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [C\ProfileController::class, 'destroy'])->name('profile.destroy');
@@ -286,6 +292,7 @@ Route::middleware(['auth', 'role:instructor,admin'])->prefix('instructor')->name
 
 /* ---------------- Admin ---------------- */
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/', fn () => redirect()->route('admin.dashboard'));
     Route::get('/dashboard', [C\Admin\DashboardController::class, 'index'])->name('dashboard');
     Route::get('/analytics', [C\Admin\AdminAnalyticsController::class, 'index'])->name('analytics.index');
     Route::get('/analytics/export', [C\Admin\AdminAnalyticsController::class, 'export'])->name('analytics.export');

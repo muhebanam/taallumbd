@@ -16,19 +16,25 @@ class User extends Authenticatable
 
     protected $fillable = [
         'name', 'email', 'password', 'role', 'avatar', 'phone',
+        'two_factor_secret', 'two_factor_recovery_codes', 'two_factor_confirmed_at',
         'preferred_locale', 'preferred_currency',
         'referral_code', 'referred_by_id', 'utm_source', 'utm_medium',
         'utm_campaign', 'utm_term', 'utm_content',
         'reputation_points', 'reputation_level', 'community_muted_until', 'is_banned',
     ];
 
-    protected $hidden = ['password', 'remember_token'];
+    protected $hidden = [
+        'password', 'remember_token',
+        'two_factor_secret', 'two_factor_recovery_codes',
+    ];
 
     protected function casts(): array
     {
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'two_factor_recovery_codes' => 'array',
+            'two_factor_confirmed_at' => 'datetime',
             'community_muted_until' => 'datetime',
             'is_banned' => 'boolean',
             'reputation_points' => 'integer',
@@ -54,6 +60,16 @@ class User extends Authenticatable
     public function isInstructor(): bool
     {
         return $this->role === 'instructor';
+    }
+
+    public function requiresTwoFactor(): bool
+    {
+        return $this->isAdmin() || $this->isInstructor();
+    }
+
+    public function hasTwoFactorEnabled(): bool
+    {
+        return ! empty($this->two_factor_secret) && ! empty($this->two_factor_confirmed_at);
     }
 
     public function isStudent(): bool
