@@ -8,9 +8,13 @@ class LessonProgress extends Model
 {
     protected $table = 'lesson_progress';
 
-    protected $fillable = ['user_id', 'course_id', 'lesson_id', 'is_completed', 'completed_at'];
+    protected $fillable = ['user_id', 'course_id', 'lesson_id', 'is_completed', 'last_position_seconds', 'completed_at'];
 
-    protected $casts = ['is_completed' => 'boolean', 'completed_at' => 'datetime'];
+    protected $casts = [
+        'is_completed' => 'boolean',
+        'last_position_seconds' => 'integer',
+        'completed_at' => 'datetime',
+    ];
 
     public function lesson()
     {

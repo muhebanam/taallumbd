@@ -36,16 +36,32 @@ class ProgressController extends Controller
             ], 403);
         }
 
-        $isCompleted = $request->boolean('is_completed', true);
         $lastPosition = $request->input('last_position_seconds') ?? $request->input('last_watched_seconds');
+        $positionSent = $lastPosition !== null;
+
+        $existing = LessonProgress::where('user_id', $user->id)->where('lesson_id', $lesson->id)->first();
+
+        // Legacy clients send nothing => completed. Position-only sync keeps existing completion state.
+        if ($request->has('is_completed')) {
+            $isCompleted = $request->boolean('is_completed');
+        } elseif ($positionSent) {
+            $isCompleted = (bool) $existing?->is_completed;
+        } else {
+            $isCompleted = true;
+        }
+
+        $values = [
+            'course_id' => $course->id,
+            'is_completed' => $isCompleted,
+            'completed_at' => $isCompleted ? ($existing?->completed_at ?? now()) : null,
+        ];
+        if ($positionSent) {
+            $values['last_position_seconds'] = (int) $lastPosition;
+        }
 
         $progressRecord = LessonProgress::updateOrCreate(
             ['user_id' => $user->id, 'lesson_id' => $lesson->id],
-            [
-                'course_id' => $course->id,
-                'is_completed' => $isCompleted,
-                'completed_at' => $isCompleted ? now() : null,
-            ]
+            $values
         );
 
         $courseProgress = $this->progressService->syncEnrollmentProgress($user, $course);

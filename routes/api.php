@@ -27,6 +27,7 @@ Route::middleware(['throttle:api'])->group(function () {
 
     /* ─── 3. Courses & Curriculum (Public / Preview) ─── */
     Route::get('/courses', [ApiV1\CourseController::class, 'index']);
+    Route::get('/recommendations', [ApiV1\MeApiController::class, 'recommendations']);
     Route::get('/courses/{course}', [ApiV1\CourseController::class, 'show']);
     Route::get('/courses/{course}/curriculum', [ApiV1\CurriculumController::class, 'curriculum']);
     Route::get('/lessons/{lesson}', [ApiV1\CurriculumController::class, 'lesson']);
@@ -72,9 +73,19 @@ Route::middleware(['throttle:api'])->group(function () {
         Route::post('/auth/logout', [ApiV1\AuthController::class, 'logout']);
         Route::post('/auth/email/resend', [ApiV1\AuthController::class, 'resendVerificationEmail']);
 
-        // Learning progress
+        // Learning progress & continue learning
+        Route::get('/me/courses', [ApiV1\MeApiController::class, 'courses']);
         Route::post('/lessons/{lesson}/progress', [ApiV1\ProgressController::class, 'updateLessonProgress']);
         Route::get('/courses/{course}/progress', [ApiV1\ProgressController::class, 'getCourseProgress']);
+
+        // Instructor / Teacher Portal
+        Route::prefix('instructor')->group(function () {
+            Route::get('/courses', [ApiV1\InstructorApiController::class, 'courses']);
+            Route::get('/analytics', [ApiV1\InstructorApiController::class, 'analytics']);
+            Route::get('/students', [ApiV1\InstructorApiController::class, 'students']);
+            Route::get('/questions', [ApiV1\InstructorApiController::class, 'questions']);
+            Route::post('/questions/{comment}/reply', [ApiV1\InstructorApiController::class, 'replyQuestion']);
+        });
 
         // Quizzes
         Route::get('/quizzes/{quiz}', [ApiV1\QuizController::class, 'show']);

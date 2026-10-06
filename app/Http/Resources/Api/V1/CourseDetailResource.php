@@ -22,7 +22,7 @@ class CourseDetailResource extends JsonResource
             $isEnrolled = $user->isEnrolledIn($this->id) || $user->id === $this->instructor_id || $user->isAdmin();
             if ($isEnrolled) {
                 $enrollment = $user->enrollments()->where('course_id', $this->id)->first();
-                $progressPercentage = $enrollment?->progress_percentage ?? 0;
+                $progressPercentage = (int) ($enrollment?->progress ?? 0);
             }
         }
 
