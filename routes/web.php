@@ -1,6 +1,14 @@
 <?php
 
 use App\Http\Controllers as C;
+use App\Http\Controllers\Organization\GuardianPortalController;
+use App\Http\Controllers\Organization\OrgAttendanceController;
+use App\Http\Controllers\Organization\OrgCertificateController;
+use App\Http\Controllers\Organization\OrgCohortController;
+use App\Http\Controllers\Organization\OrgDashboardController;
+use App\Http\Controllers\Organization\OrgExamController;
+use App\Http\Controllers\Organization\OrgGradebookController;
+use App\Http\Controllers\Organization\OrgMemberController;
 use Illuminate\Support\Facades\Route;
 
 /* ---------------- Public ---------------- */
@@ -375,4 +383,51 @@ Route::middleware(['auth', 'role:admin,editor,scholar_reviewer,instructor'])->pr
 Route::middleware(['auth', 'role:admin,instructor'])->group(function () {
     Route::get('/admin/fatawa', [C\Admin\ModerationController::class, 'fatawa'])->name('admin.fatawa.index');
     Route::put('/admin/fatawa/{fatwa}/answer', [C\Admin\ModerationController::class, 'answerFatwa'])->name('admin.fatawa.answer');
+});
+
+/* ---------------- Enterprise Multi-Tenant LMS (Master Plan Part 26) ---------------- */
+Route::prefix('org/{organization}')->name('org.')->middleware(['tenant', 'auth'])->group(function () {
+    // Org Admin & Teacher / Staff Management Area
+    Route::middleware('org.member:org_admin,teacher')->group(function () {
+        Route::get('/dashboard', [OrgDashboardController::class, 'index'])->name('dashboard');
+
+        // Members & CSV bulk import
+        Route::get('/members', [OrgMemberController::class, 'index'])->name('members.index');
+        Route::post('/members', [OrgMemberController::class, 'store'])->name('members.store');
+        Route::post('/members/bulk-import', [OrgMemberController::class, 'bulkImport'])->name('members.bulk-import');
+        Route::delete('/members/{member}', [OrgMemberController::class, 'destroy'])->name('members.destroy');
+
+        // Cohorts / Classes
+        Route::get('/cohorts', [OrgCohortController::class, 'index'])->name('cohorts.index');
+        Route::post('/cohorts', [OrgCohortController::class, 'store'])->name('cohorts.store');
+        Route::post('/cohorts/{cohort}/members', [OrgCohortController::class, 'assignMember'])->name('cohorts.members.assign');
+        Route::post('/cohorts/{cohort}/courses', [OrgCohortController::class, 'assignCourse'])->name('cohorts.courses.assign');
+
+        // Attendance
+        Route::get('/attendance', [OrgAttendanceController::class, 'index'])->name('attendance.index');
+        Route::post('/attendance', [OrgAttendanceController::class, 'store'])->name('attendance.store');
+
+        // Exams
+        Route::get('/exams', [OrgExamController::class, 'index'])->name('exams.index');
+        Route::post('/exams', [OrgExamController::class, 'store'])->name('exams.store');
+        Route::post('/exams/submissions/{submission}/grade', [OrgExamController::class, 'grade'])->name('exams.submissions.grade');
+
+        // Gradebook & Report Cards
+        Route::get('/gradebook', [OrgGradebookController::class, 'index'])->name('gradebook.index');
+        Route::post('/gradebook/generate', [OrgGradebookController::class, 'generate'])->name('gradebook.generate');
+
+        // Branded Certificates
+        Route::get('/certificates', [OrgCertificateController::class, 'index'])->name('certificates.index');
+        Route::post('/certificates', [OrgCertificateController::class, 'store'])->name('certificates.store');
+    });
+
+    // Student Exam Submission
+    Route::middleware('org.member:student,org_admin,teacher')->group(function () {
+        Route::post('/exams/{exam}/submit', [OrgExamController::class, 'submit'])->name('exams.submit');
+    });
+
+    // Guardian Portal
+    Route::middleware('org.member:guardian,org_admin')->group(function () {
+        Route::get('/guardian', [GuardianPortalController::class, 'index'])->name('guardian.index');
+    });
 });

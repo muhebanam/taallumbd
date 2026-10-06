@@ -1,8 +1,10 @@
 <?php
 
 use App\Http\Middleware\CaptureUtmParameters;
+use App\Http\Middleware\EnsureOrganizationMember;
 use App\Http\Middleware\EnsureRole;
 use App\Http\Middleware\HandleInertiaRequests;
+use App\Http\Middleware\IdentifyTenant;
 use App\Http\Middleware\SecurityHeaders;
 use App\Http\Middleware\SetLocale;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -96,6 +98,8 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
         $middleware->alias([
             'role' => EnsureRole::class,
+            'tenant' => IdentifyTenant::class,
+            'org.member' => EnsureOrganizationMember::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
