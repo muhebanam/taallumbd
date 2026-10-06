@@ -64,5 +64,18 @@ return [
             'username' => env('BKASH_USERNAME'),
             'password' => env('BKASH_PASSWORD'),
         ],
+
+        'stripe' => [
+            'enabled' => env('STRIPE_ENABLED', true),
+            'mode' => env('STRIPE_MODE', 'test'),
+            'key' => env('STRIPE_KEY'),
+            'secret' => env('STRIPE_SECRET'),
+            'webhook_secret' => env('STRIPE_WEBHOOK_SECRET'),
+            'currency' => env('STRIPE_CURRENCY', 'usd'),
+        ],
+    ],
+
+    'exchange_rates' => [
+        'usd_to_bdt' => env('EXCHANGE_RATE_USD_BDT', 120.00),
     ],
 ];

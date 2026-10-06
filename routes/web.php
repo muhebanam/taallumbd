@@ -48,8 +48,28 @@ Route::get('/verify/{identifier}', [C\CertificateVerificationController::class, 
 Route::get('/health', [C\HealthController::class, 'check'])->name('system.health');
 Route::get('/internal/cron', [C\InternalCronController::class, 'run'])->middleware('throttle:internal_cron')->name('internal.cron');
 
+/* ---------------- Localization & Multi-Currency ---------------- */
+Route::get('/locale/{locale}', [C\LocalizationController::class, 'switchLocale'])->name('locale.switch');
+Route::get('/currency/{currency}', [C\LocalizationController::class, 'switchCurrency'])->name('currency.switch');
+
+/* ---------------- Multilingual Route Prefixes (/en & /ar) ---------------- */
+foreach (['en', 'ar'] as $langPrefix) {
+    Route::prefix($langPrefix)->group(function () {
+        Route::get('/', C\HomeController::class);
+        Route::get('/courses', [C\CourseController::class, 'index']);
+        Route::get('/courses/{course}', [C\CourseController::class, 'show']);
+        Route::get('/teachers', [C\PageController::class, 'teachers']);
+        Route::get('/fatawa', [C\FatwaController::class, 'index']);
+        Route::get('/articles', [C\ArticleController::class, 'index']);
+        Route::get('/about', [C\PageController::class, 'about']);
+        Route::get('/contact', [C\ContactController::class, 'show']);
+    });
+}
+
 /* ---------------- SEO & Sitemaps ---------------- */
 Route::get('/sitemap.xml', [C\SeoController::class, 'sitemap'])->name('seo.sitemap');
+Route::get('/en/sitemap.xml', fn () => app(C\SeoController::class)->sitemap('en'))->name('seo.sitemap.en');
+Route::get('/ar/sitemap.xml', fn () => app(C\SeoController::class)->sitemap('ar'))->name('seo.sitemap.ar');
 Route::get('/robots.txt', [C\SeoController::class, 'robots'])->name('seo.robots');
 
 /* ---------------- Newsletter Subscriptions (Double Opt-In) ---------------- */

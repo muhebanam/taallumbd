@@ -15,6 +15,8 @@ class Order extends Model
         'live_class_id',
         'order_type',
         'amount',
+        'currency',
+        'amount_usd',
         'coupon_code',
         'discount_amount',
         'status',
@@ -26,6 +28,7 @@ class Order extends Model
 
     protected $casts = [
         'amount' => 'decimal:2',
+        'amount_usd' => 'decimal:2',
         'discount_amount' => 'decimal:2',
     ];
 

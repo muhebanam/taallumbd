@@ -1,7 +1,9 @@
 import React from 'react';
 import { Link } from '@inertiajs/react';
+import { useTranslation } from '../Hooks/useTranslation';
 
 export default function CourseCard({ course }) {
+    const { t, formatPrice } = useTranslation();
     const isFree = course.is_free || Number(course.price) === 0;
     const rating = course.reviews_avg_rating ? parseFloat(course.reviews_avg_rating) : 0;
 
@@ -52,7 +54,7 @@ export default function CourseCard({ course }) {
                             ? 'bg-emerald-600 text-white' 
                             : 'bg-[#FFF99A] text-[#102526]'
                     }`}>
-                        {isFree ? 'ফ্রি কোর্স' : `৳ ${Number(course.price).toLocaleString('bn-BD')}`}
+                        {isFree ? t('common.free', 'ফ্রি কোর্স') : formatPrice(course.price, course.price_usd)}
                     </span>
                 </div>
             </div>

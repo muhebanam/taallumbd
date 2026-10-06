@@ -2,17 +2,18 @@
 
 namespace App\Models;
 
+use App\Traits\HasTranslations;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Laravel\Scout\Searchable;
 
 class Course extends Model
 {
-    use HasFactory, Searchable;
+    use HasFactory, HasTranslations, Searchable;
 
     protected $fillable = [
         'instructor_id', 'category_id', 'title', 'slug', 'short_description', 'description',
-        'thumbnail', 'price', 'is_free', 'level', 'duration', 'learn_points', 'requirements', 'status',
+        'thumbnail', 'price', 'price_usd', 'is_free', 'level', 'duration', 'learn_points', 'requirements', 'status',
         'enrollment_limit', 'enrollment_start', 'enrollment_end', 'completion_requirements',
         'is_certified', 'certified_by_scholar_id', 'certified_at', 'certification_note',
     ];
@@ -21,6 +22,7 @@ class Course extends Model
         'is_free' => 'boolean',
         'is_certified' => 'boolean',
         'price' => 'decimal:2',
+        'price_usd' => 'decimal:2',
         'learn_points' => 'array',
         'requirements' => 'array',
         'completion_requirements' => 'array',

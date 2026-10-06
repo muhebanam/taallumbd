@@ -22,7 +22,8 @@ export default {
             },
             fontFamily: {
                 bangla: ['Kalpurush', 'AdorshoLipi', 'Hind Siliguri', ...defaultTheme.fontFamily.sans],
-                sans: ['Kalpurush', 'Hind Siliguri', 'Figtree', ...defaultTheme.fontFamily.sans],
+                arabic: ['Amiri', 'Traditional Arabic', 'Scheherazade New', 'serif'],
+                sans: ['Kalpurush', 'Hind Siliguri', 'Outfit', 'Figtree', ...defaultTheme.fontFamily.sans],
             },
             boxShadow: {
                 card: '0 2px 12px rgba(16, 37, 38, 0.08)',

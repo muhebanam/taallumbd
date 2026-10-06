@@ -4,6 +4,7 @@ import UserMenu from './UserMenu';
 import CourseMegaMenu from './CourseMegaMenu';
 import NotificationBell from './NotificationBell';
 import CommandPalette from './CommandPalette';
+import LanguageSwitcher from './LanguageSwitcher';
 
 export default function NavBar() {
     const { auth } = usePage().props;
@@ -127,6 +128,11 @@ export default function NavBar() {
                         <kbd className="hidden sm:inline-block rounded bg-white/10 px-1.5 py-0.5 text-[10px] font-mono text-white/60">Ctrl+K</kbd>
                     </button>
 
+                    {/* Language & Currency Switcher */}
+                    <div className="hidden md:flex items-center">
+                        <LanguageSwitcher />
+                    </div>
+
                     {/* Auth links or User Menu */}
                     <div className="hidden sm:flex items-center gap-3">
                         {auth?.user ? (
@@ -178,6 +184,10 @@ export default function NavBar() {
             {/* Mobile Menu Slide-over */}
             {mobileOpen && (
                 <div className="lg:hidden border-t border-[#254244] bg-[#102526] px-4 pt-3 pb-6 space-y-1">
+                    <div className="pb-3 border-b border-white/10 mb-2 flex items-center justify-between">
+                        <span className="text-xs text-white/60">ভাষা ও মুদ্রা নির্বাচন</span>
+                        <LanguageSwitcher />
+                    </div>
                     <Link
                         href="/"
                         onClick={() => setMobileOpen(false)}

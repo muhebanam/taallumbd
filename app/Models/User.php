@@ -15,6 +15,7 @@ class User extends Authenticatable
 
     protected $fillable = [
         'name', 'email', 'password', 'role', 'avatar', 'phone',
+        'preferred_locale', 'preferred_currency',
         'referral_code', 'referred_by_id', 'utm_source', 'utm_medium',
         'utm_campaign', 'utm_term', 'utm_content',
         'reputation_points', 'reputation_level', 'community_muted_until', 'is_banned',

@@ -7,6 +7,7 @@ use App\Payments\Drivers\BkashGateway;
 use App\Payments\Drivers\ManualGateway;
 use App\Payments\Drivers\MockGateway;
 use App\Payments\Drivers\SslCommerzGateway;
+use App\Payments\Drivers\StripeGateway;
 use InvalidArgumentException;
 
 class PaymentGatewayManager
@@ -49,6 +50,10 @@ class PaymentGatewayManager
             return (bool) config('payments.gateways.bkash.enabled', false);
         }
 
+        if ($name === 'stripe') {
+            return (bool) config('payments.gateways.stripe.enabled', true);
+        }
+
         if ($name === 'mock') {
             return (bool) (app()->environment('local', 'testing') && config('payments.mock_enabled', false));
         }
@@ -85,6 +90,17 @@ class PaymentGatewayManager
             ];
         }
 
+        // International Stripe Checkout
+        if ($this->isGatewayEnabled('stripe')) {
+            $gateways[] = [
+                'id' => 'stripe',
+                'name' => 'আন্তর্জাতিক ক্রেডিট / ডেবিট কার্ড (Stripe)',
+                'type' => 'automated',
+                'badge' => 'USD / Global Card',
+                'icon' => 'stripe',
+            ];
+        }
+
         // Manual Payment (bKash, Nagad, Rocket) - Always active default
         if ($this->isGatewayEnabled('manual')) {
             $gateways[] = [
@@ -118,6 +134,7 @@ class PaymentGatewayManager
         return match ($name) {
             'sslcommerz' => new SslCommerzGateway,
             'bkash', 'bkash_tokenized' => new BkashGateway,
+            'stripe' => new StripeGateway,
             'manual', 'nagad', 'rocket', 'manual_bkash', 'manual_nagad', 'manual_rocket' => new ManualGateway,
             'mock' => new MockGateway,
             default => throw new InvalidArgumentException("Payment gateway driver [{$name}] is not supported."),

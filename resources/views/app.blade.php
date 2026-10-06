@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="bn" class="scroll-smooth">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="{{ app()->getLocale() === 'ar' ? 'rtl' : 'ltr' }}" class="scroll-smooth">
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -9,6 +9,12 @@
         <meta property="og:description" content="উচ্চতর ইসলামী শিক্ষা, কুরআন, হাদিস, ফিকহ ও আরবি ভাষার বিশ্বস্ত প্ল্যাটফর্ম।">
         <meta property="og:type" content="website">
         <meta property="og:url" content="https://taallumbd.com">
+
+        <!-- Multilingual SEO & hreflang Alternates -->
+        <link rel="alternate" hreflang="bn" href="{{ url('/') }}" />
+        <link rel="alternate" hreflang="en" href="{{ url('/en') }}" />
+        <link rel="alternate" hreflang="ar" href="{{ url('/ar') }}" />
+        <link rel="alternate" hreflang="x-default" href="{{ url('/') }}" />
 
         <title inertia>{{ config('app.name', 'আত-তাআল্লুম | TaallumBD') }}</title>
 
@@ -27,7 +33,7 @@
         @vite(['resources/css/app.css', 'resources/js/app.jsx'])
         @inertiaHead
     </head>
-    <body class="font-bangla bg-[#F8FAF8] text-[#102526] antialiased selection:bg-[#FFF99A] selection:text-[#102526]">
+    <body class="{{ app()->getLocale() === 'ar' ? 'font-arabic' : (app()->getLocale() === 'en' ? 'font-sans' : 'font-bangla') }} bg-[#F8FAF8] text-[#102526] antialiased selection:bg-[#FFF99A] selection:text-[#102526]">
         @inertia
     </body>
 </html>

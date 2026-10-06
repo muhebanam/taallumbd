@@ -37,4 +37,19 @@
         background-image: radial-gradient(rgba(255, 249, 154, 0.12) 1px, transparent 1px);
         background-size: 20px 20px;
     }
+
+    /* RTL & Arabic Support */
+    [dir="rtl"] {
+        text-align: right;
+        font-family: 'Amiri', 'Traditional Arabic', serif;
+    }
+
+    [dir="rtl"] .ltr-only {
+        direction: ltr;
+        text-align: left;
+    }
+
+    [dir="rtl"] .icon-flip {
+        transform: scaleX(-1);
+    }
 }
