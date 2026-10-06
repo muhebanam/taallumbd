@@ -203,6 +203,11 @@ Route::middleware(['auth', 'role:instructor,admin'])->prefix('instructor')->name
     Route::get('/teacher-questions', [C\Instructor\InstructorTeacherProfileController::class, 'questions'])->name('profile.teacher.questions');
     Route::post('/teacher-questions/{question}/answer', [C\Instructor\InstructorTeacherProfileController::class, 'answerQuestion'])->name('profile.teacher.questions.answer');
     Route::post('/teacher-questions/{question}/reject', [C\Instructor\InstructorTeacherProfileController::class, 'rejectQuestion'])->name('profile.teacher.questions.reject');
+
+    // Phase 9: Teacher Economy (Earnings & Payouts)
+    Route::get('/earnings', [C\Instructor\InstructorEarningsController::class, 'index'])->name('earnings');
+    Route::post('/earnings/payout', [C\Instructor\InstructorEarningsController::class, 'requestPayout'])->name('earnings.payout');
+    Route::get('/earnings/statement/{year}/{month}', [C\Instructor\InstructorEarningsController::class, 'statement'])->name('earnings.statement');
 });
 
 /* ---------------- Admin ---------------- */
@@ -210,6 +215,14 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('/dashboard', [C\Admin\DashboardController::class, 'index'])->name('dashboard');
     Route::get('/analytics', [C\Admin\AdminAnalyticsController::class, 'index'])->name('analytics.index');
     Route::get('/analytics/export', [C\Admin\AdminAnalyticsController::class, 'export'])->name('analytics.export');
+
+    // Phase 9: Payouts & Revenue Share Administration
+    Route::get('/payouts', [C\Admin\AdminPayoutController::class, 'index'])->name('payouts.index');
+    Route::post('/payouts/{payout}/approve', [C\Admin\AdminPayoutController::class, 'approve'])->name('payouts.approve');
+    Route::post('/payouts/{payout}/reject', [C\Admin\AdminPayoutController::class, 'reject'])->name('payouts.reject');
+    Route::post('/revenue-shares', [C\Admin\AdminPayoutController::class, 'saveRevenueShare'])->name('revenue-shares.save');
+    Route::delete('/revenue-shares/{revenueShare}', [C\Admin\AdminPayoutController::class, 'deleteRevenueShare'])->name('revenue-shares.destroy');
+    Route::get('/payouts/statement/{teacher:id}/{year}/{month}', [C\Admin\AdminPayoutController::class, 'statement'])->name('payouts.statement');
     Route::get('/users', [C\Admin\UserController::class, 'index'])->name('users.index');
     Route::get('/students', [C\Admin\UserController::class, 'index'])->name('students.index');
     Route::put('/users/{user}/role', [C\Admin\UserController::class, 'updateRole'])->name('users.role');

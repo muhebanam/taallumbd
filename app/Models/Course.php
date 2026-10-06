@@ -100,6 +100,11 @@ class Course extends Model
         return $this->morphMany(ContentReview::class, 'reviewable')->latest();
     }
 
+    public function revenueShare()
+    {
+        return $this->hasOne(RevenueShare::class);
+    }
+
     public function scopePublished($q)
     {
         return $q->where('status', 'published');

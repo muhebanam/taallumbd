@@ -8,5 +8,8 @@ Schedule::command('payments:reconcile')->everyThirtyMinutes();
 // Daily analytics aggregation at 00:05
 Schedule::command('analytics:aggregate')->dailyAt('00:05');
 
+// Release matured escrow wallet earnings into available balance
+Schedule::command('wallet:release-pending')->hourly();
+
 // Weekly data retention cleanup (prunes raw events older than 90 days)
 Schedule::command('analytics:prune-events --days=90 --force')->weekly();

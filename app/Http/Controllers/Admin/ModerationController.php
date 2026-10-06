@@ -17,6 +17,7 @@ use App\Payments\PaymentGatewayManager;
 use App\Services\AuditLoggerService;
 use App\Services\NotificationDispatcher;
 use App\Services\PaymentService;
+use App\Services\TeacherWalletService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
@@ -335,6 +336,13 @@ class ModerationController extends Controller
                 'reason' => $reason,
             ]
         );
+
+        // 5. Phase 9: Reverse instructor wallet revenue
+        try {
+            app(TeacherWalletService::class)->reverseRefund($order, $reason);
+        } catch (\Throwable $e) {
+            Log::error("Teacher wallet refund reversal failed for order #{$order->id}: {$e->getMessage()}");
+        }
 
         return back()->with('success', "অর্ডার #{$order->id} সফলভাবে রিফান্ড করা হয়েছে এবং কোর্সের এনরোলমেন্ট বাতিল করা হয়েছে।");
     }

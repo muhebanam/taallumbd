@@ -10,6 +10,7 @@ use App\Models\Payment;
 use App\Models\PaymentTransaction;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class PaymentService
@@ -160,6 +161,13 @@ class PaymentService
                 );
             } catch (\Throwable $e) {
                 // Non-blocking tracking
+            }
+
+            // Phase 9: Credit instructor pending revenue in wallet
+            try {
+                app(TeacherWalletService::class)->creditPendingRevenue($lockedOrder);
+            } catch (\Throwable $e) {
+                Log::error("Teacher revenue credit failed for order #{$lockedOrder->id}: {$e->getMessage()}");
             }
 
             return $this->enroll($lockedOrder->user, $lockedOrder->course);

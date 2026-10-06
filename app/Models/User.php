@@ -123,6 +123,16 @@ class User extends Authenticatable
         return $this->hasOne(Teacher::class);
     }
 
+    public function teacherWallet()
+    {
+        return $this->hasOne(TeacherWallet::class);
+    }
+
+    public function payoutRequests()
+    {
+        return $this->hasMany(PayoutRequest::class);
+    }
+
     public function followedTeachers()
     {
         return $this->belongsToMany(Teacher::class, 'teacher_followers', 'user_id', 'teacher_id')->withTimestamps();

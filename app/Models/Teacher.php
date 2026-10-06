@@ -15,7 +15,9 @@ class Teacher extends Model
         'facebook_url', 'youtube_url', 'linkedin_url', 'twitter_url',
         'instagram_url', 'telegram_url', 'specialties', 'knowledge_path',
         'expertise_map', 'qualifications', 'experiences', 'office_hours',
-        'consultation_enabled', 'consultation_note', 'status', 'featured',
+        'consultation_enabled', 'consultation_note', 'consultation_fee',
+        'consultation_session_duration', 'consultation_booking_stub', 'consultation_currency',
+        'status', 'featured',
         'is_verified', 'verified_at', 'verified_by', 'verification_documents',
         'verification_checklist', 'verification_notes', 'allow_follow', 'show_email',
         'show_phone', 'sort_order',
@@ -31,6 +33,9 @@ class Teacher extends Model
         'verification_documents' => 'array',
         'verification_checklist' => 'array',
         'consultation_enabled' => 'boolean',
+        'consultation_fee' => 'integer',
+        'consultation_session_duration' => 'integer',
+        'consultation_booking_stub' => 'array',
         'featured' => 'boolean',
         'is_verified' => 'boolean',
         'allow_follow' => 'boolean',
@@ -43,6 +48,7 @@ class Teacher extends Model
     protected $appends = [
         'avatar_url',
         'cover_photo_url',
+        'consultation_fee_bdt',
     ];
 
     protected static function booted(): void
@@ -276,8 +282,28 @@ class Teacher extends Model
         return $suggestions;
     }
 
+    public function getConsultationFeeBdtAttribute(): float
+    {
+        return (float) bcdiv((string) ($this->consultation_fee ?? 0), '100', 2);
+    }
+
     public function verifiedBy()
     {
         return $this->belongsTo(User::class, 'verified_by');
+    }
+
+    public function wallet()
+    {
+        return $this->hasOne(TeacherWallet::class);
+    }
+
+    public function payoutRequests()
+    {
+        return $this->hasMany(PayoutRequest::class);
+    }
+
+    public function revenueShares()
+    {
+        return $this->hasMany(RevenueShare::class);
     }
 }

@@ -50,6 +50,9 @@ class InstructorTeacherProfileController extends Controller
             'office_hours' => 'nullable|array',
             'consultation_enabled' => 'boolean',
             'consultation_note' => 'nullable|string',
+            'consultation_fee' => 'nullable|numeric|min:0',
+            'consultation_session_duration' => 'nullable|integer|min:5|max:180',
+            'consultation_booking_stub' => 'nullable|array',
             'allow_follow' => 'boolean',
             'show_email' => 'boolean',
             'show_phone' => 'boolean',
@@ -71,7 +74,9 @@ class InstructorTeacherProfileController extends Controller
         $data['slug'] = $slug;
         $data['status'] = 'pending'; // Instructor self profiles require admin approval
         $data['is_verified'] = false;
-        $data['featured'] = false;
+        if ($request->has('consultation_fee')) {
+            $data['consultation_fee'] = (int) bcmul((string) $request->input('consultation_fee', 0), '100', 0);
+        }
 
         if ($request->hasFile('avatar_file')) {
             $data['avatar'] = $request->file('avatar_file')->store('teachers/avatars', 'public');
@@ -116,12 +121,19 @@ class InstructorTeacherProfileController extends Controller
             'office_hours' => 'nullable|array',
             'consultation_enabled' => 'boolean',
             'consultation_note' => 'nullable|string',
+            'consultation_fee' => 'nullable|numeric|min:0',
+            'consultation_session_duration' => 'nullable|integer|min:5|max:180',
+            'consultation_booking_stub' => 'nullable|array',
             'allow_follow' => 'boolean',
             'show_email' => 'boolean',
             'show_phone' => 'boolean',
         ]);
 
         $data = $request->except(['avatar_file', 'cover_file']);
+
+        if ($request->has('consultation_fee')) {
+            $data['consultation_fee'] = (int) bcmul((string) $request->input('consultation_fee', 0), '100', 0);
+        }
 
         if ($request->name !== $teacher->name) {
             $slug = Str::slug($request->name);
