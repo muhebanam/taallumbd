@@ -7,8 +7,8 @@ COPY . .
 # Limit Node memory to avoid OOM on Render free tier (512 MB RAM)
 RUN NODE_OPTIONS="--max_old_space_size=384" npm run build
 
-# Stage 2: PHP 8.3 + Nginx Runtime
-FROM php:8.3-fpm-alpine
+# Stage 2: PHP 8.4 + Nginx Runtime
+FROM php:8.4-fpm-alpine
 
 # Install system dependencies & Nginx
 RUN apk add --no-cache \
@@ -59,7 +59,7 @@ COPY . .
 COPY --from=node_builder /app/public/build /var/www/html/public/build
 
 # Install PHP production dependencies safely without scripts
-RUN composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader --no-scripts
+RUN composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader --no-scripts --ignore-platform-req=php
 
 # Copy Nginx config (replace root config to avoid Alpine's conf.d include issue)
 COPY docker/nginx.conf /etc/nginx/nginx.conf
