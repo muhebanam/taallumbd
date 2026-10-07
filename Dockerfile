@@ -2,7 +2,7 @@
 FROM node:20-alpine AS node_builder
 WORKDIR /app
 COPY package*.json ./
-RUN npm install --legacy-peer-deps
+RUN npm install --legacy-peer-deps && npm install @rollup/rollup-linux-x64-musl --no-save
 COPY . .
 # Limit Node memory to avoid OOM on Render free tier (512 MB RAM)
 RUN NODE_OPTIONS="--max_old_space_size=384" npm run build
