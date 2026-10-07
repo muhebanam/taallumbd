@@ -14,9 +14,6 @@ return new class extends Migration
         // 1. Enrollments Table: Composite index for fast student lookups & status
         if (Schema::hasTable('enrollments')) {
             Schema::table('enrollments', function (Blueprint $table) {
-                // Check if index already exists to avoid duplication
-                $sm = Schema::getConnection()->getDoctrineSchemaManager();
-                
                 // Add index on status & created_at for dashboard queries
                 $table->index(['status', 'created_at'], 'idx_enrollments_status_created');
             });
