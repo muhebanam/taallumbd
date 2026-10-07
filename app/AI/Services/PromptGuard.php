@@ -61,6 +61,26 @@ class PromptGuard
     }
 
     /**
+     * Scrub Personally Identifiable Information (PII) before sending to external LLM.
+     */
+    public function scrubPii(string $text): string
+    {
+        // 1. Email addresses
+        $text = preg_replace('/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/', '[EMAIL_REDACTED]', $text);
+
+        // 2. Bangladeshi mobile numbers
+        $text = preg_replace('/(?:\+?88)?01[3-9]\d{8}/', '[PHONE_REDACTED]', $text);
+
+        // 3. Credit / Debit card patterns
+        $text = preg_replace('/\b(?:\d{4}[ -]?){3}\d{4}\b/', '[CARD_REDACTED]', $text);
+
+        // 4. National ID patterns
+        $text = preg_replace('/\b(?:NID|nid)[:\s]*\d{10,17}\b/i', '[NID_REDACTED]', $text);
+
+        return $text;
+    }
+
+    /**
      * Get system safety instructions to prepend to any LLM prompt.
      */
     public function getIslamicSystemGuidelines(): string

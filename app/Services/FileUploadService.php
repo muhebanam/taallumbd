@@ -62,6 +62,9 @@ class FileUploadService
 
         $rawContents = file_get_contents($file->getRealPath());
 
+        // Validate binary magic-byte signatures
+        self::validateMagicBytes($rawContents, $mime);
+
         // 3. Image re-encoding (strips polyglots, PHP tags in EXIF, embedded malcode)
         $cleanBinary = null;
         $targetExt = 'png';
@@ -120,5 +123,32 @@ class FileUploadService
             now()->addMinutes($minutes),
             ['path' => base64_encode($path)]
         );
+    }
+
+    /**
+     * Validate raw binary magic bytes to prevent file spoofing/polyglot attacks.
+     *
+     * @throws ValidationException
+     */
+    protected static function validateMagicBytes(string $bytes, string $mime): void
+    {
+        if (strlen($bytes) < 12) {
+            throw ValidationException::withMessages([
+                'screenshot' => 'ফাইলটি করাপ্টেড বা অসম্পূর্ণ।',
+            ]);
+        }
+
+        $isValid = match ($mime) {
+            'image/jpeg' => str_starts_with($bytes, "\xFF\xD8\xFF"),
+            'image/png'  => str_starts_with($bytes, "\x89PNG\r\n\x1a\n"),
+            'image/webp' => str_starts_with($bytes, 'RIFF') && substr($bytes, 8, 4) === 'WEBP',
+            default      => false,
+        };
+
+        if (! $isValid) {
+            throw ValidationException::withMessages([
+                'screenshot' => 'ফাইলের অভ্যন্তরীণ বাইনারি সিগনেচার সঠিক নয়। এটি একটি ভুয়া ইমেজ ফাইল।',
+            ]);
+        }
     }
 }

@@ -120,20 +120,12 @@ class ManualGateway implements PaymentGateway
 
     public function refund(Order $order, ?string $reason = null): bool
     {
-        $order->update(['status' => 'cancelled']);
-
-        PaymentTransaction::create([
-            'order_id' => $order->id,
-            'gateway' => $order->payment_method ?? 'manual',
-            'type' => 'refund',
-            'gateway_ref' => $order->transaction_id,
-            'amount' => $order->final_payable_amount,
-            'currency' => 'BDT',
-            'status' => 'refunded',
-            'payload' => ['reason' => $reason, 'cancelled_at' => now()->toIso8601String()],
-            'ip_address' => Request::ip(),
-        ]);
-
-        return true;
+        try {
+            app(\App\Services\RefundService::class)->processRefund($order, $reason ?? 'ম্যানুয়াল পেমেন্ট রিফান্ড');
+            return true;
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('Manual refund failed: ' . $e->getMessage());
+            return false;
+        }
     }
 }

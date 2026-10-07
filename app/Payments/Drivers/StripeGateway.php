@@ -191,6 +191,30 @@ class StripeGateway implements PaymentGateway
      */
     public function handleIpn(Request $request): array
     {
+        // 1. Signature Verification (if webhook secret is configured)
+        if ($this->webhookSecret && ! app()->environment('testing')) {
+            $sigHeader = $request->header('Stripe-Signature');
+            $rawBody = $request->getContent();
+
+            $parsedSig = [];
+            foreach (explode(',', (string) $sigHeader) as $part) {
+                $kv = explode('=', trim($part), 2);
+                if (count($kv) === 2) {
+                    $parsedSig[$kv[0]] = $kv[1];
+                }
+            }
+
+            $t = $parsedSig['t'] ?? '';
+            $v1 = $parsedSig['v1'] ?? '';
+            $signedPayload = "{$t}.{$rawBody}";
+            $computedSig = hash_hmac('sha256', $signedPayload, $this->webhookSecret);
+
+            if (! hash_equals($computedSig, $v1)) {
+                Log::warning('Stripe webhook signature verification failed.');
+                return ['success' => false, 'message' => 'Invalid Stripe webhook signature.'];
+            }
+        }
+
         $payload = $request->all();
         $event = $payload['type'] ?? null;
 
@@ -225,8 +249,12 @@ class StripeGateway implements PaymentGateway
      */
     public function refund(Order $order, ?string $reason = null): bool
     {
-        $order->update(['status' => 'cancelled']);
-
-        return true;
+        try {
+            app(\App\Services\RefundService::class)->processRefund($order, $reason ?? 'Stripe রিফান্ড');
+            return true;
+        } catch (\Throwable $e) {
+            Log::error('Stripe refund failed: ' . $e->getMessage());
+            return false;
+        }
     }
 }

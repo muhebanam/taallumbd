@@ -503,4 +503,68 @@ class TeacherWalletService
             return $locked;
         });
     }
+
+    /**
+     * Reverse instructor revenue share when an order is refunded.
+     */
+    public function reverseRevenueForRefund(Order $order, string $reason = 'অর্ডার রিফান্ড'): ?WalletTransaction
+    {
+        $creditTx = WalletTransaction::where('reference_type', 'order')
+            ->where('reference_id', $order->id)
+            ->where('type', 'credit')
+            ->first();
+
+        if (! $creditTx) {
+            return null;
+        }
+
+        // Avoid double-reversal
+        $reversed = WalletTransaction::where('reference_type', 'order_refund')
+            ->where('reference_id', $order->id)
+            ->where('type', 'debit')
+            ->exists();
+
+        if ($reversed) {
+            return null;
+        }
+
+        return DB::transaction(function () use ($creditTx, $order, $reason) {
+            $wallet = TeacherWallet::where('id', $creditTx->wallet_id)->lockForUpdate()->firstOrFail();
+            $amountToDeduct = $creditTx->amount;
+
+            // Check if credit was matured or still in pending_balance
+            $wasMatured = $creditTx->matured_at !== null || ($creditTx->hold_until && $creditTx->hold_until->isPast());
+
+            if ($wasMatured) {
+                $wallet->balance = (int) bcsub((string) $wallet->balance, (string) $amountToDeduct, 0);
+                $balanceAfter = $wallet->balance;
+                $balanceType = 'available';
+            } else {
+                $wallet->pending_balance = (int) bcsub((string) $wallet->pending_balance, (string) $amountToDeduct, 0);
+                if ($wallet->pending_balance < 0) {
+                    $wallet->pending_balance = 0;
+                }
+                $balanceAfter = $wallet->pending_balance;
+                $balanceType = 'pending';
+            }
+
+            $wallet->save();
+
+            return WalletTransaction::create([
+                'wallet_id' => $wallet->id,
+                'type' => 'debit',
+                'balance_type' => $balanceType,
+                'amount' => $amountToDeduct,
+                'balance_after' => $balanceAfter,
+                'reference_type' => 'order_refund',
+                'reference_id' => $order->id,
+                'description' => "অর্ডার #{$order->id} রিফান্ড বাবদ রেভিনিউ সমন্বয়: {$reason}",
+                'metadata' => [
+                    'order_id' => $order->id,
+                    'original_credit_id' => $creditTx->id,
+                    'reason' => $reason,
+                ],
+            ]);
+        });
+    }
 }

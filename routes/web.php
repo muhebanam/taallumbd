@@ -377,6 +377,10 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::post('/community/reports/{report}/resolve', [C\Admin\AdminCommunityModerationController::class, 'resolve'])->name('community.reports.resolve');
     Route::post('/community/users/{user}/unmute', [C\Admin\AdminCommunityModerationController::class, 'unmute'])->name('community.users.unmute');
     Route::post('/community/users/{user}/unban', [C\Admin\AdminCommunityModerationController::class, 'unban'])->name('community.users.unban');
+
+    // Admin Orders & Refunds
+    Route::get('/orders', [C\Admin\AdminOrderController::class, 'index'])->name('orders.index');
+    Route::post('/orders/{order}/refund', [C\Admin\AdminOrderController::class, 'refund'])->name('orders.refund');
 });
 
 /* ---------------- Editorial & Scholar Review Workflow (Admin, Editor, Scholar Reviewer, Instructor) ---------------- */

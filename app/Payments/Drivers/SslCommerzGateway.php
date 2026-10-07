@@ -306,4 +306,18 @@ class SslCommerzGateway implements PaymentGateway
             'message' => 'SSLCommerz পেমেন্ট সফলভাবে যাচাই ও নিশ্চিত করা হয়েছে!',
         ];
     }
+
+    /**
+     * Refund a SSLCommerz order payment.
+     */
+    public function refund(Order $order, ?string $reason = null): bool
+    {
+        try {
+            app(\App\Services\RefundService::class)->processRefund($order, $reason ?? 'SSLCommerz রিফান্ড');
+            return true;
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('SSLCommerz refund failed: ' . $e->getMessage());
+            return false;
+        }
+    }
 }

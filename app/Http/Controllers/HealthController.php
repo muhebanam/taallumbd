@@ -90,7 +90,32 @@ class HealthController extends Controller
             ];
         }
 
-        // 5. Last Cron Run
+        // 5. Disk Space & Capacity
+        try {
+            $freeSpace = @disk_free_space(storage_path());
+            $totalSpace = @disk_total_space(storage_path());
+            if ($freeSpace !== false && $totalSpace !== false && $totalSpace > 0) {
+                $usedPercent = round((($totalSpace - $freeSpace) / $totalSpace) * 100, 1);
+                $checks['disk_space'] = [
+                    'status' => $usedPercent > 90 ? 'warning' : 'ok',
+                    'used_percent' => $usedPercent,
+                    'free_mb' => round($freeSpace / (1024 * 1024), 1),
+                    'total_mb' => round($totalSpace / (1024 * 1024), 1),
+                ];
+            }
+        } catch (Throwable $e) {
+            // Ignore if restricted in shared environment
+        }
+
+        // 6. Payment Gateways Readiness
+        $checks['payment_gateways'] = [
+            'stripe' => ! empty(config('payments.gateways.stripe.secret')) ? 'configured' : 'sandbox_default',
+            'bkash' => ! empty(config('payments.gateways.bkash.app_key')) ? 'configured' : 'sandbox_default',
+            'sslcommerz' => ! empty(config('payments.gateways.sslcommerz.store_id')) ? 'configured' : 'sandbox_default',
+            'manual' => 'ready',
+        ];
+
+        // 7. Last Cron Run
         $checks['last_cron_run'] = Cache::get('internal:cron:last_run', 'never');
 
         $httpCode = $status === 'healthy' ? 200 : ($status === 'degraded' ? 200 : 503);

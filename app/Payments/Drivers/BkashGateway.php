@@ -380,4 +380,18 @@ class BkashGateway implements PaymentGateway
 
         return ['success' => false, 'status' => $status];
     }
+
+    /**
+     * Refund a bKash order payment.
+     */
+    public function refund(Order $order, ?string $reason = null): bool
+    {
+        try {
+            app(\App\Services\RefundService::class)->processRefund($order, $reason ?? 'bKash রিফান্ড');
+            return true;
+        } catch (\Throwable $e) {
+            Log::error('bKash refund failed: ' . $e->getMessage());
+            return false;
+        }
+    }
 }
